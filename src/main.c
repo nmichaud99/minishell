@@ -126,12 +126,12 @@ int	main(int ac, char **av, char **env)
 		t_token *tmp = token;
 		while (tmp)
 		{
-			printf("%s\n", tmp->str);
+			printf("'%s'\n", tmp->str);
 			printf("%u\n", tmp->type);
 			tmp = tmp->next;
 		}
 		free_token(&token);
-		free(line);
 	}
+	rl_clear_history();
 	return (0);
 }

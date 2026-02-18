@@ -16,12 +16,15 @@ void    free_token(t_token **head)
 {
 	t_token *tmp;
 
+	if (!head || !*head)
+		return ;
 	while (*head)
 	{
 		free((*head)->str);
 		tmp = *head;
 		*head = (*head)->next;
 		free(tmp);
+		tmp = NULL;
 	}
 	head = NULL;
 }

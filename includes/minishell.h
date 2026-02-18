@@ -35,7 +35,7 @@ typedef enum e_token_type
 	OUT_DIR,
 	HEREDOC,
 	APPEND,
-	DOLLAR
+	VARIABLE
 }   t_token_type;
 
 typedef struct s_token
@@ -51,6 +51,6 @@ void    free_token(t_token **head);
 // lexing
 char	*dquote(t_token **head, char *str, char c);
 int		is_operator(char c);
-t_token	*lexing(t_token **head, char *str);
+void	lexing(t_token **head, char *str);
 
 #endif

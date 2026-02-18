@@ -42,13 +42,14 @@ char	*dquote(t_token **head, char *str, char c)
 		else
 			tmp = res;
 		res = ft_strjoin(tmp, line);
+		free(str);
 		if (!res)
 		{
-			free(tmp);
+			free(line);
 			free_token(head);
 			exit(EXIT_FAILURE);
 		}
-		free(tmp);
+		free(line);
 		if (flag)
 			break ;
 	}
