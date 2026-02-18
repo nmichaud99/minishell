@@ -48,6 +48,8 @@ typedef struct s_token
 
 // utils
 void    free_token(t_token **head);
+t_token	*new_token(t_token_type type, char *content);
+void	add_token(t_token **head, t_token *new);
 
 // lexing
 char	*dquote(t_token **head, char *str, char c);
