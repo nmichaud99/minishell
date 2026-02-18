@@ -35,7 +35,8 @@ typedef enum e_token_type
 	OUT_DIR,
 	HEREDOC,
 	APPEND,
-	VARIABLE
+	VARIABLE,
+	SEMI
 }   t_token_type;
 
 typedef struct s_token

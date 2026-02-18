@@ -99,10 +99,66 @@ void	handle_single_quotes(t_token **head, char *str, int *i)
 	*i += ft_strlen(content) + 2;
 }
 
+void	handle_word(t_token **head, char *str, int *i, int flag)
+{
+	char	*res;
+	int		start;
+
+	start = *i;
+	if (flag == 1)
+		(*i)++;
+	while (str[*i] && str[*i] != ' ' && str[*i] != '\'' && str[*i] != '"'
+			&& !is_operator(str[*i]) && str[*i] != '$' && str[*i] != ';'
+			&& str[*i] != '\n')
+		(*i)++;
+	res = malloc(*i - start + 1);
+	if (!res)
+		exit(EXIT_FAILURE);
+	ft_strlcpy(res, str + start, *i - start + 1);
+	add_token(head, new_token(WORD, res));
+}
+
+void	merge_words(t_token **head)
+{
+	t_token	*tmp;
+	char	*merged;
+
+	tmp = *head;
+	if (!head || !*head || !(*head)->next)
+    	return ;
+	while (tmp->next != NULL && tmp->next->next != NULL)
+		tmp = tmp->next;
+	if (tmp->str)
+		merged = ft_strjoin(tmp->str, tmp->next->str);
+	else
+		merged = tmp->next->str;
+	free(tmp->str);
+	tmp->str = merged;
+	tmp->type = WORD;
+	if (merged != tmp->next->str)
+		free(tmp->next->str);
+	free(tmp->next);
+	tmp->next = NULL;
+}
+
 void	handle_operators(t_token **head, char *str, int *i)
 {
+	int	tmp;
+
 	if (str[*i] == '|')
 		add_token(head, new_token(PIPE, NULL));
+	else if (str[*i] == '\\')
+	{
+		if (str[*i + 1])
+		{
+			tmp = *i;
+			(*i)++;
+			handle_word(head, str, i, 1);
+			(*i)--;
+			if (tmp != 0 && str[tmp - 1] != ' ' && !is_operator(str[tmp - 1]))
+				merge_words(head);
+		}
+	}
 	else if (str[*i] == '<')
 	{
 		if (str[*i + 1] && str[*i + 1] == '<')
@@ -126,14 +182,16 @@ void	handle_operators(t_token **head, char *str, int *i)
 	(*i)++;
 }
 
+
 void	handle_variable(t_token **head, char *str, int *i)
 {
-	char *res;
+	char 	*res;
 	int		start;
 
 	(*i)++;
 	start = *i;
-	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"')
+	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"'
+		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i]))
 	{
 		res = malloc(2);
 		if (!res)
@@ -152,19 +210,11 @@ void	handle_variable(t_token **head, char *str, int *i)
 	add_token(head, new_token(VARIABLE, res));
 }
 
-void	handle_word(t_token **head, char *str, int *i)
+void	handle_semi(t_token **head, char *str, int *i)
 {
-	char	*res;
-	int		start;
-
-	start = *i;
-	while (str[*i] && str[*i] != ' ' && str[*i] != '\'' && str[*i] != '"' && !is_operator(str[*i]))
-		(*i)++;
-	res = malloc(*i - start + 1);
-	if (!res)
-		exit(EXIT_FAILURE);
-	ft_strlcpy(res, str + start, *i - start + 1);
-	add_token(head, new_token(WORD, res));
+	(void)str;
+	add_token(head, new_token(SEMI, NULL));
+	(*i)++;
 }
 
 void	lexing(t_token **head, char *str)
@@ -176,6 +226,8 @@ void	lexing(t_token **head, char *str)
 	{
 		while (str[i] == ' ')
 			i++;
+		if (str[i] == 0)
+			return ;
 		if (str[i] == '"')
 		{
 			handle_double_quotes(head, str, &i);
@@ -192,8 +244,10 @@ void	lexing(t_token **head, char *str)
 			handle_operators(head, str, &i);
 		else if (str[i] == '$')
 			handle_variable(head, str, &i);
+		else if (str[i] == ';' || str[i] == '\n')
+			handle_semi(head, str, &i);
 		else
-			handle_word(head, str, &i);
+			handle_word(head, str, &i, 0);
 	}
 	return ;
 }
