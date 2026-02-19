@@ -35,6 +35,48 @@ char	*quote(char *str, char c, t_token *head)
 	}
 }
 
+void	create_new_tokens(t_token **head)
+{
+	t_token	*prev;
+	t_token	*last;
+	char	*str;
+	int		i;
+
+	if (!head || !*head)
+		return ;
+	prev = NULL;
+	last = *head;
+	while (last->next)
+	{
+		prev = last;
+		last = last->next;
+	}
+	str = ft_strdup(last->str);
+	if (!str)
+		exit(EXIT_FAILURE);
+	if (prev)
+		free_token(&prev->next);
+	else
+	{
+		free((*head)->str);
+		free(*head);
+		*head = NULL;
+	}
+	i = 0;
+	while (str[i])
+	{
+		while (str[i] == ' ')
+			i++;
+		if (str[i] == 0)
+			return ;
+		if (str[i] == '$')
+			handle_variable(head, str, &i);
+		else
+			handle_word(head, str, &i, 0);
+	}
+	free(str);
+}
+
 void	handle_double_quotes(t_token **head, char *str, int *i)
 {
 	char	*content;
@@ -49,8 +91,10 @@ void	handle_double_quotes(t_token **head, char *str, int *i)
 		free(content);
 		return ;
 	}
-	add_token(head, new_token(STRING, content));	
+	add_token(head, new_token(STRING, content));
 	*i += ft_strlen(content) + 2;
+	if (dollar_exists(content))
+		create_new_tokens(head);
 }
 
 void	handle_single_quotes(t_token **head, char *str, int *i)
@@ -153,7 +197,6 @@ void	handle_operators(t_token **head, char *str, int *i)
 	}
 	(*i)++;
 }
-
 
 void	handle_variable(t_token **head, char *str, int *i)
 {
