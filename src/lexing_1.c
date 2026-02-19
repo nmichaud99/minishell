@@ -65,14 +65,12 @@ void	create_new_tokens(t_token **head)
 	i = 0;
 	while (str[i])
 	{
-		while (str[i] == ' ')
-			i++;
 		if (str[i] == 0)
 			return ;
 		if (str[i] == '$')
 			handle_variable(head, str, &i);
 		else
-			handle_word(head, str, &i, 0);
+			handle_word_2(head, str, &i, 0);
 	}
 	free(str);
 }
@@ -124,6 +122,25 @@ void	handle_word(t_token **head, char *str, int *i, int flag)
 	if (flag == 1)
 		(*i)++;
 	while (str[*i] && str[*i] != ' ' && str[*i] != '\'' && str[*i] != '"'
+			&& !is_operator(str[*i]) && str[*i] != '$' && str[*i] != ';'
+			&& str[*i] != '\n')
+		(*i)++;
+	res = malloc(*i - start + 1);
+	if (!res)
+		exit(EXIT_FAILURE);
+	ft_strlcpy(res, str + start, *i - start + 1);
+	add_token(head, new_token(WORD, res));
+}
+
+void	handle_word_2(t_token **head, char *str, int *i, int flag)
+{
+	char	*res;
+	int		start;
+
+	start = *i;
+	if (flag == 1)
+		(*i)++;
+	while (str[*i] && str[*i] != '\'' && str[*i] != '"'
 			&& !is_operator(str[*i]) && str[*i] != '$' && str[*i] != ';'
 			&& str[*i] != '\n')
 		(*i)++;
@@ -206,7 +223,8 @@ void	handle_variable(t_token **head, char *str, int *i)
 	(*i)++;
 	start = *i;
 	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"'
-		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i]))
+		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i])
+		|| str[*i] == '\\')
 	{
 		res = malloc(2);
 		if (!res)
