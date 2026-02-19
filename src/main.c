@@ -131,6 +131,7 @@ int	main(int ac, char **av, char **env)
 			tmp = tmp->next;
 		}
 		free_token(&token);
+		free(line);
 	}
 	rl_clear_history();
 	return (0);
