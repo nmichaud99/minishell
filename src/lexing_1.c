@@ -66,7 +66,7 @@ char	*modif_string(char *str)
 	return (res);
 }
 
-char	*quote(char *str, char c, t_token *head)
+static char	*quote(char *str, char c)
 {
 	int		i;
 	char	*string;
@@ -74,19 +74,11 @@ char	*quote(char *str, char c, t_token *head)
 	i = 1;
 	while (str[i] && str[i] != c)
 		i++;
-	if (str[i] != c)
+	string = malloc(i);
+	if (!string)
 		return (NULL);
-	else
-	{
-		string = malloc(i);
-		if (!string)
-		{
-			free_token(&head);
-			exit(EXIT_FAILURE);
-		}
-		ft_strlcpy(string, str + 1, i);
-		return (string);
-	}
+	ft_strlcpy(string, str + 1, i);
+	return (string);
 }
 
 void	create_new_tokens(t_token **head)
@@ -132,43 +124,28 @@ void	create_new_tokens(t_token **head)
 void	handle_double_quotes(t_token **head, char *str, int *i)
 {
 	char	*content;
-	char	*modified;
 
-	content = quote(&str[*i], '"', *head);
+	content = quote(&str[*i], '"');
 	if (!content)
 	{
-		content = dquote(head, str, '"');
 		free_token(head);
-		*i = -1;
-		lexing(head, content);
-		free(content);
-		return ;
+		exit(EXIT_FAILURE);
 	}
 	*i += ft_strlen(content) + 2;
-	if (backslash_exists(content))
-	{
-		modified = modif_string(content);
-		free(content);
-		content = modified;
-	}
 	add_token(head, new_token(STRING, content));
 	if (dollar_exists(content))
-		create_new_tokens_del(head);
+		create_new_tokens(head);
 }
 
 void	handle_single_quotes(t_token **head, char *str, int *i)
 {
 	char	*content;
 
-	content = quote(&str[*i], '\'', *head);
+	content = quote(&str[*i], '\'');
 	if (!content)
 	{
-		content = dquote(head, str, '\'');
 		free_token(head);
-		*i = -1;
-		lexing(head, content);
-		free(content);
-		return ;
+		exit(EXIT_FAILURE);
 	}
 	add_token(head, new_token(S_STRING, content));
 	*i += ft_strlen(content) + 2;
@@ -183,8 +160,7 @@ void	handle_word(t_token **head, char *str, int *i, int flag)
 	if (flag == 1)
 		(*i)++;
 	while (str[*i] && str[*i] != ' ' && str[*i] != '\'' && str[*i] != '"'
-			&& !is_operator(str[*i]) && str[*i] != '$' && str[*i] != ';'
-			&& str[*i] != '\n')
+			&& !is_operator(str[*i]) && str[*i] != '$')
 		(*i)++;
 	res = malloc(*i - start + 1);
 	if (!res)
@@ -202,8 +178,7 @@ void	handle_word_2(t_token **head, char *str, int *i, int flag)
 	if (flag == 1)
 		(*i)++;
 	while (str[*i] && str[*i] != '\'' && str[*i] != '"'
-			&& !is_operator(str[*i]) && str[*i] != '$' && str[*i] != ';'
-			&& str[*i] != '\n')
+			&& !is_operator(str[*i]) && str[*i] != '$')
 		(*i)++;
 	res = malloc(*i - start + 1);
 	if (!res)
@@ -212,6 +187,7 @@ void	handle_word_2(t_token **head, char *str, int *i, int flag)
 	add_token(head, new_token(WORD, res));
 }
 
+/*
 void	merge_words(t_token **head)
 {
 	t_token	*tmp;
@@ -234,25 +210,13 @@ void	merge_words(t_token **head)
 	free(tmp->next);
 	tmp->next = NULL;
 }
+*/
+
 
 void	handle_operators(t_token **head, char *str, int *i)
 {
-	int	tmp;
-
 	if (str[*i] == '|')
 		add_token(head, new_token(PIPE, NULL));
-	else if (str[*i] == '\\')
-	{
-		if (str[*i + 1])
-		{
-			tmp = *i;
-			(*i)++;
-			handle_word(head, str, i, 1);
-			(*i)--;
-			if (tmp != 0 && str[tmp - 1] != ' ' && !is_operator(str[tmp - 1]))
-				merge_words(head);
-		}
-	}
 	else if (str[*i] == '<')
 	{
 		if (str[*i + 1] && str[*i + 1] == '<')
@@ -284,7 +248,7 @@ void	handle_variable(t_token **head, char *str, int *i)
 	(*i)++;
 	start = *i;
 	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"'
-		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i]))
+		|| is_operator(str[*i]))
 	{
 		res = malloc(2);
 		if (!res)
@@ -301,13 +265,6 @@ void	handle_variable(t_token **head, char *str, int *i)
 		exit(EXIT_FAILURE);
 	ft_strlcpy(res, str + start, *i - start + 1);
 	add_token(head, new_token(VARIABLE, res));
-}
-
-void	handle_semi(t_token **head, char *str, int *i)
-{
-	(void)str;
-	add_token(head, new_token(SEMI, NULL));
-	(*i)++;
 }
 
 void	lexing(t_token **head, char *str)
@@ -337,8 +294,6 @@ void	lexing(t_token **head, char *str)
 			handle_operators(head, str, &i);
 		else if (str[i] == '$')
 			handle_variable(head, str, &i);
-		else if (str[i] == ';' || str[i] == '\n')
-			handle_semi(head, str, &i);
 		else
 			handle_word(head, str, &i, 0);
 	}
