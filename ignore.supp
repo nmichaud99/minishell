@@ -1,0 +1,36 @@
+{
+   ignore_libreadline
+   Memcheck:Leak
+   ...
+   obj:*/libreadline.so*
+}
+{
+   ignore_libtinfo
+   Memcheck:Leak
+   ...
+   obj:*/libtinfo.so*
+}
+{
+   ignore_libncurses
+   Memcheck:Leak
+   ...
+   obj:*/libncurses.so*
+}
+{
+   ignore_gconv
+   Memcheck:Leak
+   ...
+   fun:__gconv_*
+}
+{
+   ignore_setlocale
+   Memcheck:Leak
+   ...
+   fun:setlocale
+}
+{
+   ignore_add_to_environ
+   Memcheck:Leak
+   ...
+   fun:__add_to_environ
+}

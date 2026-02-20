@@ -267,35 +267,40 @@ void	handle_variable(t_token **head, char *str, int *i)
 	add_token(head, new_token(VARIABLE, res));
 }
 
-void	lexing(t_token **head, char *str)
+void	lexing(t_data *data)
 {
 	int		i;
 
 	i = 0;
-	while (str[i])
+	while (data->line[i])
 	{
-		while (str[i] == ' ')
+		while (data->line[i] == ' ')
 			i++;
-		if (str[i] == 0)
+		if (data->line[i] == 0)
 			return ;
-		if (str[i] == '"')
+		if (data->line[i] == '"')
 		{
-			handle_double_quotes(head, str, &i);
+			handle_double_quotes(data->tokens, data->line, &i);
 			if (i == -1)
 				return ;
 		}
-		else if (str[i] == '\'')
+		else if (data->line[i] == '\'')
 		{
-			handle_single_quotes(head, str, &i);
+			handle_single_quotes(data->tokens, data->line, &i);
 			if (i == -1)
 				return ;
 		}
-		else if (is_operator(str[i]))
-			handle_operators(head, str, &i);
-		else if (str[i] == '$')
-			handle_variable(head, str, &i);
+		else if (is_operator(data->line[i]))
+			handle_operators(data->tokens, data->line, &i);
+		else if (data->line[i] == '$')
+			handle_variable(data->tokens, data->line, &i);
+		else if (data->line[i] == 3)
+		{
+			printf("execution ctr c\n");
+			exit_free(data, EXIT_SUCCESS);
+		}
 		else
-			handle_word(head, str, &i, 0);
+			handle_word(data->tokens, data->line, &i, 0);
 	}
 	return ;
 }
