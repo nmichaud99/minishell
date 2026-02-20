@@ -33,3 +33,24 @@ int	dollar_exists(char *str)
 	return (0);
 }
 
+int	backslash_exists(char *str)
+{
+	int	i;
+
+	i = 0;
+	while (str[i])
+	{
+		if (str[i] == '\\')
+			return (1);
+		i++;
+	}
+	return (0);
+}
+
+int	is_backslash_char(char c)
+{
+	if (c == 'a' || c == 'b' || c == 't' || c == 'n' || c == 'v'
+		|| c == 'f' || c == 'r')
+		return (1);
+	return (0);
+}

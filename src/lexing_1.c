@@ -12,6 +12,60 @@
 
 #include "minishell.h"
 
+int	count_backslash_to_rm(char *str)
+{
+	int		i;
+	int		count;
+
+	i = 0;
+	count = 0;
+	while (str[i])
+	{
+		if (str[i] == '\\')
+		{
+			if (str[i + 1] && (str[i + 1] == '\\' || str[i + 1] == '"' || str[i + 1] == '$'))
+			{
+				count++;
+				i++;
+			}
+		}
+		i++;
+	}
+	return (count);
+}
+
+char	*modif_string(char *str)
+{
+	char	*res;
+	int		i;
+	int		j;
+
+	res = malloc((int)strlen(str) - count_backslash_to_rm(str) + 1);
+	if (!res)
+		return (NULL);
+	i = 0;
+	j = 0;
+	while (str[i])
+	{
+		if (str[i] == '\\')
+		{
+			if (str[i + 1] && (str[i + 1] == '\\' || str[i + 1] == '"' || str[i + 1] == '$'))
+			{
+				res[j] = str[i + 1];
+				i++;
+			}
+			else
+				res[j] = str[i];
+		}
+		else
+			res[j] = str[i];
+		j++;
+		i++;
+	}
+	res[j] = 0;
+	return (res);
+}
+
 char	*quote(char *str, char c, t_token *head)
 {
 	int		i;
@@ -78,6 +132,7 @@ void	create_new_tokens(t_token **head)
 void	handle_double_quotes(t_token **head, char *str, int *i)
 {
 	char	*content;
+	char	*modified;
 
 	content = quote(&str[*i], '"', *head);
 	if (!content)
@@ -89,10 +144,16 @@ void	handle_double_quotes(t_token **head, char *str, int *i)
 		free(content);
 		return ;
 	}
-	add_token(head, new_token(STRING, content));
 	*i += ft_strlen(content) + 2;
+	if (backslash_exists(content))
+	{
+		modified = modif_string(content);
+		free(content);
+		content = modified;
+	}
+	add_token(head, new_token(STRING, content));
 	if (dollar_exists(content))
-		create_new_tokens(head);
+		create_new_tokens_del(head);
 }
 
 void	handle_single_quotes(t_token **head, char *str, int *i)
@@ -223,8 +284,7 @@ void	handle_variable(t_token **head, char *str, int *i)
 	(*i)++;
 	start = *i;
 	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"'
-		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i])
-		|| str[*i] == '\\')
+		|| str[*i] == ';' || str[*i] == '\n' || is_operator(str[*i]))
 	{
 		res = malloc(2);
 		if (!res)
