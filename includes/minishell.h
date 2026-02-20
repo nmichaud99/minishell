@@ -35,7 +35,8 @@ typedef enum e_token_type
 	OUT_DIR,
 	HEREDOC,
 	APPEND,
-	VARIABLE
+	VARIABLE,
+	SEMI
 }   t_token_type;
 
 typedef struct s_token
@@ -47,10 +48,21 @@ typedef struct s_token
 
 // utils
 void    free_token(t_token **head);
+t_token	*new_token(t_token_type type, char *content);
+void	add_token(t_token **head, t_token *new);
 
 // lexing
 char	*dquote(t_token **head, char *str, char c);
 int		is_operator(char c);
+int		dollar_exists(char *str);
+int		backslash_exists(char *str);
+void	handle_word(t_token **head, char *str, int *i, int flag);
+void	handle_word_2(t_token **head, char *str, int *i, int flag);
+void	handle_operators(t_token **head, char *str, int *i);
+void	handle_variable(t_token **head, char *str, int *i);
+void	handle_semi(t_token **head, char *str, int *i);
 void	lexing(t_token **head, char *str);
+int		del_exists(char *str);
+void	create_new_tokens_del(t_token **head);
 
 #endif

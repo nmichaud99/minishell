@@ -15,6 +15,7 @@
 char	*dquote(t_token **head, char *str, char c)
 {
 	char	*res;
+	char	*old;
 	char	*tmp;
 	char	*line;
 	int		i;
@@ -41,8 +42,9 @@ char	*dquote(t_token **head, char *str, char c)
 			tmp = str;
 		else
 			tmp = res;
+		old = res;
 		res = ft_strjoin(tmp, line);
-		free(str);
+		free(old);
 		if (!res)
 		{
 			free(line);
