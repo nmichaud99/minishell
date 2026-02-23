@@ -12,18 +12,18 @@
 
 #include "minishell.h"
 
+volatile sig_atomic_t gSignalStatus = 0;
+
 void	init_data(t_data *data)
 {
-	data->tokens = malloc(sizeof(t_token));
-	if (!data->tokens)
-		exit_free(data, EXIT_FAILURE);
+	data->tokens = NULL;
 	data->line = NULL;
 }
 
-void	sigint_handler(sig)
-int sig;
+void	sigint_handler(int sig)
 {
-	printf("%d received\n",sig);
+	gSignalStatus = sig;
+    write(1, "\n", 1);
 }
 
 int	main(int ac, char **av, char **env)
@@ -34,6 +34,7 @@ int	main(int ac, char **av, char **env)
 	(void)av;
 	(void)env;
 	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (1);
@@ -45,15 +46,24 @@ int	main(int ac, char **av, char **env)
 			break ;
 		if (*(data->line))
 			add_history(data->line);
+		if (gSignalStatus == SIGINT)
+		{
+			gSignalStatus = 0;
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+			free(data->line);
+			continue ;
+		}
 		lexing(data);
-		t_token *tmp = *(data->tokens);
+		t_token *tmp = data->tokens;
 		while (tmp)
 		{
 			printf("'%s'\n", tmp->str);
 			printf("%u\n", tmp->type);
 			tmp = tmp->next;
 		}
-		free_token(data->tokens);
+		free_token(&data->tokens);
 		free(data->line);
 	}
 	free(data);

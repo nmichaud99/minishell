@@ -280,27 +280,27 @@ void	lexing(t_data *data)
 			return ;
 		if (data->line[i] == '"')
 		{
-			handle_double_quotes(data->tokens, data->line, &i);
+			handle_double_quotes(&data->tokens, data->line, &i);
 			if (i == -1)
 				return ;
 		}
 		else if (data->line[i] == '\'')
 		{
-			handle_single_quotes(data->tokens, data->line, &i);
+			handle_single_quotes(&data->tokens, data->line, &i);
 			if (i == -1)
 				return ;
 		}
 		else if (is_operator(data->line[i]))
-			handle_operators(data->tokens, data->line, &i);
+			handle_operators(&data->tokens, data->line, &i);
 		else if (data->line[i] == '$')
-			handle_variable(data->tokens, data->line, &i);
+			handle_variable(&data->tokens, data->line, &i);
 		else if (data->line[i] == 3)
 		{
 			printf("execution ctr c\n");
 			exit_free(data, EXIT_SUCCESS);
 		}
 		else
-			handle_word(data->tokens, data->line, &i, 0);
+			handle_word(&data->tokens, data->line, &i, 0);
 	}
 	return ;
 }

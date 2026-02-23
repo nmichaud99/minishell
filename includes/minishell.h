@@ -48,7 +48,7 @@ typedef struct s_token
 
 typedef struct	s_data
 {
-	t_token	**tokens;
+	t_token	*tokens;
 	char	*line;
 }	t_data;
 
