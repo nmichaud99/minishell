@@ -53,18 +53,18 @@ typedef enum e_node_type
 	CMD
 }	t_node_type;
 
-typedef struct s_node
+typedef struct s_ast
 {
 	t_node_type		type;
 	t_token			*cmd;
-	struct s_node	*left;
-	struct s_node	*right;
-}	t_node;
+	struct s_ast	*left;
+	struct s_ast	*right;
+}	t_ast;
 
 typedef struct	s_data
 {
 	t_token	*tokens;
-	t_node	*nodes;
+	t_ast	*nodes;
 	char	*line;
 }	t_data;
 

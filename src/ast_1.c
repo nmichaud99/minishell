@@ -12,13 +12,4 @@
 
 #include "minishell.h"
 
-void	find_pipes(t_data *data)
-{
-	if (!data)
-		return ;
-	while (data->tokens != NULL)
-	{
-		if (data->tokens->type == PIPE)
-			add_token(&nodes, new(node, 
-	}
-}
+
