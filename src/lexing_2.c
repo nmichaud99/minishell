@@ -32,4 +32,3 @@ int	dollar_exists(char *str)
 	}
 	return (0);
 }
-

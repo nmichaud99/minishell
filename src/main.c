@@ -12,126 +12,61 @@
 
 #include "minishell.h"
 
-static char	*cmd_slash(char *cmd, int *exit_code)
+volatile sig_atomic_t gSignalStatus = 0;
+
+void	init_data(t_data *data)
 {
-	if (access(cmd, F_OK) == -1)
-		*exit_code = 127;
-	else if (access(cmd, X_OK) == -1)
-		*exit_code = 126;
-	else
-		return (ft_strdup(cmd));
-	return (NULL);
+	data->tokens = NULL;
+	data->line = NULL;
 }
 
-char	*get_path_line(char **env)
+void	sigint_handler(int sig)
 {
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		if (ft_strncmp(env[i], "PATH=", 5) == 0)
-			return (env[i] + 5);
-		else
-			i++;
-	}
-	return (NULL);
-}
-
-static char	*get_full_path(char *cmd, char **path, int *exit_code, int *flag)
-{
-	char	*tmp;
-	char	*full_path;
-	int		i;
-
-	(void)exit_code;
-	i = 0;
-	while (path[i])
-	{
-		tmp = ft_strjoin(path[i], "/");
-		if (!tmp)
-			return (NULL);
-		full_path = ft_strjoin(tmp, cmd);
-		free(tmp);
-		if (!full_path)
-			return (NULL);
-		if (access(full_path, F_OK) == 0 && access(full_path, X_OK) == 0)
-			return (full_path);
-		else if (access(full_path, F_OK) == 0 && access(full_path, X_OK) == -1)
-			*flag = 1;
-		free(full_path);
-		i++;
-	}
-	return (NULL);
-}
-
-char	*find_cmd(char *cmd, char **path, int *exit_code)
-{
-	int		i;
-	char	*full_path;
-	int		flag;
-
-	flag = 0;
-	if (!cmd || cmd[0] == '\0')
-	{
-		*exit_code = 126;
-		return (NULL);
-	}
-	if (ft_strchr(cmd, '/') != NULL)
-		return (cmd_slash(cmd, exit_code));
-	i = 0;
-	full_path = get_full_path(cmd, path, exit_code, &flag);
-	if (full_path != NULL)
-		return (full_path);
-	if (flag == 1)
-		*exit_code = 126;
-	else
-		*exit_code = 127;
-	return (NULL);
+	gSignalStatus = sig;
+    write(1, "\n", 1);
 }
 
 int	main(int ac, char **av, char **env)
 {
-	char	*line;
-	/*char	**cmd_args;
-	char	**paths;
-	char	*full_path;
-	int		exit_code;
-	pid_t	pid;*/
-	t_token	*token;
+	t_data	*data;
 
 	(void)ac;
 	(void)av;
 	(void)env;
+	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (1);
+	init_data(data);
 	while (1)
 	{
-		line = readline("minishell$ ");
-		if (!line)
+		data->line = readline("minishell$ ");
+		if (!data->line)
 			break ;
-		if (*line)
-			add_history(line);
-		/*pid = fork();
-		if (pid == 0)
+		if (*(data->line))
+			add_history(data->line);
+		if (gSignalStatus == SIGINT)
 		{
-			cmd_args = ft_split(line, ' ');
-			paths = ft_split(get_path_line(env), ':');
-			full_path = find_cmd(cmd_args[0], paths, &exit_code);
-			if (!full_path)
-				perror(NULL);
-			execve(full_path, cmd_args, env);
+			gSignalStatus = 0;
+			rl_on_new_line();
+			rl_replace_line("", 0);
+			rl_redisplay();
+			free(data->line);
+			continue ;
 		}
-		wait(&pid);*/
-		token = NULL;
-		lexing(&token, line);
-		t_token *tmp = token;
+		lexing(data);
+		t_token *tmp = data->tokens;
 		while (tmp)
 		{
-			printf("%s\n", tmp->str);
+			printf("'%s'\n", tmp->str);
 			printf("%u\n", tmp->type);
 			tmp = tmp->next;
 		}
-		free_token(&token);
-		free(line);
+		free_token(&data->tokens);
+		free(data->line);
 	}
+	free(data);
+	rl_clear_history();
 	return (0);
 }
