@@ -46,12 +46,27 @@ typedef struct s_token
 	struct s_token	*next;
 }	t_token;
 
+typedef enum e_node_type
+{
+	PIPE,
+	REDIR,
+	CMD
+}	t_node_type;
+
+typedef struct s_node
+{
+	t_node_type		type;
+	t_token			*cmd;
+	struct s_node	*left;
+	struct s_node	*right;
+}	t_node;
+
 typedef struct	s_data
 {
 	t_token	*tokens;
+	t_node	*nodes;
 	char	*line;
 }	t_data;
-
 
 // utils
 void	free_token(t_token **head);
