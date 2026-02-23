@@ -56,23 +56,3 @@ void	add_token(t_token **head, t_token *new)
 		tmp = tmp->next;
 	tmp->next = new;
 }
-
-t_node	*new_node(t_data *data, t_node_type type, t_token *cmd)
-{
-	t_node	*res;
-
-	res = malloc(sizeof(t_node));
-	if (!res)
-		return (NULL);
-	res->type = type;
-	res->cmd = cmd;
-	while (res->cmd->next != NULL && res->cmd->type != PIPE && res->cmd->type != REDIR)
-		cmd = cmd->next;
-	res->cmd->next = NULL
-	if (type = PIPE)
-	{
-		res->left = data->nodes;
-		res->right = data->nodes;
-	}
-	return (res);
-}
