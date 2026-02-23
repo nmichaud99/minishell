@@ -23,7 +23,10 @@ void	init_data(t_data *data)
 void	sigint_handler(int sig)
 {
 	gSignalStatus = sig;
-    write(1, "\n", 1);
+	write(1, "\n", 1);
+	rl_on_new_line();
+	rl_replace_line("", 0);
+	rl_redisplay();
 }
 
 int	main(int ac, char **av, char **env)
@@ -49,9 +52,6 @@ int	main(int ac, char **av, char **env)
 		if (gSignalStatus == SIGINT)
 		{
 			gSignalStatus = 0;
-			rl_on_new_line();
-			rl_replace_line("", 0);
-			rl_redisplay();
 			free(data->line);
 			continue ;
 		}
