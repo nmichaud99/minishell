@@ -39,6 +39,14 @@ typedef enum e_token_type
 	VARIABLE
 }	t_token_type;
 
+typedef enum e_redir_type
+{
+	REDIR_IN,
+	REDIR_OUT,
+	REDIR_HEREDOC,
+	REDIR_APPEND,
+}	t_redir_type;
+
 typedef struct s_token
 {
 	t_token_type	type;
@@ -48,9 +56,9 @@ typedef struct s_token
 
 typedef enum e_node_type
 {
-	PIPE,
-	REDIR,
-	CMD
+	NODE_PIPE,
+	NODE_REDIR,
+	NODE_CMD
 }	t_node_type;
 
 typedef struct s_ast
@@ -67,6 +75,22 @@ typedef struct	s_data
 	t_ast	*nodes;
 	char	*line;
 }	t_data;
+
+typedef struct s_redirs
+{
+	t_redir_type	type;
+	char			*file_name;
+	struct s_redirs	*next;
+}	t_redirs;
+
+// AST v2
+typedef struct s_cmd_list
+{
+	char			**args;
+	t_redirs		*redirs;
+	//t_token_type	type;
+	struct s_cmd_list	*next;
+}	t_cmd_list;
 
 // utils
 void	free_token(t_token **head);
@@ -89,5 +113,9 @@ void	handle_semi(t_token **head, char *str, int *i);
 void	lexing(t_data *data);
 int		del_exists(char *str);
 void	create_new_tokens_del(t_token **head);
+
+// Cmd List
+t_cmd_list	*use_tokens(t_token **tokens);
+t_cmd_list	*create_node(t_token **tokens, t_cmd_list **list);
 
 #endif

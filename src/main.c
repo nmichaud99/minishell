@@ -32,7 +32,9 @@ void	sigint_handler(int sig)
 
 int	main(int ac, char **av, char **env)
 {
-	t_data	*data;
+	t_data		*data;
+	char		**args;
+	//t_cmd_list	*list;
 
 	(void)ac;
 	(void)av;
@@ -66,6 +68,24 @@ int	main(int ac, char **av, char **env)
 			printf("'%s'\n", tmp->str);
 			printf("%u\n", tmp->type);
 			tmp = tmp->next;
+		}
+		t_cmd_list *cmd_list = use_tokens(&data->tokens);
+		while (cmd_list)
+		{
+			printf("//=== Command ===//\n");
+			if (cmd_list->redirs->file_name)
+				printf("file name : %s\n", cmd_list->redirs->file_name);
+			if (cmd_list->args)
+				args = cmd_list->args;
+			if (*args)
+			{
+				while (*args)
+				{
+					printf("%s\n", *args);
+					args++;
+				}
+				cmd_list = cmd_list->next;
+			}
 		}
 		free_token(&data->tokens);
 		free(data->line);
