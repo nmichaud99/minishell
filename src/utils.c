@@ -39,7 +39,7 @@ t_token	*new_token(t_token_type type, char *content)
 	res->type = type;
 	res->str = content;
 	res->next = NULL;
-	return (res); 
+	return (res);
 }
 
 void	add_token(t_token **head, t_token *new)
