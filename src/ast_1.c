@@ -144,15 +144,20 @@ t_redir_type	convert_types(t_token_type token_type)
 	return (type);
 }
 
-void	add_redir_node(t_redirs **redirs, t_token_type type, char *file_name)
+void	add_redir_node(t_redirs **redirs, t_token_type type, t_token *next)
 {
 	t_redirs	*tmp;
 	t_redirs	*new_node;
+	char		*filename;
 
 	new_node = malloc(sizeof(t_redirs));
 	if (!new_node)
 		return ;
-	new_node->file_name = file_name;
+	if (next->type == VARIABLE)
+		filename = expand_variable(next->str);
+	else
+		filename = next->str;
+	new_node->file_name = filename;
 	new_node->type = convert_types(type);
 	new_node->next = NULL;
 	tmp = *redirs;
@@ -175,7 +180,7 @@ t_redirs	*get_redirs(t_token **tokens, t_redirs **redirs)
 	{
 		if (tmp->next && is_redir(tmp->type) && is_arg(tmp->next->type))
 		{
-			add_redir_node(redirs, tmp->type, tmp->next->str);
+			add_redir_node(redirs, tmp->type, tmp->next);
 			tmp = tmp->next->next;
 		}
 		else
@@ -195,24 +200,20 @@ int	count_args(t_token **tokens)
 	prev = NULL;
 	while (tmp != NULL)
 	{
-		if (prev && is_arg(tmp->type) && is_redir(prev->type))
+		if (is_arg(tmp->type))
 		{
-			prev = tmp;
-			tmp = tmp->next;
-		}
-		else if (is_arg(tmp->type))
-		{
+			if (prev && is_redir(prev->type))
+			{
+				prev = tmp;
+				tmp = tmp->next;
+				continue ;
+			}
 			args_size++;
-			prev = tmp;
-			tmp = tmp->next;
 		}
-		else
-		{
-			prev = tmp;
-			tmp = tmp->next;
-		}
+		prev = tmp;
+		tmp = tmp->next;
 	}
-	printf("nb arg : %d\n", args_size);
+	// printf("nb arg : %d\n", args_size);
 	return (args_size);
 }
 
@@ -241,6 +242,9 @@ char	**get_args(t_token **tokens)
 				tmp = tmp->next;
 				continue ;
 			}
+			if (tmp->type == VARIABLE)
+				args[i++] == getenv(tmp->str);
+			else
 				args[i++] = ft_strdup(tmp->str);
 		}
 		prev = tmp;
@@ -295,7 +299,7 @@ t_cmd_list	*use_tokens(t_token **tokens)
 				next_start = tmp->next->next;
 			tmp->next = NULL;
 			create_node(head, &list);
-			head = &next_start;
+			*head = next_start;
 			tmp = next_start;
 			free(pipe_token);
 			continue ;
