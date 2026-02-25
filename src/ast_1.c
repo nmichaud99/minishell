@@ -154,7 +154,7 @@ void	add_redir_node(t_redirs **redirs, t_token_type type, t_token *next)
 	if (!new_node)
 		return ;
 	if (next->type == VARIABLE)
-		filename = expand_variable(next->str);
+		filename = getenv(next->str);
 	else
 		filename = next->str;
 	new_node->file_name = filename;
@@ -243,7 +243,7 @@ char	**get_args(t_token **tokens)
 				continue ;
 			}
 			if (tmp->type == VARIABLE)
-				args[i++] == getenv(tmp->str);
+				args[i++] = getenv(tmp->str);
 			else
 				args[i++] = ft_strdup(tmp->str);
 		}

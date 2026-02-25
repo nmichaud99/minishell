@@ -83,7 +83,7 @@ typedef struct s_redirs
 	struct s_redirs	*next;
 }	t_redirs;
 
-// AST v2
+// Command List
 typedef struct s_cmd_list
 {
 	char			**args;
@@ -113,6 +113,7 @@ void	handle_semi(t_token **head, char *str, int *i);
 void	lexing(t_data *data);
 int		del_exists(char *str);
 void	create_new_tokens_del(t_token **head);
+char	**init_env_tab(char **env);
 
 // Cmd List
 t_cmd_list	*use_tokens(t_token **tokens);

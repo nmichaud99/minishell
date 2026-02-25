@@ -34,6 +34,7 @@ int	main(int ac, char **av, char **env)
 {
 	t_data		*data;
 	char		**args;
+	char		**env_tab;
 	//t_cmd_list	*list;
 
 	(void)ac;
@@ -45,6 +46,7 @@ int	main(int ac, char **av, char **env)
 	if (!data)
 		return (1);
 	init_data(data);
+	env_tab = init_env_tab(env);
 	while (1)
 	{
 		gSignalStatus = 0;
