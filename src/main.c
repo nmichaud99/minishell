@@ -73,7 +73,7 @@ int	main(int ac, char **av, char **env)
 		while (cmd_list)
 		{
 			printf("//=== Command ===//\n");
-			if (cmd_list->redirs->file_name)
+			if (cmd_list->redirs && cmd_list->redirs->file_name)
 				printf("file name : %s\n", cmd_list->redirs->file_name);
 			if (cmd_list->args)
 				args = cmd_list->args;
