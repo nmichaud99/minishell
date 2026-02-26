@@ -92,6 +92,14 @@ typedef struct s_cmd_list
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
+// Environment
+typedef struct s_env
+{
+	char			*key;
+	char			*value;
+	struct s_env	*next;
+}					t_env;
+
 // utils
 void	free_token(t_token **head);
 t_token	*new_token(t_token_type type, char *content);
