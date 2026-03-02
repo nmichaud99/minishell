@@ -19,6 +19,8 @@ void	init_data(t_data *data)
 	data->tokens = NULL;
 	data->nodes = NULL;
 	data->line = NULL;
+	data->cmds = NULL;
+	data->env = NULL;
 }
 
 void	sigint_handler(int sig)
@@ -44,12 +46,6 @@ int	main(int ac, char **av, char **env)
 	if (!data)
 		return (1);
 	init_data(data);
-	// Environment Initialization
-	/* while (*env)
-	{
-		printf("%s\n", *env);
-		env++;
-	} */
 	init_env_tab(env, data);
 	while (1)
 	{
@@ -87,6 +83,11 @@ int	main(int ac, char **av, char **env)
 			{
 				while (*args)
 				{
+					if (ft_srtlen(*args) == 6 && ft_strncmp(*args, "export", 6) == 0)
+					{
+						printf("arg after export\n", *args + 1);
+						add_or_modify_env_node(data, *args + 1);
+					}
 					printf("%s\n", *args);
 					args++;
 				}

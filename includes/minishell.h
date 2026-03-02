@@ -77,13 +77,6 @@ typedef struct s_env
 	struct s_env	*next;
 }					t_env;
 
-typedef struct	s_data
-{
-	t_token	*tokens;
-	t_ast	*nodes;
-	char	*line;
-	t_env	*env;
-}	t_data;
 
 typedef struct s_redirs
 {
@@ -100,6 +93,15 @@ typedef struct s_cmd_list
 	//t_token_type	type;
 	struct s_cmd_list	*next;
 }	t_cmd_list;
+
+typedef struct	s_data
+{
+	t_token		*tokens;
+	t_ast		*nodes;
+	char		*line;
+	t_env		*env;
+	t_cmd_list	*cmds;
+}	t_data;
 
 // utils
 void	free_token(t_token **head);
@@ -123,6 +125,9 @@ void	lexing(t_data *data);
 int		del_exists(char *str);
 void	create_new_tokens_del(t_token **head);
 void	init_env_tab(char **env, t_data *data);
+
+// Print for testing
+void	print_env(t_data *data);
 
 // Cmd List
 t_cmd_list	*use_tokens(t_token **tokens);
