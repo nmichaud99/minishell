@@ -111,3 +111,80 @@ int	main(int ac, char **av, char **env)
 	rl_clear_history();
 	return (0);
 }
+
+/*int	main(int ac, char **av, char **env)
+{
+	t_data		*data;
+	char		**args;
+	//t_cmd_list	*list;
+
+	(void)ac;
+	(void)av;
+	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
+	data = malloc(sizeof(t_data));
+	if (!data)
+		return (1);
+	init_data(data);
+	init_env_tab(env, data);
+	print_env(data);
+	while (1)
+	{
+		gSignalStatus = 0;
+		data->line = readline("minishell$ ");
+		if (!data->line)
+		{
+			printf("exit\n");
+			break ;
+		}
+		if (*(data->line))
+			add_history(data->line);
+		if (gSignalStatus == SIGINT)
+		{
+			free(data->line);
+			continue ;
+		}
+		lexing(data);
+		t_token *tmp = data->tokens;
+		while (tmp)
+		{
+			printf("'%s'\n", tmp->str);
+			printf("%u\n", tmp->type);
+			tmp = tmp->next;
+		}
+		t_cmd_list *cmd_list = use_tokens(&data->tokens);
+		while (cmd_list)
+		{
+			printf("//=== Command ===//\n");
+			if (cmd_list->redirs && cmd_list->redirs->file_name)
+				printf("file name : %s\n", cmd_list->redirs->file_name);
+			if (cmd_list->args)
+				args = cmd_list->args;
+			if (*args)
+			{
+				while (*args)
+				{
+					if (ft_strlen(*args) == 6 && ft_strcmp(*args, "export") == 0)
+					{
+						printf("arg after export : %s\n", *(args + 1));
+						add_or_modify_env_node(data, *(args + 1));
+					}
+					if (ft_strlen(*args) == 5 && ft_strcmp(*args, "unset") == 0)
+					{
+						printf("arg after unset : %s\n", *(args + 1));
+						exec_unset(data, *(args + 1));
+					}
+					printf("%s\n", *args);
+					args++;
+				}
+				cmd_list = cmd_list->next;
+			}
+		}
+		free_token(&data->tokens);
+		free(data->line);
+	}
+	print_env(data);
+	free(data);
+	rl_clear_history();
+	return (0);
+}*/
