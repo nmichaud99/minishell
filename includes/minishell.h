@@ -107,6 +107,7 @@ typedef struct	s_data
 void	free_token(t_token **head);
 t_token	*new_token(t_token_type type, char *content);
 void	add_token(t_token **head, t_token *new);
+int		ft_strcmp(const char *s1, const char *s2);
 
 // exit
 void	exit_free(t_data *data, int status);
@@ -126,14 +127,17 @@ int		del_exists(char *str);
 void	create_new_tokens_del(t_token **head);
 void	init_env_tab(char **env, t_data *data);
 
-// Print for testing
-void	print_env(t_data *data);
-
 // Cmd List
 t_cmd_list	*use_tokens(t_token **tokens);
 t_cmd_list	*create_node(t_token **tokens, t_cmd_list **list);
 
-// Command Execution
+// Export
 void	add_or_modify_env_node(t_data *data, char *new_var);
+
+// Env
+void	print_env(t_data *data);
+
+// Unset
+void	exec_unset(t_data *data, char *var);
 
 #endif

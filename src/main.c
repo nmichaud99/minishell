@@ -84,10 +84,15 @@ int	main(int ac, char **av, char **env)
 			{
 				while (*args)
 				{
-					if (ft_strlen(*args) == 6 && ft_strncmp(*args, "export", 6) == 0)
+					if (ft_strlen(*args) == 6 && ft_strcmp(*args, "export") == 0)
 					{
 						printf("arg after export : %s\n", *(args + 1));
 						add_or_modify_env_node(data, *(args + 1));
+					}
+					if (ft_strlen(*args) == 5 && ft_strcmp(*args, "unset") == 0)
+					{
+						printf("arg after unset : %s\n", *(args + 1));
+						exec_unset(data, *(args + 1));
 					}
 					printf("%s\n", *args);
 					args++;

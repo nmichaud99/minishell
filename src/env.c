@@ -93,6 +93,7 @@ void	init_env_tab(char **env, t_data *data)
 	}
 }
 
+// Exec env
 void	print_env(t_data *data)
 {
 	t_env	*tmp;
@@ -106,15 +107,8 @@ void	print_env(t_data *data)
 	printf("%s=%s\n", tmp->key, tmp->value);
 }
 
-// Add Variable to environment
-/*
-	- If nom de variable deja existant :
-		- if new value = old value -> return
-		- else modifier la valeur
 
-	- Else if nom de variable existe pas, la creer
-*/
-
+// Exec export
 void	add_or_modify_env_node(t_data *data, char *new_var)
 {
 	t_env	*tmp;
@@ -130,7 +124,7 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 	tmp = data->env;
 	while (tmp && tmp->next)
 	{
-		if (tmp->key == new_key)
+		if (ft_strcmp(tmp->key, new_key) == 0)
 		{
 			if (ft_strcmp(new_value, tmp->value) == 0)
 				return ;
@@ -145,4 +139,35 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 	add_env_node(data, new_var);
 }
 
-// Modify Variable
+// Free env node
+void	free_env_node(t_env *env)
+{
+	free(env->key);
+	free(env->value);
+}
+
+// Exec Unset command
+
+void	exec_unset(t_data *data, char *var)
+{
+	t_env	*tmp;
+	t_env	*to_delete;
+
+	tmp = data->env;
+	while (tmp && tmp->next)
+	{
+		if (tmp->next && ft_strcmp(tmp->next->key, var) == 0)
+		{
+			to_delete = tmp->next;
+			if (tmp->next->next)
+				tmp->next = tmp->next->next;
+			else
+				tmp->next = NULL;
+			free_env_node(to_delete);
+			printf("Variable %s successfully deleted from env!\n", var);
+			return ;
+		}
+		tmp = tmp->next;
+	}
+	printf("The variable %s does not exist in the env !\n", var);
+}
