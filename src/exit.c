@@ -51,6 +51,24 @@ void	free_redirs(t_redirs **redirs)
 	*redirs = NULL;
 }
 
+void	free_env(t_env **env)
+{
+	t_env *tmp;
+
+	if (!env || !*env)
+		return ;
+	while (*env)
+	{
+		free((*env)->key);
+		free((*env)->value);
+		tmp = *env;
+		*env = (*env)->next;
+		free(tmp);
+		tmp = NULL;
+	}
+	*env = NULL;
+}
+
 void	free_list(t_cmd_list **list)
 {
 	t_cmd_list *tmp;
@@ -79,6 +97,16 @@ void	free_data(t_data *data)
 void	exit_free(t_data *data, int status)
 {
 	free_data(data);
+	free_env(&data->env);
 	free(data);
 	exit(status);
 }
+
+/* 
+EXIT CODES 
+Success : EXIT_SUCCESS (0)
+FAILURE : EXIT_FAILURE (non zero)
+CMD NOT FOUND : 127
+CMD NOT EXECUTABLE (if executable (built ins or '/' in string)): 126
+SYNTAX ERROR : 2
+*/

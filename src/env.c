@@ -29,9 +29,21 @@ int	ft_strcmp(const char *s1, const char *s2)
 
 int	is_valid_string(char *str)
 {
-	if (str[0] && str[0] == '=')
+	int	i;
+
+	i = 0;
+	if (str[0] && ((str[i] <= 'z' && str[i] >= 'a') || (str[i] <= 'Z' && str[i] >= 'A') || str[i] == '_'))
+		i++;
+	else
 		return (0);
-	if (!ft_strchr(str, '=') || !(ft_strchr(str, '=') + 1))
+	while (str[i] && str[i] != '=')
+	{
+		if ((str[i] <= 'z' && str[i] >= 'a') || (str[i] <= 'Z' && str[i] >= 'A') || (str[i] <= '9' && str[i] >= '0') || str[i] == '_')
+				i++;
+		else
+			return (0);
+	}
+	if (!str[i] || str[i] != '=')
 		return (0);
 	return (1);
 }
@@ -66,9 +78,18 @@ void	add_env_node(t_data *data, char *env_line)
 
 	new_node = malloc(sizeof(t_env));
 	if (!new_node)
-		return ;
+		exit_free(data, EXIT_FAILURE);
 	new_node->key = get_variable_key(env_line);
+	if (!new_node->key)
+		exit_free(data, EXIT_FAILURE);
 	new_node->value = ft_strdup(ft_strchr(env_line, '=') + 1);
+	if (!new_node->value)
+	{
+		free(new_node->key);
+		new_node->key = NULL;
+		free(new_node);
+		exit_free(data, EXIT_FAILURE);
+	}
 	new_node->next = NULL;
 	tmp = data->env;
 	if (!data->env)
@@ -107,6 +128,19 @@ void	print_env(t_data *data)
 	printf("%s=%s\n", tmp->key, tmp->value);
 }
 
+void	print_env_export(t_data *data)
+{
+	t_env	*tmp;
+
+	tmp = data->env;
+	while (tmp && tmp->next)
+	{
+		printf("export ");
+		printf("%s=%s\n", tmp->key, tmp->value);
+		tmp = tmp->next;
+	}
+	printf("%s=%s\n", tmp->key, tmp->value);
+}
 
 // Exec export
 void	add_or_modify_env_node(t_data *data, char *new_var)
@@ -115,12 +149,17 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 	char	*new_key;
 	char	*new_value;
 
-	if (!is_valid_string(new_var))
-		return ;
+	/*if (!is_valid_string(new_var))
+		return ;*/
 	new_key = get_variable_key(new_var);
+	if (!new_key)
+		exit_free(data, EXIT_FAILURE);
 	new_value = ft_strdup(ft_strchr(new_var, '=') + 1);
 	if (!new_value)
-		return ;
+	{
+		free(new_key);
+		exit_free(data, EXIT_FAILURE);
+	}
 	tmp = data->env;
 	while (tmp && tmp->next)
 	{
@@ -136,7 +175,41 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 		}
 		tmp = tmp->next;
 	}
+	free(new_key);
+	free(new_value);
 	add_env_node(data, new_var);
+}
+
+int	ft_export(t_data *data)
+{
+	t_cmd_list	*tmp_list;
+	char		**tmp_args;
+
+	tmp_list = data->cmd_list;
+	while (tmp_list)
+	{
+		tmp_args = tmp_list->args;
+		while (*tmp_args)
+		{
+			if (ft_strlen(*tmp_args) == 6 && ft_strcmp(*tmp_args, "export") == 0)
+			{
+				if (!*(tmp_args + 1))
+				{
+					print_env_export(data);
+					return (0);
+				}
+				else if (!is_valid_string(*(tmp_args + 1)))
+				{
+					printf("export: '%s': is not a valid identifier\n", *(tmp_args + 1));
+						return (2);
+				}
+				add_or_modify_env_node(data, *(tmp_args + 1));
+			}
+			tmp_args++;
+		}
+		tmp_list = tmp_list->next;
+	}
+	return (0);
 }
 
 // Free env node
@@ -144,6 +217,8 @@ void	free_env_node(t_env *env)
 {
 	free(env->key);
 	free(env->value);
+	free(env);
+	env = NULL;
 }
 
 // Exec Unset command
@@ -154,7 +229,7 @@ void	exec_unset(t_data *data, char *var)
 	t_env	*to_delete;
 
 	tmp = data->env;
-	while (tmp && tmp->next)
+	while (tmp)
 	{
 		if (tmp->next && ft_strcmp(tmp->next->key, var) == 0)
 		{
@@ -170,4 +245,24 @@ void	exec_unset(t_data *data, char *var)
 		tmp = tmp->next;
 	}
 	printf("The variable %s does not exist in the env !\n", var);
+}
+
+char	*get_variable_value(t_data *data, char *str)
+{
+	t_env	*tmp;
+	char	*tmp_value;
+
+	tmp = data->env;
+	while (tmp)
+	{
+		if (ft_strcmp(tmp->key, str) == 0)
+		{
+			tmp_value = ft_strdup(tmp->value);
+			if (!tmp_value)
+				exit_free(data, EXIT_FAILURE);
+			return (tmp_value);
+		}
+		tmp = tmp->next;
+	}
+	return (NULL);
 }

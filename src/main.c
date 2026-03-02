@@ -43,6 +43,7 @@ int	main(int ac, char **av, char **env)
 	if (!data)
 		return (1);
 	data->env = NULL;
+	init_data(data);
 	init_env_tab(env, data);
 	while (1)
 	{
@@ -78,6 +79,14 @@ int	main(int ac, char **av, char **env)
 		parsing(data);
 		if (!data->cmd_list)
 			exit_free(data, EXIT_FAILURE);
+		if (ft_export(data))
+		{
+			free_token(&data->tokens);
+			free_list(&data->cmd_list);
+			free(data->line);
+			continue ;
+		}
+		//print_env(data);
 		t_cmd_list *tmp_list = data->cmd_list;
 		while (tmp_list)
 		{
@@ -93,32 +102,25 @@ int	main(int ac, char **av, char **env)
 				}
 			}
 			char **tmp_args = tmp_list->args;
-			if (*tmp_args)
+			while (*tmp_args)
 			{
 				printf("//=== Arguments ===//\n");
-				while (*tmp_args)
+				printf("%s\n", *tmp_args);
+				if (ft_strlen(*tmp_args) == 5 && ft_strcmp(*tmp_args, "unset") == 0)
 				{
-					printf("%s\n", *tmp_args);
-					if (ft_strlen(*tmp_args) == 6 && ft_strcmp(*tmp_args, "export") == 0)
-					{
-						printf("arg after export : %s\n", *(tmp_args + 1));
-						add_or_modify_env_node(data, *(tmp_args + 1));
-					}
-					if (ft_strlen(*tmp_args) == 5 && ft_strcmp(*tmp_args, "unset") == 0)
-					{
-						printf("arg after unset : %s\n", *(tmp_args + 1));
-						exec_unset(data, *(tmp_args + 1));
-					}
-					printf("%s\n", *tmp_args);
-					tmp_args++;
+					printf("arg after unset : %s\n", *(tmp_args + 1));
+					exec_unset(data, *(tmp_args + 1));
 				}
+				tmp_args++;
 			}
 			tmp_list = tmp_list->next;
 		}
+		//print_env(data);
 		free_token(&data->tokens);
 		free_list(&data->cmd_list);
 		free(data->line);
 	}
+	free_env(&data->env);
 	free(data);
 	rl_clear_history();
 	return (0);

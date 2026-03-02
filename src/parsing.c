@@ -159,7 +159,11 @@ char	**get_args(t_data *data, t_token *start, t_token *end)
 				continue ;
 			}
 			if (tmp->type == VARIABLE)
-				printf("On a une variable donc pas gere !\n");
+			{
+				args[i] = get_variable_value(data, tmp->str);
+				printf("variable : %s\n", args[i]);
+				i++;
+			}
 			else
 			{
 				args[i] = ft_strdup(tmp->str);
