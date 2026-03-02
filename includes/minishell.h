@@ -54,28 +54,6 @@ typedef struct s_token
 	struct s_token	*next;
 }	t_token;
 
-typedef enum e_node_type
-{
-	NODE_PIPE,
-	NODE_REDIR,
-	NODE_CMD
-}	t_node_type;
-
-typedef struct s_ast
-{
-	t_node_type		type;
-	t_token			*cmd;
-	struct s_ast	*left;
-	struct s_ast	*right;
-}	t_ast;
-
-typedef struct	s_data
-{
-	t_token	*tokens;
-	t_ast	*nodes;
-	char	*line;
-}	t_data;
-
 typedef struct s_redirs
 {
 	t_redir_type	type;
@@ -100,12 +78,26 @@ typedef struct s_env
 	struct s_env	*next;
 }					t_env;
 
+typedef struct	s_data
+{
+	char		*line;
+	t_token		*tokens;
+	t_cmd_list	*cmd_list;
+	t_env		*env;
+}	t_data;
+
 // utils
-void	free_token(t_token **head);
-t_token	*new_token(t_token_type type, char *content);
-void	add_token(t_token **head, t_token *new);
+t_token		*new_token(t_token_type type, char *content);
+void		add_token(t_token **head, t_token *new);
+t_cmd_list	*new_cmd(char **args, t_redirs *redirs);
+void		add_cmd(t_cmd_list **list, t_cmd_list *new);
 
 // exit
+void	ft_free(char ***str);
+void	free_token(t_token **head);
+void	free_redirs(t_redirs **redirs);
+void	free_list(t_cmd_list **list);
+void	free_data(t_data *data);
 void	exit_free(t_data *data, int status);
 
 // lexing
@@ -119,12 +111,12 @@ void	handle_operators(t_token **head, char *str, int *i);
 void	handle_variable(t_token **head, char *str, int *i);
 void	handle_semi(t_token **head, char *str, int *i);
 void	lexing(t_data *data);
-int		del_exists(char *str);
-void	create_new_tokens_del(t_token **head);
-char	**init_env_tab(char **env);
 
-// Cmd List
-t_cmd_list	*use_tokens(t_token **tokens);
-t_cmd_list	*create_node(t_token **tokens, t_cmd_list **list);
+// syntax check
+int		syntax_check(t_data *data);
+
+// parsing
+int		is_redir(t_token_type type);
+void	parsing(t_data *data);
 
 #endif

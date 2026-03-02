@@ -16,9 +16,10 @@ volatile sig_atomic_t gSignalStatus = 0;
 
 void	init_data(t_data *data)
 {
-	data->tokens = NULL;
-	data->nodes = NULL;
 	data->line = NULL;
+	data->tokens = NULL;
+	data->cmd_list = NULL;
+	data->env = NULL;
 }
 
 void	sigint_handler(int sig)
@@ -33,9 +34,6 @@ void	sigint_handler(int sig)
 int	main(int ac, char **av, char **env)
 {
 	t_data		*data;
-	char		**args;
-	char		**env_tab;
-	//t_cmd_list	*list;
 
 	(void)ac;
 	(void)av;
@@ -45,10 +43,9 @@ int	main(int ac, char **av, char **env)
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (1);
-	init_data(data);
-	env_tab = init_env_tab(env);
 	while (1)
 	{
+		init_data(data);
 		gSignalStatus = 0;
 		data->line = readline("minishell$ ");
 		if (!data->line)
@@ -71,25 +68,43 @@ int	main(int ac, char **av, char **env)
 			printf("%u\n", tmp->type);
 			tmp = tmp->next;
 		}
-		t_cmd_list *cmd_list = use_tokens(&data->tokens);
-		while (cmd_list)
+		if (!syntax_check(data))
 		{
-			printf("//=== Command ===//\n");
-			if (cmd_list->redirs && cmd_list->redirs->file_name)
-				printf("file name : %s\n", cmd_list->redirs->file_name);
-			if (cmd_list->args)
-				args = cmd_list->args;
-			if (*args)
+			printf("Syntax error !\n");
+			free_data(data);
+			continue ;
+		}
+		parsing(data);
+		if (!data->cmd_list)
+			exit_free(data, EXIT_FAILURE);
+		t_cmd_list *tmp_list = data->cmd_list;
+		while (tmp_list)
+		{
+			t_redirs *tmp_redirs = tmp_list->redirs;
+			printf("\n//=== Command ===//\n");
+			if (tmp_redirs)
 			{
-				while (*args)
+				printf("//=== Redirs ===//\n");
+				while (tmp_redirs)
 				{
-					printf("%s\n", *args);
-					args++;
+					printf("file name : %s\n", tmp_redirs->file_name);
+					tmp_redirs = tmp_redirs->next;
 				}
-				cmd_list = cmd_list->next;
 			}
+			char **tmp_args = tmp_list->args;
+			if (*tmp_args)
+			{
+				printf("//=== Arguments ===//\n");
+				while (*tmp_args)
+				{
+					printf("%s\n", *tmp_args);
+					tmp_args++;
+				}
+			}
+			tmp_list = tmp_list->next;
 		}
 		free_token(&data->tokens);
+		free_list(&data->cmd_list);
 		free(data->line);
 	}
 	free(data);

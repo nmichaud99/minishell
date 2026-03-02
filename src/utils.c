@@ -12,23 +12,6 @@
 
 #include "minishell.h"
 
-void	free_token(t_token **head)
-{
-	t_token *tmp;
-
-	if (!head || !*head)
-		return ;
-	while (*head)
-	{
-		free((*head)->str);
-		tmp = *head;
-		*head = (*head)->next;
-		free(tmp);
-		tmp = NULL;
-	}
-	head = NULL;
-}
-
 t_token	*new_token(t_token_type type, char *content)
 {
 	t_token	*res;
@@ -52,6 +35,34 @@ void	add_token(t_token **head, t_token *new)
 		return ;
 	}
 	tmp = *head;
+	while (tmp->next)
+		tmp = tmp->next;
+	tmp->next = new;
+}
+
+t_cmd_list	*new_cmd(char **args, t_redirs *redirs)
+{
+	t_cmd_list	*res;
+
+	res = malloc(sizeof(t_cmd_list));
+	if (!res)
+		return (NULL);
+	res->args = args;
+	res->redirs = redirs;
+	res->next = NULL;
+	return (res);
+}
+
+void	add_cmd(t_cmd_list **list, t_cmd_list *new)
+{
+	t_cmd_list	*tmp;
+
+	if (!*list)
+	{
+		*list = new;
+		return ;
+	}
+	tmp = *list;
 	while (tmp->next)
 		tmp = tmp->next;
 	tmp->next = new;
