@@ -79,7 +79,7 @@ int	main(int ac, char **av, char **env)
 		parsing(data);
 		if (!data->cmd_list)
 			exit_free(data, EXIT_FAILURE);
-		if (ft_export(data))
+		if (expansion(data))
 		{
 			free_token(&data->tokens);
 			free_list(&data->cmd_list);

@@ -180,34 +180,29 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 	add_env_node(data, new_var);
 }
 
-int	ft_export(t_data *data)
+int	expansion(t_data *data)
 {
 	t_cmd_list	*tmp_list;
 	char		**tmp_args;
 
 	tmp_list = data->cmd_list;
-	while (tmp_list)
+	tmp_args = tmp_list->args;
+	if (*tmp_args)
 	{
-		tmp_args = tmp_list->args;
-		while (*tmp_args)
+		if (ft_strlen(*tmp_args) == 6 && ft_strcmp(*tmp_args, "export") == 0)
 		{
-			if (ft_strlen(*tmp_args) == 6 && ft_strcmp(*tmp_args, "export") == 0)
+			if (!*(tmp_args + 1))
 			{
-				if (!*(tmp_args + 1))
-				{
-					print_env_export(data);
-					return (0);
-				}
-				else if (!is_valid_string(*(tmp_args + 1)))
-				{
-					printf("export: '%s': is not a valid identifier\n", *(tmp_args + 1));
-						return (2);
-				}
-				add_or_modify_env_node(data, *(tmp_args + 1));
+				print_env_export(data);
+				return (1);
 			}
-			tmp_args++;
+			else if (!is_valid_string(*(tmp_args + 1)))
+			{
+				printf("export: '%s': is not a valid identifier\n", *(tmp_args + 1));
+					return (2);
+			}
+			add_or_modify_env_node(data, *(tmp_args + 1));
 		}
-		tmp_list = tmp_list->next;
 	}
 	return (0);
 }
@@ -223,7 +218,7 @@ void	free_env_node(t_env *env)
 
 // Exec Unset command
 
-void	exec_unset(t_data *data, char *var)
+int	exec_unset(t_data *data, char *var)
 {
 	t_env	*tmp;
 	t_env	*to_delete;
@@ -239,12 +234,11 @@ void	exec_unset(t_data *data, char *var)
 			else
 				tmp->next = NULL;
 			free_env_node(to_delete);
-			printf("Variable %s successfully deleted from env!\n", var);
-			return ;
+			return (0);
 		}
 		tmp = tmp->next;
 	}
-	printf("The variable %s does not exist in the env !\n", var);
+	return (1);
 }
 
 char	*get_variable_value(t_data *data, char *str)
