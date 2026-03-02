@@ -19,7 +19,6 @@ void	init_data(t_data *data)
 	data->line = NULL;
 	data->tokens = NULL;
 	data->cmd_list = NULL;
-	data->env = NULL;
 }
 
 void	sigint_handler(int sig)
@@ -43,6 +42,8 @@ int	main(int ac, char **av, char **env)
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (1);
+	data->env = NULL;
+	init_env_tab(env, data);
 	while (1)
 	{
 		init_data(data);
@@ -97,6 +98,17 @@ int	main(int ac, char **av, char **env)
 				printf("//=== Arguments ===//\n");
 				while (*tmp_args)
 				{
+					printf("%s\n", *tmp_args);
+					if (ft_strlen(*tmp_args) == 6 && ft_strcmp(*tmp_args, "export") == 0)
+					{
+						printf("arg after export : %s\n", *(tmp_args + 1));
+						add_or_modify_env_node(data, *(tmp_args + 1));
+					}
+					if (ft_strlen(*tmp_args) == 5 && ft_strcmp(*tmp_args, "unset") == 0)
+					{
+						printf("arg after unset : %s\n", *(tmp_args + 1));
+						exec_unset(data, *(tmp_args + 1));
+					}
 					printf("%s\n", *tmp_args);
 					tmp_args++;
 				}
