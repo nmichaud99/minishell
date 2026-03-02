@@ -47,6 +47,7 @@ int	main(int ac, char **av, char **env)
 		return (1);
 	init_data(data);
 	init_env_tab(env, data);
+	print_env(data);
 	while (1)
 	{
 		gSignalStatus = 0;
@@ -83,10 +84,10 @@ int	main(int ac, char **av, char **env)
 			{
 				while (*args)
 				{
-					if (ft_srtlen(*args) == 6 && ft_strncmp(*args, "export", 6) == 0)
+					if (ft_strlen(*args) == 6 && ft_strncmp(*args, "export", 6) == 0)
 					{
-						printf("arg after export\n", *args + 1);
-						add_or_modify_env_node(data, *args + 1);
+						printf("arg after export : %s\n", *(args + 1));
+						add_or_modify_env_node(data, *(args + 1));
 					}
 					printf("%s\n", *args);
 					args++;
@@ -97,6 +98,7 @@ int	main(int ac, char **av, char **env)
 		free_token(&data->tokens);
 		free(data->line);
 	}
+	print_env(data);
 	free(data);
 	rl_clear_history();
 	return (0);

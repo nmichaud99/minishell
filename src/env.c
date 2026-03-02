@@ -83,9 +83,7 @@ void	add_env_node(t_data *data, char *env_line)
 
 void	init_env_tab(char **env, t_data *data)
 {
-	(void)env;
-	int		i;
-	t_env	*tmp;
+	int	i;
 
 	i = 0;
 	while (env[i])
@@ -106,7 +104,6 @@ void	print_env(t_data *data)
 		tmp = tmp->next;
 	}
 	printf("%s=%s\n", tmp->key, tmp->value);
-
 }
 
 // Add Variable to environment
@@ -118,18 +115,18 @@ void	print_env(t_data *data)
 	- Else if nom de variable existe pas, la creer
 */
 
-void	*add_or_modify_env_node(t_data *data, char *new_var)
+void	add_or_modify_env_node(t_data *data, char *new_var)
 {
 	t_env	*tmp;
 	char	*new_key;
 	char	*new_value;
 
+	if (!is_valid_string(new_var))
+		return ;
 	new_key = get_variable_key(new_var);
 	new_value = ft_strdup(ft_strchr(new_var, '=') + 1);
 	if (!new_value)
-		return (NULL);
-	if (!is_valid_string(new_var))
-		return (NULL);
+		return ;
 	tmp = data->env;
 	while (tmp && tmp->next)
 	{

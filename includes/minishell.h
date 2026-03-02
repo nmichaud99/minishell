@@ -133,4 +133,7 @@ void	print_env(t_data *data);
 t_cmd_list	*use_tokens(t_token **tokens);
 t_cmd_list	*create_node(t_token **tokens, t_cmd_list **list);
 
+// Command Execution
+void	add_or_modify_env_node(t_data *data, char *new_var);
+
 #endif
