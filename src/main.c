@@ -99,6 +99,10 @@ int	main(int ac, char **av, char **env)
 			{
 				printf("//=== Arguments ===//\n");
 				printf("%s\n", *tmp_args);
+				if (ft_strlen(*tmp_args) == 2 && ft_strcmp(*tmp_args, "cd") == 0)
+				{
+					exec_cd(data, tmp_args);
+				}
 				tmp_args++;
 			}
 			tmp_list = tmp_list->next;

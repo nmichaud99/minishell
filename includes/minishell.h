@@ -131,8 +131,12 @@ void	parsing(t_data *data);
 //export
 void	add_env_node(t_data *data, char *env_line);
 int		ft_export(t_data *data, char **args);
+void	add_or_modify_env_node(t_data *data, char *new_var);
 
 //unset
 int		exec_unset(t_data *data, char **args);
+
+//cd
+int	exec_cd(t_data *data, char **args);
 
 #endif

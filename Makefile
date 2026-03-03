@@ -1,7 +1,7 @@
 NAME = minishell
 
 SOURCES = $(addprefix $(SRC_DIR)/, \
-		main.c lexing_1.c lexing_2.c utils.c exit.c parsing.c syntax_check.c env.c built_ins_export.c built_ins_unset.c)
+		main.c lexing_1.c lexing_2.c utils.c exit.c parsing.c syntax_check.c env.c built_ins_export.c built_ins_unset.c built_ins_cd.c)
 
 OBJECTS = $(SOURCES:src/%.c=obj/%.o)
 
