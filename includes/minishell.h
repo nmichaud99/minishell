@@ -70,7 +70,8 @@ typedef struct s_cmd_list
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
-typedef struct	s_data
+// Environment
+typedef struct s_env
 {
 	char			*key;
 	char			*value;
