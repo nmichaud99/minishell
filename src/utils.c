@@ -40,13 +40,13 @@ void	add_token(t_token **head, t_token *new)
 	tmp->next = new;
 }
 
-t_cmd_list	*new_cmd(char **args, t_redirs *redirs)
+t_cmd_list	*new_cmd(t_data *data, char **args, t_redirs *redirs)
 {
 	t_cmd_list	*res;
 
 	res = malloc(sizeof(t_cmd_list));
 	if (!res)
-		return (NULL);
+		exit_free(data, EXIT_FAILURE);
 	res->args = args;
 	res->redirs = redirs;
 	res->next = NULL;

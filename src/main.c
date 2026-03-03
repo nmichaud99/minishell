@@ -14,12 +14,22 @@
 
 volatile sig_atomic_t gSignalStatus = 0;
 
-void	init_data(t_data *data)
+void	init_data(t_data *data, int flag)
 {
-	data->line = NULL;
-	data->tokens = NULL;
-	data->cmd_list = NULL;
-}
+	if (flag == 0)
+	{
+		data->line = NULL;
+		data->tokens = NULL;
+		data->cmd_list = NULL;
+	}
+	else
+	{
+		free_token(&data->tokens);
+		free_list(&data->cmd_list);
+		free(data->line);
+		data->line = NULL;
+	}
+	}
 
 void	sigint_handler(int sig)
 {
@@ -43,11 +53,11 @@ int	main(int ac, char **av, char **env)
 	if (!data)
 		return (1);
 	data->env = NULL;
-	init_data(data);
+	init_data(data, 0);
 	init_env_tab(env, data);
 	while (1)
 	{
-		init_data(data);
+		init_data(data, 1);
 		gSignalStatus = 0;
 		data->line = readline("minishell$ ");
 		if (!data->line)
@@ -104,9 +114,6 @@ int	main(int ac, char **av, char **env)
 			tmp_list = tmp_list->next;
 		}
 		//print_env(data);
-		free_token(&data->tokens);
-		free_list(&data->cmd_list);
-		free(data->line);
 	}
 	free_env(&data->env);
 	free(data);

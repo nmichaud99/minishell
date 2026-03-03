@@ -190,10 +190,10 @@ void	parsing(t_data *data)
 	{
 		if (current->type == PIPE)
 		{
-			add_cmd(&data->cmd_list, new_cmd(get_args(data, start, current), get_redirs(data, start, current)));
+			add_cmd(&data->cmd_list, new_cmd(data, get_args(data, start, current), get_redirs(data, start, current)));
 			start = current->next;
 		}
 		current = current->next;
 	}
-	add_cmd(&data->cmd_list, new_cmd(get_args(data, start, NULL), get_redirs(data, start, NULL)));
+	add_cmd(&data->cmd_list, new_cmd(data, get_args(data, start, NULL), get_redirs(data, start, NULL)));
 }

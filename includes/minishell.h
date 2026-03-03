@@ -89,7 +89,7 @@ typedef struct	s_data
 // utils
 t_token		*new_token(t_token_type type, char *content);
 void		add_token(t_token **head, t_token *new);
-t_cmd_list	*new_cmd(char **args, t_redirs *redirs);
+t_cmd_list	*new_cmd(t_data *data, char **args, t_redirs *redirs);
 void		add_cmd(t_cmd_list **list, t_cmd_list *new);
 int			ft_strcmp(const char *s1, const char *s2);
 

@@ -55,5 +55,8 @@ char	*get_variable_value(t_data *data, char *str)
 		}
 		tmp = tmp->next;
 	}
-	return (NULL);
+	tmp_value = ft_strdup("");
+	if (!tmp_value)
+		exit_free(data, EXIT_FAILURE);
+	return (tmp_value);
 }
