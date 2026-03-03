@@ -12,34 +12,48 @@
 
 #include "minishell.h"
 
-char	**init_env_tab(char **env)
+void	init_env_tab(char **env, t_data *data)
 {
-	char	**env_tab;
-	int		i;
+	int	i;
 
 	i = 0;
 	while (env[i])
-		i++;
-	env_tab = malloc(sizeof(char *) * (i + 1));
-	if (!env_tab)
-		return (NULL);
-	i = 0;
-	while (i < len)
 	{
-		env_tab[i] = ft_strdup(env[i]);
+		add_env_node(data, env[i]);
 		i++;
 	}
-	env_tab[i] = NULL;
-	i = 0;
-	while (env_tab[i])
-	{
-		//printf("env : %s\n", env_tab[i]);
-		i++;
-	}
-	return (env_tab);
 }
 
+// Exec env
+void	print_env(t_data *data)
+{
+	t_env	*tmp;
 
-// Add Variable
+	tmp = data->env;
+	while (tmp && tmp->next)
+	{
+		printf("%s=%s\n", tmp->key, tmp->value);
+		tmp = tmp->next;
+	}
+	printf("%s=%s\n", tmp->key, tmp->value);
+}
 
-// Modify Variable
+char	*get_variable_value(t_data *data, char *str)
+{
+	t_env	*tmp;
+	char	*tmp_value;
+
+	tmp = data->env;
+	while (tmp)
+	{
+		if (ft_strcmp(tmp->key, str) == 0)
+		{
+			tmp_value = ft_strdup(tmp->value);
+			if (!tmp_value)
+				exit_free(data, EXIT_FAILURE);
+			return (tmp_value);
+		}
+		tmp = tmp->next;
+	}
+	return (NULL);
+}
