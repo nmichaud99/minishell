@@ -1,30 +1,17 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   env.c                                              :+:      :+:    :+:   */
+/*   expansion.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/17 15:11:50 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/02/17 15:11:50 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/03/02 19:03:19 by nmichaud          #+#    #+#             */
+/*   Updated: 2026/03/02 19:03:23 by nmichaud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	init_env_tab(char **env, t_data *data)
-{
-	int	i;
-
-	i = 0;
-	while (env[i])
-	{
-		add_env_node(data, env[i]);
-		i++;
-	}
-}
-
-// Exec env
 void	print_env(t_data *data)
 {
 	t_env	*tmp;
@@ -56,4 +43,31 @@ char	*get_variable_value(t_data *data, char *str)
 		tmp = tmp->next;
 	}
 	return (NULL);
+}
+
+void	handle_variable(t_token **head, char *str, int *i)
+{
+	char 	*res;
+	int		start;
+
+	(*i)++;
+	start = *i;
+	if (!str[*i] || str[*i] == ' ' || str[*i] == '\'' || str[*i] == '"'
+		|| is_operator(str[*i]))
+	{
+		res = malloc(2);
+		if (!res)
+			exit(EXIT_FAILURE);
+		res[0] = '$';
+		res[1] = 0;
+		add_token(head, new_token(WORD, res));
+		return ;
+	}
+	while (str[*i] && str[*i] != ' ' && str[*i] != '\'' && str[*i] != '"')
+		(*i)++;
+	res = malloc(*i - start + 1);
+	if (!res)
+		exit(EXIT_FAILURE);
+	ft_strlcpy(res, str + start, *i - start + 1);
+	add_token(head, new_token(VARIABLE, res));
 }

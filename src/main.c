@@ -79,14 +79,7 @@ int	main(int ac, char **av, char **env)
 		parsing(data);
 		if (!data->cmd_list)
 			exit_free(data, EXIT_FAILURE);
-		if (expansion(data))
-		{
-			free_token(&data->tokens);
-			free_list(&data->cmd_list);
-			free(data->line);
-			continue ;
-		}
-		//print_env(data);
+		print_env(data);
 		t_cmd_list *tmp_list = data->cmd_list;
 		while (tmp_list)
 		{
@@ -106,11 +99,6 @@ int	main(int ac, char **av, char **env)
 			{
 				printf("//=== Arguments ===//\n");
 				printf("%s\n", *tmp_args);
-				if (ft_strlen(*tmp_args) == 5 && ft_strcmp(*tmp_args, "unset") == 0)
-				{
-					printf("arg after unset : %s\n", *(tmp_args + 1));
-					exec_unset(data, *(tmp_args + 1));
-				}
 				tmp_args++;
 			}
 			tmp_list = tmp_list->next;

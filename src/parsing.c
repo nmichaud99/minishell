@@ -170,7 +170,6 @@ char	**get_args(t_data *data, t_token *start, t_token *end)
 				if (!args[i])
 					exit_free(data, EXIT_FAILURE);
 				i++;
-
 			}
 		}
 		prev = tmp;

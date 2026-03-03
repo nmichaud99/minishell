@@ -91,14 +91,21 @@ t_token		*new_token(t_token_type type, char *content);
 void		add_token(t_token **head, t_token *new);
 t_cmd_list	*new_cmd(char **args, t_redirs *redirs);
 void		add_cmd(t_cmd_list **list, t_cmd_list *new);
+int			ft_strcmp(const char *s1, const char *s2);
 
 // exit
 void	ft_free(char ***str);
 void	free_token(t_token **head);
 void	free_redirs(t_redirs **redirs);
 void	free_list(t_cmd_list **list);
+void	free_env(t_env **env);
 void	free_data(t_data *data);
 void	exit_free(t_data *data, int status);
+
+//env.c
+void	init_env_tab(char **env, t_data *data);
+char	*get_variable_value(t_data *data, char *str);
+void	print_env(t_data *data);
 
 // lexing
 char	*dquote(t_token **head, char *str, char c);
@@ -118,5 +125,14 @@ int		syntax_check(t_data *data);
 // parsing
 int		is_redir(t_token_type type);
 void	parsing(t_data *data);
+
+//built-ins
+
+//export
+void	add_env_node(t_data *data, char *env_line);
+int		ft_export(t_data *data, char **args);
+
+//unset
+int		exec_unset(t_data *data, char **args);
 
 #endif
