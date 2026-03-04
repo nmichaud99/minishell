@@ -58,7 +58,7 @@ int	add_redir_node(t_redirs **redirs, t_token *token, t_token *end)
 			return (0);
 		}
 		new_node->file_name = filename;
-		new_node->type = convert_types(token->next->type);
+		new_node->type = convert_types(token->type);
 		new_node->next = NULL;
 	}
 	if (!*redirs)

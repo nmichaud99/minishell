@@ -196,7 +196,6 @@ int	lexing(t_data *data)
 				printf("Syntax error unclosed quotes\n");
 				return (0);
 			}
-
 		}
 	}
 	return (1);

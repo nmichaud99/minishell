@@ -102,7 +102,13 @@ typedef struct	s_data
 	t_cmd_list		*cmd_list;
 	t_expanded_list	*expanded_list;
 	t_env			*env;
+	char			**env_tab;
 	int				*exit_status;
+	int				pipefd[2];
+	pid_t			pid;
+	pid_t			last_pid;
+	int				last_status;
+	char			*full_path;
 }	t_data;
 
 // --- utils --- //
@@ -111,6 +117,9 @@ void			add_token(t_token **head, t_token *new);
 t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
+
+// --- env utils --- //
+char			**get_env_tab(t_data *data);
 
 // --- exit and free --- //
 
@@ -124,6 +133,7 @@ void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
 void			free_data(t_data *data);
 void			exit_free(t_data *data, int status);
+void			error_sys(t_data *data, char *s);
 
 // --- lexing --- //
 
@@ -173,5 +183,20 @@ int				ft_echo(char **args);
 void			print_env(t_data *data);
 // cd
 int				exec_cd(t_data *data, char **args);
+
+// --- pipes and exec
+
+// redirs handler
+int				redir_in_handler(t_data *data, t_expanded_list *list);
+int				redir_out_handler(t_data *data, t_expanded_list *list);
+// pipes
+void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
+int				pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list);
+// get path
+char			*find_cmd(t_data *data, char *cmd, char **path, int *err);
+// exec commands
+int				exec_cmd1(t_data *data, t_expanded_list *list);
+int				exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
+int				exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
 
 #endif

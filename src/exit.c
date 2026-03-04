@@ -143,7 +143,7 @@ void	free_data(t_data *data)
 	free_token(&data->tokens);
 	free_list(&data->cmd_list);
 	free_expanded_list(&data->expanded_list);
-	free(data->exit_status);
+	free(data->full_path);
 	free(data->line);
 }
 
@@ -151,8 +151,15 @@ void	exit_free(t_data *data, int status)
 {
 	free_data(data);
 	free_env(&data->env);
+	// free(data->exit_status);
 	free(data);
 	exit(status);
+}
+
+void	error_sys(t_data *data, char *s)
+{
+	perror(s);
+	exit_free(data, *(data->exit_status));
 }
 
 /* 
