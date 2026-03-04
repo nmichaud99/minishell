@@ -1,27 +1,45 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   lexing_2.c                                         :+:      :+:    :+:   */
+/*   built_ins_echo.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/17 18:17:13 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/02/17 18:17:15 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/03/03 21:16:57 by nmichaud          #+#    #+#             */
+/*   Updated: 2026/03/03 21:17:08 by nmichaud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	is_operator(char c)
+int	ft_echo(char **args)
 {
-	if (c == '|' || c == '<' || c == '>')
-		return (1);
-	return (0);
-}
+	char	**tmp_args;
 
-int	is_space(char c)
-{
-	if (c == ' ' || c == '\t' || c == '\n')
-		return (1);
+	if (*(args + 1) && !ft_strncmp(*(args + 1), "-n", 2))
+	{
+		tmp_args = args + 2;
+		while (*tmp_args)
+		{
+			if (*(tmp_args + 1))
+				printf("%s ", *tmp_args);
+			else
+				printf("%s", *tmp_args);
+			tmp_args++;
+		}
+		return (0);
+	}
+	else
+	{
+		tmp_args = args + 1;
+		while (*tmp_args)
+		{
+			if (*(tmp_args + 1))
+				printf("%s ", *tmp_args);
+			else
+				printf("%s\n", *tmp_args);
+			tmp_args++;
+		}
+	}
 	return (0);
 }

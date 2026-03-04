@@ -17,6 +17,39 @@ void	ft_free(char ***str)
 	*str = NULL;
 }
 
+void	free_word(t_word **word)
+{
+	if (!word || !*word)
+		return ;
+	if ((*word)->txt)
+	{
+		free((*word)->txt);
+		(*word)->txt = NULL;
+	}
+	if ((*word)->quoting)
+	{
+		free((*word)->quoting);
+		(*word)->quoting = NULL;
+	}
+	free(*word);
+	*word = NULL;
+}
+
+void	free_word_tab(t_word ***word)
+{
+	int	i;
+	if (!word || !*word || !**word)
+		return ;
+	i = 0;
+	while ((*word)[i])
+	{
+		free_word(&((*word)[i]));
+		i++;
+	}
+	free(*word);
+	*word = NULL;
+}
+
 void	free_token(t_token **head)
 {
 	t_token *tmp;
@@ -25,7 +58,7 @@ void	free_token(t_token **head)
 		return ;
 	while (*head)
 	{
-		free((*head)->str);
+		free_word(&(*head)->word);
 		tmp = *head;
 		*head = (*head)->next;
 		free(tmp);
@@ -77,6 +110,24 @@ void	free_list(t_cmd_list **list)
 		return ;
 	while (*list)
 	{
+		free_word_tab(&(*list)->args);
+		free_redirs(&(*list)->redirs);
+		tmp = *list;
+		*list = (*list)->next;
+		free(tmp);
+		tmp = NULL;
+	}
+	*list = NULL;
+}
+
+void	free_expanded_list(t_expanded_list **list)
+{
+	t_expanded_list *tmp;
+
+	if (!list || !*list)
+		return ;
+	while (*list)
+	{
 		ft_free(&(*list)->args);
 		free_redirs(&(*list)->redirs);
 		tmp = *list;
@@ -91,6 +142,8 @@ void	free_data(t_data *data)
 {
 	free_token(&data->tokens);
 	free_list(&data->cmd_list);
+	free_expanded_list(&data->expanded_list);
+	free(data->exit_status);
 	free(data->line);
 }
 

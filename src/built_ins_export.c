@@ -88,10 +88,16 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 		if (ft_strcmp(tmp->key, new_key) == 0)
 		{
 			if (ft_strcmp(new_value, tmp->value) == 0)
+			{
+				free(new_key);
+				free(new_value);
 				return ;
+			}
 			else
 			{
+				free(tmp->value);
 				tmp->value = new_value;
+				free(new_key);
 				return ;
 			}
 		}
@@ -146,12 +152,17 @@ int	ft_export(t_data *data, char **args)
 	}
 	else
 	{
-		if (!is_valid_string(*(args + 1)))
+		args++;
+		while (*args)
 		{
-			printf("export: '%s': is not a valid identifier\n", *(args + 1));
-				return (2);
+			if (!is_valid_string(*args))
+			{
+				printf("export: '%s': is not a valid identifier\n", *args);
+					return (2);
+			}
+			add_or_modify_env_node(data, *args);
+			args++;
 		}
-		add_or_modify_env_node(data, *(args + 1));
 	}
 	return (0);
 }
