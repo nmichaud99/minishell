@@ -33,7 +33,7 @@ int	exec_cd(t_data *data, char **args)
 		free(old_pwd_join);
 		exit_free(data, EXIT_FAILURE);
 	}
-	printf("Old Pwd Join : %s\n", old_pwd_join);
+	//printf("Old Pwd Join : %s\n", old_pwd_join);
 	add_or_modify_env_node(data, old_pwd_join);
 	free(old_pwd_join);
 	if (*(args + 1) && chdir(*(args + 1)) != 0)
@@ -49,10 +49,10 @@ int	exec_cd(t_data *data, char **args)
 		free(new_pwd_join);
 		exit_free(data, EXIT_FAILURE);
 	}
-	printf("New Pwd Join : %s\n", new_pwd_join);
+	//printf("New Pwd Join : %s\n", new_pwd_join);
 	add_or_modify_env_node(data, new_pwd_join);
 	free(new_pwd_join);
-	printf("cd: SUCCESS!\n");
+	//printf("cd: SUCCESS!\n");
 	//print_env(data);
 	return (0);
 }

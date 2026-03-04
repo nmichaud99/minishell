@@ -160,11 +160,13 @@ int	main(int ac, char **av, char **env)
 		else if (!ft_strncmp(*(data->expanded_list->args), "echo", 4))
 			ft_echo(data->expanded_list->args);
 		else if (!ft_strncmp(*(data->expanded_list->args), "env", 3))
-			print_env(data);
+			exec_env(data, data->expanded_list->args);
 		else if (!ft_strncmp(*(data->expanded_list->args), "unset", 5))
 			exec_unset(data, data->expanded_list->args);
 		else if (!ft_strncmp(*(data->expanded_list->args), "cd", 2))
 			exec_cd(data, data->expanded_list->args);
+		else if (!ft_strncmp(*(data->expanded_list->args), "pwd", 3))
+			exec_pwd(data, data->expanded_list->args);
 	}
 	free_env(&data->env);
 	free(data);

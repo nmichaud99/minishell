@@ -111,6 +111,7 @@ void			add_token(t_token **head, t_token *new);
 t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
+void			print_env(t_data *data);
 
 // --- error handling --- //
 void			ft_perror(char **arg);
@@ -174,8 +175,10 @@ int				ft_export(t_data *data, char **args);
 // echo
 int				ft_echo(char **args);
 // env
-void			print_env(t_data *data);
+int				exec_env(t_data *data, char **args);
 // cd
 int				exec_cd(t_data *data, char **args);
+// pwd
+int				exec_pwd(t_data *data, char **args);
 
 #endif

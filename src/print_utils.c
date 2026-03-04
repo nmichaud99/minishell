@@ -1,26 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   built_ins_env.c                                    :+:      :+:    :+:   */
+/*   print_utils.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/03 21:28:27 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/03/03 21:28:28 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/02/17 16:40:16 by nmichaud          #+#    #+#             */
+/*   Updated: 2026/02/17 16:40:17 by nmichaud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-int	exec_env(t_data *data, char **args)
+void	print_env(t_data *data)
 {
 	t_env	*tmp;
 
-	if (args[1])
-	{
-		ft_putstr_fd("env: too many arguments\n", 2);
-		return (1);
-	}
 	tmp = data->env;
 	while (tmp && tmp->next)
 	{
@@ -28,5 +23,4 @@ int	exec_env(t_data *data, char **args)
 		tmp = tmp->next;
 	}
 	printf("%s=%s\n", tmp->key, tmp->value);
-	return (0);
 }
