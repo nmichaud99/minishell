@@ -18,6 +18,7 @@
 # include <string.h>
 # include <sys/wait.h>
 # include <sys/types.h>
+# include <sys/stat.h>
 # include <unistd.h>
 # include <readline/readline.h>
 # include <readline/history.h>
@@ -193,7 +194,7 @@ int				redir_out_handler(t_data *data, t_expanded_list *list);
 void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
 int				pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list);
 // get path
-char			*find_cmd(t_data *data, char *cmd, char **path, int *err);
+char			*find_cmd(char *cmd, char **path);
 // exec commands
 int				exec_cmd1(t_data *data, t_expanded_list *list);
 int				exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);

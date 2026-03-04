@@ -18,9 +18,7 @@ int	exec_cmd1(t_data *data, t_expanded_list *list)
 	char	*path_val;
 	int		in;
 	int		out;
-	int		err;
 
-	err = 0;
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
 		exit_free(data, EXIT_FAILURE);
@@ -58,7 +56,7 @@ int	exec_cmd1(t_data *data, t_expanded_list *list)
 	}
 	if (*list->args)
 	{
-		data->full_path = find_cmd(data, list->args[0], paths, &err);
+		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
 		if (data->full_path == NULL)
 			return (1);
@@ -76,9 +74,7 @@ int	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
-	int		err;
 
-	err = 0;
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
 		exit_free(data, EXIT_FAILURE);
@@ -119,7 +115,7 @@ int	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	close(data->pipefd[1]);
 	if (*list->args)
 	{
-		data->full_path = find_cmd(data, list->args[0], paths, &err);
+		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
 		if (data->full_path == NULL)
 			return (1);
@@ -137,9 +133,7 @@ int	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
-	int		err;
 
-	err = 0;
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
 		exit_free(data, EXIT_FAILURE);
@@ -173,16 +167,33 @@ int	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	}
 	if (*list->args)
 	{
-		data->full_path = find_cmd(data, list->args[0], paths, &err);
+		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
-		if (data->full_path == NULL)
+		if (!data->full_path)
 		{
-			if (err == 127)
-				printf("minishell: %s: command not found\n", list->args[0]);
-			exit(*(data->exit_status));
+			fprintf(stderr, "%s: command not found\n", list->args[0]);
+			exit(127);
+		}
+		struct stat st;
+		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
+		{
+			fprintf(stderr, "%s: Is a directory\n", data->full_path);
+			exit(126);
 		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
-			error_sys(data, "exec failure");
+		{
+			if (errno == ENOENT)
+				fprintf(stderr, "%s: No such file or directory\n", list->args[0]);
+			else if (errno == EACCES)
+				fprintf(stderr, "%s: Permission denied\n", list->args[0]);
+			else if (errno == EISDIR)
+				fprintf(stderr, "%s: Is a directory\n", list->args[0]);
+			else if (errno == ENOEXEC)
+				fprintf(stderr, "%s: cannot execute binary file\n", list->args[0]);
+			else
+				fprintf(stderr, "%s: Unknown execve error\n", list->args[0]);
+			exit(errno == ENOENT ? 127 : 126);
+		}
 	}
 	ft_free(&paths);
 	exit(0);

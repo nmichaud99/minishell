@@ -12,14 +12,73 @@
 
 #include "minishell.h"
 
-static char	*cmd_slash(t_data *data, char *cmd, int *err)
+static char	*get_full_path(char *cmd, char **path)
+{
+	char	*tmp;
+	char	*full_path;
+	int		i;
+	int		permission_flag;
+	char	*tmp2;
+
+	i = 0;
+	permission_flag = 0;
+	while (path[i])
+	{
+		tmp = ft_strjoin(path[i], "/");
+		if (!tmp)
+			return (NULL);
+		full_path = ft_strjoin(tmp, cmd);
+		free(tmp);
+		if (!full_path)
+			return (NULL);
+		if (access(full_path, F_OK) == 0)
+		{
+			if (access(full_path, X_OK) == 0)
+				return (full_path);
+			else
+			{
+				permission_flag = 1;
+				tmp2 = ft_strdup(full_path);
+				if (!tmp2)
+					return (NULL);
+			}
+		}
+		free(full_path);
+		i++;
+	}
+	if (permission_flag == 1)
+		return (tmp2);
+	return (NULL);
+}
+
+char	*find_cmd(char *cmd, char **path)
+{
+	char	*full_path;
+
+	if (!cmd || cmd[0] == '\0')
+		return (NULL);
+	if (ft_strchr(cmd, '/') != NULL)
+	{
+		full_path = ft_strdup(cmd);
+		if (!full_path)
+			return (NULL);
+		return (full_path);
+	}
+	full_path = get_full_path(cmd, path);
+	return (full_path);
+}
+
+/*static char	*cmd_slash(t_data *data, char *cmd, int *err)
 {
 	char	*res;
+	struct	stat st;
 
 	if (access(cmd, F_OK) == -1)
-		*err = 127;
+		*err = 123;
+	else if (stat(cmd, &st) == 0 && S_ISDIR(st.st_mode))
+		*err = 124;
 	else if (access(cmd, X_OK) == -1)
-		*err = 126;
+		*err = 125;
 	else
 	{
 		res = ft_strdup(cmd);
@@ -30,13 +89,15 @@ static char	*cmd_slash(t_data *data, char *cmd, int *err)
 	return (NULL);
 }
 
-static char	*get_full_path(char *cmd, char **path, int *flag)
+static char	*get_full_path(char *cmd, char **path, int *err)
 {
 	char	*tmp;
 	char	*full_path;
 	int		i;
+	int		permission_flag;
 
 	i = 0;
+	permission_flag = 0;
 	while (path[i])
 	{
 		tmp = ft_strjoin(path[i], "/");
@@ -46,13 +107,20 @@ static char	*get_full_path(char *cmd, char **path, int *flag)
 		free(tmp);
 		if (!full_path)
 			return (NULL);
-		if (access(full_path, F_OK) == 0 && access(full_path, X_OK) == 0)
-			return (full_path);
-		else if (access(full_path, F_OK) == 0 && access(full_path, X_OK) == -1)
-			*flag = 1;
+		if (access(full_path, F_OK) == 0)
+		{
+			if (access(full_path, X_OK) == 0)
+				return (full_path);
+			else
+				permission_flag = 1;
+		}
 		free(full_path);
 		i++;
 	}
+	if (permission_flag == 0)
+		*err = 126;
+	else
+		*err = 127;
 	return (NULL);
 }
 
@@ -60,9 +128,7 @@ char	*find_cmd(t_data *data, char *cmd, char **path, int *err)
 {
 	int		i;
 	char	*full_path;
-	int		flag;
 
-	flag = 0;
 	if (!cmd || cmd[0] == '\0')
 	{
 		*err = 126;
@@ -71,12 +137,6 @@ char	*find_cmd(t_data *data, char *cmd, char **path, int *err)
 	if (ft_strchr(cmd, '/') != NULL)
 		return (cmd_slash(data, cmd, err));
 	i = 0;
-	full_path = get_full_path(cmd, path, &flag);
-	if (full_path != NULL)
-		return (full_path);
-	if (flag == 1)
-		*err = 126;
-	else
-		*err = 127;
-	return (NULL);
-}
+	full_path = get_full_path(cmd, path, err);
+	return (full_path);
+}*/
