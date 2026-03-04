@@ -76,6 +76,7 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 	if (!new_key)
 		exit_free(data, EXIT_FAILURE);
 	new_value = ft_strdup(ft_strchr(new_var, '=') + 1);
+	printf("new_value : %s\n", new_value);
 	if (!new_value)
 	{
 		free(new_key);
