@@ -12,14 +12,14 @@
 
 #include "minishell.h"
 
-void	ft_perror(char *cmd, char *arg)
+void	ft_perror(char **arg)
 {
 	ft_putstr_fd("minishell: ", 2);
-	ft_putstr_fd(cmd, 2);
+	ft_putstr_fd(arg[0], 2);
 	ft_putstr_fd(": ", 2);
-	if (arg)
+	if (arg[1])
 	{
-		ft_putstr_fd(arg, 2);
+		ft_putstr_fd(arg[1], 2);
 		ft_putstr_fd(": ", 2);
 	}
 	ft_putstr_fd(strerror(errno), 2);

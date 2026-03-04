@@ -113,7 +113,7 @@ void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
 
 // --- error handling --- //
-void			ft_perror(char *cmd, char *arg);
+void			ft_perror(char **arg);
 
 // --- exit and free --- //
 
