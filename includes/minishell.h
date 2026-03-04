@@ -112,6 +112,9 @@ t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
 
+// --- error handling --- //
+void			ft_perror(char *cmd, char *arg);
+
 // --- exit and free --- //
 
 void			ft_free(char ***str);

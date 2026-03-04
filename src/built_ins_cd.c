@@ -12,11 +12,6 @@
 
 #include "minishell.h"
 
-/*
-- recuperer pwd
-- mettre a jour env avec pwd et oldpwd a chque deplacement
-*/
-
 int	exec_cd(t_data *data, char **args)
 {
 	char	*old_pwd;
@@ -24,7 +19,7 @@ int	exec_cd(t_data *data, char **args)
 	char	*old_pwd_join;
 	char	*new_pwd_join;
 
-	print_env(data);
+	//print_env(data);
 	old_pwd = getcwd(NULL, 0);
 	old_pwd_join = ft_strjoin("OLDPWD=", old_pwd);
 	if (!old_pwd_join)
@@ -39,9 +34,7 @@ int	exec_cd(t_data *data, char **args)
 	free(old_pwd_join);
 	if (*(args + 1) && chdir(*(args + 1)) != 0)
 	{
-		ft_putstr_fd("minishell: ", 2);
-		ft_putstr_fd("c", 2);
-
+		ft_perror("cd", *(args + 1));
 		return (1);
 	}
 	new_pwd = getcwd(NULL, 0);
@@ -57,6 +50,6 @@ int	exec_cd(t_data *data, char **args)
 	free(new_pwd);
 	free(new_pwd_join);
 	printf("cd: SUCCESS!\n");
-	print_env(data);
+	//print_env(data);
 	return (0);
 }
