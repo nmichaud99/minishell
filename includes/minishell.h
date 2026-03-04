@@ -124,6 +124,7 @@ void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
 void			free_data(t_data *data);
 void			exit_free(t_data *data, int status);
+void			perror_exit_free(t_data *data, char *cmd, char *arg);
 
 // --- lexing --- //
 

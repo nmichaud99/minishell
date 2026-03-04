@@ -155,8 +155,22 @@ void	exit_free(t_data *data, int status)
 	exit(status);
 }
 
-/* 
-EXIT CODES 
+void	perror_exit_free(t_data *data, char *cmd, char *arg, int status)
+{
+	ft_putstr_fd("minishell: cd: ", 2);
+	ft_putstr_fd("minishell: cd: ", 2);
+	ft_putstr_fd(arg, 2);
+	ft_putstr_fd(": ", 2);
+	ft_putstr_fd(strerror(errno), 2);
+	ft_putstr_fd("\n", 2);
+	free_data(data);
+	free_env(&data->env);
+	free(data);
+	exit(status);
+}
+
+/*
+EXIT CODES
 Success : EXIT_SUCCESS (0)
 FAILURE : EXIT_FAILURE (non zero)
 CMD NOT FOUND : 127
