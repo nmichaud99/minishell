@@ -4,7 +4,7 @@ SOURCES = $(addprefix $(SRC_DIR)/, \
 		utils.c exit.c \
 		lexing_1.c lexing_2.c parsing.c syntax_check.c expansion.c \
 		built_ins_export.c built_ins_unset.c built_ins_echo.c built_ins_env.c built_ins_cd.c \
-		main.c perror_handling.c built_ins_pwd.c)
+		main.c perror_handling.c built_ins_pwd.c env_utils.c print_utils.c)
 
 OBJECTS = $(SOURCES:src/%.c=obj/%.o)
 

@@ -102,6 +102,7 @@ typedef struct	s_data
 	t_cmd_list		*cmd_list;
 	t_expanded_list	*expanded_list;
 	t_env			*env;
+	char			**env_tab;
 	int				*exit_status;
 }	t_data;
 
@@ -112,6 +113,7 @@ t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
 void			print_env(t_data *data);
+char			**get_env_tab(t_data *data);
 
 // --- error handling --- //
 void			ft_perror(char **arg);
@@ -128,7 +130,6 @@ void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
 void			free_data(t_data *data);
 void			exit_free(t_data *data, int status);
-void			perror_exit_free(t_data *data, char *cmd, char *arg);
 
 // --- lexing --- //
 

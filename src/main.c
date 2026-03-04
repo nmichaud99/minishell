@@ -73,6 +73,19 @@ int	main(int ac, char **av, char **env)
 	data->env = NULL;
 	init_data(data, 0);
 	init_env_tab(env, data);
+
+	// test get_env_tab
+	char	**res;
+	char	**tmp;
+	res = get_env_tab(data);
+	tmp = res;
+	while (*res)
+	{
+		printf("env tab : %s\n", *res);
+		res++;
+	}
+	ft_free(&tmp);
+
 	while (1)
 	{
 		init_data(data, 1);
@@ -154,7 +167,8 @@ int	main(int ac, char **av, char **env)
 			}
 			tmp = tmp->next;
 		}
-		print_env(data);*/
+		print_env(data);
+		*/
 		if (!ft_strncmp(*(data->expanded_list->args), "export", 6))
 			ft_export(data, data->expanded_list->args);
 		else if (!ft_strncmp(*(data->expanded_list->args), "echo", 4))
