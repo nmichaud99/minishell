@@ -12,13 +12,6 @@
 
 #include "minishell.h"
 
-int	is_arg(t_token_type type)
-{
-	if (type != WORD && type != STRING && type != S_STRING && type != VARIABLE)
-		return (0);
-	return (1);
-}
-
 int	is_redir(t_token_type type)
 {
 	if (type ==	IN_DIR || type == OUT_DIR || type == HEREDOC || type == APPEND)
@@ -41,7 +34,7 @@ t_redir_type	convert_types(t_token_type token_type)
 	return (type);
 }
 
-void	add_redir_node(t_data *data, t_redirs **redirs, t_token *token, t_token *end)
+int	add_redir_node(t_redirs **redirs, t_token *token, t_token *end)
 {
 	t_redirs	*tmp;
 	t_redirs	*new_node;
@@ -49,8 +42,8 @@ void	add_redir_node(t_data *data, t_redirs **redirs, t_token *token, t_token *en
 
 	new_node = malloc(sizeof(t_redirs));
 	if (!new_node)
-		return ;
-	if (!token->next || token->next == end)
+		return (0);
+	if (!token->next || token->next == end || token->next->type != WORD)
 	{
 		new_node->file_name = NULL;
 		new_node->type = 0;
@@ -58,13 +51,11 @@ void	add_redir_node(t_data *data, t_redirs **redirs, t_token *token, t_token *en
 	}
 	else
 	{
-		if (token->type == VARIABLE)
-			filename = getenv(token->next->str);
-		else
+		filename = ft_strdup(token->next->word->txt);
+		if (!filename)
 		{
-			filename = ft_strdup(token->next->str);
-			if (!filename)
-				exit_free(data, EXIT_FAILURE);
+			free(new_node);
+			return (0);
 		}
 		new_node->file_name = filename;
 		new_node->type = convert_types(token->next->type);
@@ -73,15 +64,16 @@ void	add_redir_node(t_data *data, t_redirs **redirs, t_token *token, t_token *en
 	if (!*redirs)
 	{
 		*redirs = new_node;
-		return ;
+		return (1);
 	}
 	tmp = *redirs;
 	while (tmp && tmp->next)
 		tmp = tmp->next;
 	tmp->next = new_node;
+	return (1);
 }
 
-t_redirs	*get_redirs(t_data *data, t_token *start, t_token *end)
+t_redirs	*get_redirs(t_token *start, t_token *end, int *flag)
 {
 	t_token		*tmp;
 	t_redirs 	*redirs;
@@ -92,7 +84,11 @@ t_redirs	*get_redirs(t_data *data, t_token *start, t_token *end)
 	{
 		if (is_redir(tmp->type))
 		{
-			add_redir_node(data, &redirs, tmp, end);
+			if (add_redir_node(&redirs, tmp, end) == 0)
+			{
+				*flag = 1;
+				return (NULL);
+			}
 			if (tmp->next == end || tmp->next->next == end)
 				break ;
 			tmp = tmp->next->next;
@@ -114,7 +110,7 @@ int	count_args(t_token *start, t_token *end)
 	prev = NULL;
 	while (tmp != end)
 	{
-		if (is_arg(tmp->type))
+		if (tmp->type == WORD)
 		{
 			if (prev && is_redir(prev->type))
 			{
@@ -130,16 +126,37 @@ int	count_args(t_token *start, t_token *end)
 	return (args_size);
 }
 
-char	**get_args(t_data *data, t_token *start, t_token *end)
+t_quote_type	*dup_quoting(t_word *word)
+{
+	t_quote_type	*res;
+	int				size;
+	int				i;
+
+	size = ft_strlen(word->txt);
+	if (size == 0)
+		return (NULL);
+	res = malloc(sizeof(t_quote_type) * size);
+	if (!res)
+		return (NULL);
+	i = 0;
+	while (i < size)
+	{
+		res[i] = word->quoting[i];
+		i++;
+	}
+	return (res);
+}
+
+t_word	**get_args(t_token *start, t_token *end, int *flag)
 {
 	int			nb_args;
-	char		**args;
+	t_word		**args;
 	t_token		*tmp;
 	t_token		*prev;
 	int			i;
 
 	nb_args = count_args(start, end);
-	args = malloc(sizeof(char *) * (nb_args + 1));
+	args = malloc(sizeof(t_word *) * (nb_args + 1));
 	if (!args)
 		return (NULL);
 	i = 0;
@@ -150,7 +167,7 @@ char	**get_args(t_data *data, t_token *start, t_token *end)
 	i = 0;
 	while (tmp != end)
 	{
-		if (is_arg(tmp->type))
+		if (tmp->type == WORD)
 		{
 			if (prev && is_redir(prev->type))
 			{
@@ -158,17 +175,31 @@ char	**get_args(t_data *data, t_token *start, t_token *end)
 				tmp = tmp->next;
 				continue ;
 			}
-			if (tmp->type == VARIABLE)
-			{
-				args[i] = get_variable_value(data, tmp->str);
-				printf("variable : %s\n", args[i]);
-				i++;
-			}
 			else
 			{
-				args[i] = ft_strdup(tmp->str);
+				args[i] = malloc(sizeof(t_word));
 				if (!args[i])
-					exit_free(data, EXIT_FAILURE);
+				{
+					*flag = 1;
+					free_word_tab(&args);
+					return (NULL);
+				}
+				args[i]->txt = ft_strdup(tmp->word->txt);
+				if (!args[i]->txt)
+				{
+					*flag = 1;
+					args[i] = NULL;
+					free_word_tab(&args);
+					return (NULL);
+				}
+				args[i]->quoting = dup_quoting(tmp->word);
+				if (!args[i]->quoting)
+				{
+					*flag = 1;
+					args[i] = NULL;
+					free_word_tab(&args);
+					return (NULL);
+				}
 				i++;
 			}
 		}
@@ -183,17 +214,54 @@ void	parsing(t_data *data)
 {
 	t_token		*start;
 	t_token		*current;
+	t_word		**tmp;
+	t_redirs	*tmp_redirs;
+	t_cmd_list	*tmp_list;
+	int			flag;
 
+	flag = 0;
 	start = data->tokens;
 	current = data->tokens;
 	while (current)
 	{
 		if (current->type == PIPE)
 		{
-			add_cmd(&data->cmd_list, new_cmd(data, get_args(data, start, current), get_redirs(data, start, current)));
+			tmp = get_args(start, current, &flag);
+			if (!tmp && flag == 1)
+				exit_free(data, EXIT_FAILURE);
+			tmp_redirs = get_redirs(start, current, &flag);
+			if (!tmp_redirs && flag == 1)
+			{
+				free_word_tab(&tmp);
+				exit_free(data, EXIT_FAILURE);
+			}
+			tmp_list = new_cmd(tmp, tmp_redirs);
+			if (!tmp_list)
+			{
+				free_word_tab(&tmp);
+				free_redirs(&tmp_redirs);
+				exit_free(data, EXIT_FAILURE);
+			}
+			add_cmd(&data->cmd_list, tmp_list);
 			start = current->next;
 		}
 		current = current->next;
 	}
-	add_cmd(&data->cmd_list, new_cmd(data, get_args(data, start, NULL), get_redirs(data, start, NULL)));
+	tmp = get_args(start, NULL, &flag);
+	if (!tmp && flag == 1)
+		exit_free(data, EXIT_FAILURE);
+	tmp_redirs = get_redirs(start, current, &flag);
+	if (!tmp_redirs && flag == 1)
+	{
+		free_word_tab(&tmp);
+		exit_free(data, EXIT_FAILURE);
+	}
+	tmp_list = new_cmd(tmp, tmp_redirs);
+	if (!tmp_list)
+	{
+		free_word_tab(&tmp);
+		free_redirs(&tmp_redirs);
+		exit_free(data, EXIT_FAILURE);
+	}
+	add_cmd(&data->cmd_list, tmp_list);
 }

@@ -29,14 +29,11 @@
 typedef enum e_token_type
 {
 	WORD,
-	STRING,
-	S_STRING,
 	PIPE,
 	IN_DIR,
 	OUT_DIR,
 	HEREDOC,
 	APPEND,
-	VARIABLE
 }	t_token_type;
 
 typedef enum e_redir_type
@@ -47,10 +44,23 @@ typedef enum e_redir_type
 	REDIR_APPEND,
 }	t_redir_type;
 
+typedef enum e_quote_type
+{
+	NONE,
+	DOUBLE,
+	SINGLE
+}	t_quote_type;
+
+typedef struct s_word
+{
+	char			*txt;
+	t_quote_type	*quoting;
+}	t_word;
+
 typedef struct s_token
 {
 	t_token_type	type;
-	char			*str;
+	t_word			*word;
 	struct s_token	*next;
 }	t_token;
 
@@ -64,11 +74,18 @@ typedef struct s_redirs
 // Command List
 typedef struct s_cmd_list
 {
-	char			**args;
+	t_word			**args;
 	t_redirs		*redirs;
 	//t_token_type	type;
 	struct s_cmd_list	*next;
 }	t_cmd_list;
+
+typedef struct s_expanded_list
+{
+	char					**args;
+	t_redirs				*redirs;
+	struct s_expanded_list	*next;
+}	t_expanded_list;
 
 // Environment
 typedef struct s_env
@@ -80,59 +97,81 @@ typedef struct s_env
 
 typedef struct	s_data
 {
-	char		*line;
-	t_token		*tokens;
-	t_cmd_list	*cmd_list;
-	t_env		*env;
+	char			*line;
+	t_token			*tokens;
+	t_cmd_list		*cmd_list;
+	t_expanded_list	*expanded_list;
+	t_env			*env;
+	int				*exit_status;
 }	t_data;
 
-// utils
-t_token		*new_token(t_token_type type, char *content);
-void		add_token(t_token **head, t_token *new);
-t_cmd_list	*new_cmd(t_data *data, char **args, t_redirs *redirs);
-void		add_cmd(t_cmd_list **list, t_cmd_list *new);
-int			ft_strcmp(const char *s1, const char *s2);
+// --- utils --- //
+t_token			*new_token(t_token_type type, t_word *word);
+void			add_token(t_token **head, t_token *new);
+t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
+void			add_cmd(t_cmd_list **list, t_cmd_list *new);
+int				ft_strcmp(const char *s1, const char *s2);
 
-// exit
-void	ft_free(char ***str);
-void	free_token(t_token **head);
-void	free_redirs(t_redirs **redirs);
-void	free_list(t_cmd_list **list);
-void	free_env(t_env **env);
-void	free_data(t_data *data);
-void	exit_free(t_data *data, int status);
+// --- exit and free --- //
 
-//env.c
-void	init_env_tab(char **env, t_data *data);
-char	*get_variable_value(t_data *data, char *str);
-void	print_env(t_data *data);
+void			ft_free(char ***str);
+void			free_word(t_word **word);
+void			free_token(t_token **head);
+void			free_env(t_env **env);
+void			free_redirs(t_redirs **redirs);
+void			free_word_tab(t_word ***word);
+void			free_list(t_cmd_list **list);
+void			free_expanded_list(t_expanded_list **list);
+void			free_data(t_data *data);
+void			exit_free(t_data *data, int status);
 
-// lexing
-char	*dquote(t_token **head, char *str, char c);
-int		is_operator(char c);
-int		dollar_exists(char *str);
-int		backslash_exists(char *str);
-void	handle_word(t_token **head, char *str, int *i, int flag);
-void	handle_word_2(t_token **head, char *str, int *i, int flag);
-void	handle_operators(t_token **head, char *str, int *i);
-void	handle_variable(t_token **head, char *str, int *i);
-void	handle_semi(t_token **head, char *str, int *i);
-void	lexing(t_data *data);
+// --- lexing --- //
 
+// lexing_1
+int				handle_word(t_data *data, t_token **head, char *str, int *i);
+void			handle_operators(t_data *data, t_token **head, char *str, int *i);
+int				lexing(t_data *data);
+// lexing_2
+int				is_operator(char c);
+int				is_space(char c);
 // syntax check
-int		syntax_check(t_data *data);
+int				syntax_check(t_data *data);
 
-// parsing
-int		is_redir(t_token_type type);
-void	parsing(t_data *data);
+// --- parsing --- //
 
-//built-ins
+int				is_redir(t_token_type type);
+t_redir_type	convert_types(t_token_type token_type);
+int				add_redir_node(t_redirs **redirs, t_token *token, t_token *end);
+t_redirs		*get_redirs(t_token *start, t_token *end, int *flag);
+int				count_args(t_token *start, t_token *end);
+t_quote_type	*dup_quoting(t_word *word);
+t_word			**get_args(t_token *start, t_token *end, int *flag);
+void			parsing(t_data *data);
 
-//export
-void	add_env_node(t_data *data, char *env_line);
-int		ft_export(t_data *data, char **args);
+// --- expansion --- //
+char			*get_variable_value(t_data *data, char *str);
+char			*expand(t_data *data, t_word *arg, int *i, t_quote_type quote);
+char			*expand_arg(t_data *data, t_word *arg);
+t_redirs		*dup_redirs(t_redirs *src);
+void			expansion(t_data *data);
 
-//unset
-int		exec_unset(t_data *data, char **args);
+// --- built-ins --- //
+
+// unset
+void			free_env_node(t_env **env);
+int				exec_unset(t_data *data, char **args);
+// export
+char			*get_variable_key(const char *s);
+void			add_env_node(t_data *data, char *env_line);
+void			add_or_modify_env_node(t_data *data, char *new_var);
+void			print_env_export(t_data *data);
+int				is_valid_string(char *str);
+int				ft_export(t_data *data, char **args);
+// echo
+int				ft_echo(char **args);
+// env
+void			print_env(t_data *data);
+// cd
+int				exec_cd(t_data *data, char **args);
 
 #endif

@@ -14,6 +14,18 @@
 
 volatile sig_atomic_t gSignalStatus = 0;
 
+void	init_env_tab(char **env, t_data *data)
+{
+	int	i;
+
+	i = 0;
+	while (env[i])
+	{
+		add_env_node(data, env[i]);
+		i++;
+	}
+}
+
 void	init_data(t_data *data, int flag)
 {
 	if (flag == 0)
@@ -21,15 +33,21 @@ void	init_data(t_data *data, int flag)
 		data->line = NULL;
 		data->tokens = NULL;
 		data->cmd_list = NULL;
+		data->expanded_list = NULL;
+		data->exit_status = malloc(sizeof(int *));
+		if (!data->exit_status)
+			exit(EXIT_FAILURE);
+		*(data->exit_status) = 0;
 	}
 	else
 	{
 		free_token(&data->tokens);
 		free_list(&data->cmd_list);
+		free_expanded_list(&data->expanded_list);
 		free(data->line);
 		data->line = NULL;
 	}
-	}
+}
 
 void	sigint_handler(int sig)
 {
@@ -62,6 +80,7 @@ int	main(int ac, char **av, char **env)
 		data->line = readline("minishell$ ");
 		if (!data->line)
 		{
+			free(data->exit_status);
 			printf("exit\n");
 			break ;
 		}
@@ -72,14 +91,19 @@ int	main(int ac, char **av, char **env)
 			free(data->line);
 			continue ;
 		}
-		lexing(data);
-		t_token *tmp = data->tokens;
-		while (tmp)
+		if (!lexing(data))
 		{
-			printf("'%s'\n", tmp->str);
-			printf("%u\n", tmp->type);
-			tmp = tmp->next;
+			free_data(data);
+			continue ;
 		}
+		/*t_token *tmp1 = data->tokens;
+		while (tmp1)
+		{
+			if (tmp1->type == WORD)
+				printf("'%s'\n", tmp1->word->txt);
+			printf("%u\n", tmp1->type);
+			tmp1 = tmp1->next;
+		}*/
 		if (!syntax_check(data))
 		{
 			printf("Syntax error !\n");
@@ -89,7 +113,7 @@ int	main(int ac, char **av, char **env)
 		parsing(data);
 		if (!data->cmd_list)
 			exit_free(data, EXIT_FAILURE);
-		print_env(data);
+		/*print_env(data);
 		t_cmd_list *tmp_list = data->cmd_list;
 		while (tmp_list)
 		{
@@ -104,16 +128,43 @@ int	main(int ac, char **av, char **env)
 					tmp_redirs = tmp_redirs->next;
 				}
 			}
-			char **tmp_args = tmp_list->args;
+			t_word **tmp_args = tmp_list->args;
 			while (*tmp_args)
 			{
 				printf("//=== Arguments ===//\n");
-				printf("%s\n", *tmp_args);
+				printf("%s\n", (*tmp_args)->txt);
+				printf("//=== Quoting ===//\n");
+				int	i = 0;
+				while ((*tmp_args)->txt[i])
+					printf("%d ", (*tmp_args)->quoting[i++]);
+				printf("\n");
 				tmp_args++;
 			}
 			tmp_list = tmp_list->next;
+		}*/
+		expansion(data);
+		/*t_expanded_list	*tmp = data->expanded_list;
+		while (tmp)
+		{
+			char	**tmp_expanded_args = tmp->args;
+			while (*tmp_expanded_args)
+			{
+				printf("%s\n", *tmp_expanded_args);
+				tmp_expanded_args++;
+			}
+			tmp = tmp->next;
 		}
-		//print_env(data);
+		print_env(data);*/
+		if (!ft_strncmp(*(data->expanded_list->args), "export", 6))
+			ft_export(data, data->expanded_list->args);
+		else if (!ft_strncmp(*(data->expanded_list->args), "echo", 4))
+			ft_echo(data->expanded_list->args);
+		else if (!ft_strncmp(*(data->expanded_list->args), "env", 3))
+			print_env(data);
+		else if (!ft_strncmp(*(data->expanded_list->args), "unset", 5))
+			exec_unset(data, data->expanded_list->args);
+		else if (!ft_strncmp(*(data->expanded_list->args), "cd", 2))
+			exec_cd(data, data->expanded_list->args);
 	}
 	free_env(&data->env);
 	free(data);

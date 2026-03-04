@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-t_token	*new_token(t_token_type type, char *content)
+t_token	*new_token(t_token_type type, t_word *word)
 {
 	t_token	*res;
 
@@ -20,7 +20,7 @@ t_token	*new_token(t_token_type type, char *content)
 	if (!res)
 		return (NULL);
 	res->type = type;
-	res->str = content;
+	res->word = word;
 	res->next = NULL;
 	return (res);
 }
@@ -40,13 +40,13 @@ void	add_token(t_token **head, t_token *new)
 	tmp->next = new;
 }
 
-t_cmd_list	*new_cmd(t_data *data, char **args, t_redirs *redirs)
+t_cmd_list	*new_cmd(t_word **args, t_redirs *redirs)
 {
 	t_cmd_list	*res;
 
 	res = malloc(sizeof(t_cmd_list));
 	if (!res)
-		exit_free(data, EXIT_FAILURE);
+		return (NULL);
 	res->args = args;
 	res->redirs = redirs;
 	res->next = NULL;
@@ -82,3 +82,4 @@ int	ft_strcmp(const char *s1, const char *s2)
 	}
 	return (0);
 }
+// 
