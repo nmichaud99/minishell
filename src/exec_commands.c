@@ -123,7 +123,7 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 		if (dup2(data->pipefd[1], STDOUT_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 	}
-	close(data->pipefd[0]);
+	//close(data->pipefd[0]);
 	close(data->pipefd[1]);
 	if (*list->args)
 	{

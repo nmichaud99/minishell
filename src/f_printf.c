@@ -13,6 +13,20 @@
 #include "minishell.h"
 
 
+void	ft_perror(char **arg)
+{
+	ft_putstr_fd("minishell: ", 2);
+	ft_putstr_fd(arg[0], 2);
+	ft_putstr_fd(": ", 2);
+	if (arg[1])
+	{
+		ft_putstr_fd(arg[1], 2);
+		ft_putstr_fd(": ", 2);
+	}
+	ft_putstr_fd(strerror(errno), 2);
+	ft_putstr_fd("\n", 2);
+}
+
 void    f_printf(char *s1, char *s2)
 {
     int size1;

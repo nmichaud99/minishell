@@ -12,10 +12,16 @@
 
 #include "minishell.h"
 
-int	exec_env(t_data *data)
+
+int	exec_env(t_data *data, char **args)
 {
 	t_env	*tmp;
 
+	if (args[1])
+	{
+		ft_putstr_fd("env: too many arguments\n", 2);
+		return (1);
+	}
 	tmp = data->env;
 	while (tmp && tmp->next)
 	{

@@ -12,6 +12,19 @@
 
 #include "minishell.h"
 
+void	print_env(t_data *data)
+{
+	t_env	*tmp;
+
+	tmp = data->env;
+	while (tmp && tmp->next)
+	{
+		printf("%s=%s\n", tmp->key, tmp->value);
+		tmp = tmp->next;
+	}
+	printf("%s=%s\n", tmp->key, tmp->value);
+}
+
 char	**get_env_tab(t_data *data)
 {
 	t_env	*tmp;

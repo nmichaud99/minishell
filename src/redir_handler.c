@@ -30,7 +30,9 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 		tmp = tmp->next;
 	}
 	if (!last)
+	{
 		return (STDIN_FILENO);
+	}
 	tmp = list->redirs;
 	while (tmp != last)
 	{
