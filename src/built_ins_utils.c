@@ -64,19 +64,19 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 		saved_stdin = dup(STDIN_FILENO);
 		saved_stdout = dup(STDOUT_FILENO);
 		in = redir_in_handler(data, list);
-		if (in != 0)
+		if (in == -1)
+			return (1);
+		else if (in != STDIN_FILENO)
 		{
-			if (in == -1)
-				return (-1);
 			if (dup2(in, STDIN_FILENO) == -1)
 				error_sys(data, "dup2 error");
 			close(in);
 		}
 		out = redir_out_handler(data, list);
-		if (out != 0)
+		if (out == -1)
+			return (1);
+		else if (out != STDOUT_FILENO)
 		{
-			if (out == -1)
-				return (-2);
 			if (dup2(out, STDOUT_FILENO) == -1)
 				error_sys(data, "dup2 error 2");
 			close(out);
