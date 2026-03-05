@@ -34,11 +34,17 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 	tmp = list->redirs;
 	while (tmp != last)
 	{
-		if (last->type == REDIR_IN)
+		if (tmp->type == REDIR_IN)
 		{
-			new_fd = open(last->file_name, O_RDONLY);
+			new_fd = open(tmp->file_name, O_RDONLY);
 			if (new_fd == -1)
+			{
+				if (errno == EACCES)
+					f_printf(tmp->file_name, "Permission denied\n");
+				else
+					f_printf(tmp->file_name, "No such file or directory\n");
 				return (-1);
+			}
 			close(new_fd);
 		}
 		else
@@ -50,7 +56,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 				line = readline("> ");
 				if (!line)
 					break ;
-				if (ft_strcmp(line, last->file_name) == 0)
+				if (ft_strcmp(line, tmp->file_name) == 0)
 				{
 					free(line);
 					break ;
@@ -66,7 +72,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 		tmp = tmp->next;
 	}
 	if (last->type == REDIR_IN)
-			fd = open(last->file_name, O_RDONLY);
+		fd = open(last->file_name, O_RDONLY);
 	else
 	{
 		if (pipe(pipefd) == -1)
@@ -87,6 +93,13 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 		}
 		close(pipefd[1]);
 		fd = pipefd[0];
+	}
+	if (fd == -1)
+	{
+		if (errno == EACCES)
+			f_printf(tmp->file_name, "Permission denied\n");
+		else
+			f_printf(tmp->file_name, "No such file or directory\n");
 	}
 	return (fd);
 }
@@ -116,7 +129,10 @@ int	redir_out_handler(t_data *data, t_expanded_list *list)
 		{
 			new_fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			if (new_fd == -1)
+			{
+				f_printf(tmp->file_name, "Permission denied\n");
 				return (-1);
+			}
 			else
 				close(new_fd);
 		}
@@ -124,15 +140,22 @@ int	redir_out_handler(t_data *data, t_expanded_list *list)
 		{
 			new_fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_APPEND, 0644);
 			if (new_fd == -1)
+			{
+				f_printf(tmp->file_name, "Permission denied\n");
 				return (-1);
+			}
 			else
 				close(new_fd);
 		}
 		tmp = tmp->next;
 	}
 	if (last->type == REDIR_OUT)
+	{
 		fd = open(last->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	}
 	else
 		fd = open(last->file_name, O_WRONLY | O_CREAT | O_APPEND, 0644);
+	if (fd == -1)
+		f_printf(tmp->file_name, "Permission denied\n");
 	return (fd);
 }
