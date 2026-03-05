@@ -133,14 +133,17 @@ int	main(int ac, char **av, char **env)
 		data->env_tab = get_env_tab(data);
 		prev_fd = -1;
 		list = data->expanded_list;
-		// si !list->next et commande = built_in, on ne rentre pas dans la boucle
-		while (list)
+		if (data->expanded_list->next || !*(list->args) || is_built_in(*list->args) == NO)
 		{
-			data->last_pid = pipe_creator(data, &prev_fd, list);
-			list = list->next;
-		}
-		if (data->expanded_list->next || is_built_in(*(data->expanded_list->args)) == NONE)
+			while (list)
+			{
+				data->last_pid = pipe_creator(data, &prev_fd, list);
+				list = list->next;
+			}
 			wait_and_return(data);
+		}
+		else
+			*(data->exit_status) = exec_built_in(data, list, 0);
 	}
 	free_env(&data->env);
 	free(data->exit_status);

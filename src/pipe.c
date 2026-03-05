@@ -25,11 +25,6 @@ void	exec_if(t_data *data, int *prev_fd, t_expanded_list *list)
 
 int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 {
-	if (*list->args && is_built_in(*list->args) != NONE)
-	{
-		*(data->exit_status) = exec_built_in(data, list, 0);
-		return (0);
-	}
 	if (list->next)
 	{
 		if (pipe(data->pipefd) == -1)

@@ -57,7 +57,7 @@ int	exec_cmd1(t_data *data, t_expanded_list *list)
 	}
 	if (*list->args)
 	{
-		if (is_built_in(list->args[0]))
+		if (is_built_in(list->args[0]) != NO)
 		{
 			ft_free(&paths);
 			exit(exec_built_in(data, list, 1));
@@ -142,7 +142,7 @@ int	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	close(data->pipefd[1]);
 	if (*list->args)
 	{
-		if (is_built_in(list->args[0]))
+		if (is_built_in(list->args[0]) != NO)
 		{
 			ft_free(&paths);
 			exit(exec_built_in(data, list, 1));
@@ -220,7 +220,7 @@ int	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	}
 	if (*list->args)
 	{
-		if (is_built_in(list->args[0]))
+		if (is_built_in(list->args[0]) != NO)
 		{
 			ft_free(&paths);
 			exit(exec_built_in(data, list, 1));
