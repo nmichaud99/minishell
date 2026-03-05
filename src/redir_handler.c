@@ -17,6 +17,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 	t_redirs	*tmp;
 	t_redirs	*last;
 	int			fd;
+	int			new_fd;
 	int			pipefd[2];
 	char		*line;
 
@@ -29,9 +30,43 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 		tmp = tmp->next;
 	}
 	if (!last)
-		return (0);
+		return (STDIN_FILENO);
+	tmp = list->redirs;
+	while (tmp != last)
+	{
+		if (last->type == REDIR_IN)
+		{
+			new_fd = open(last->file_name, O_RDONLY);
+			if (new_fd == -1)
+				return (-1);
+			close(new_fd);
+		}
+		else
+		{
+			if (pipe(pipefd) == -1)
+				error_sys(data, "pipe failure");
+			while (1)
+			{
+				line = readline("> ");
+				if (!line)
+					break ;
+				if (ft_strcmp(line, last->file_name) == 0)
+				{
+					free(line);
+					break ;
+				}
+				write(pipefd[1], line, ft_strlen(line));
+				write(pipefd[1], "\n", 1);
+				free(line);
+			}
+			close(pipefd[1]);
+			new_fd = pipefd[0];
+			close(new_fd);
+		}
+		tmp = tmp->next;
+	}
 	if (last->type == REDIR_IN)
-		fd = open(last->file_name, O_RDONLY);
+			fd = open(last->file_name, O_RDONLY);
 	else
 	{
 		if (pipe(pipefd) == -1)
@@ -47,8 +82,8 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 				break ;
 			}
 			write(pipefd[1], line, ft_strlen(line));
-    		write(pipefd[1], "\n", 1);
-  			free(line);
+			write(pipefd[1], "\n", 1);
+			free(line);
 		}
 		close(pipefd[1]);
 		fd = pipefd[0];
@@ -73,7 +108,7 @@ int	redir_out_handler(t_data *data, t_expanded_list *list)
 		tmp = tmp->next;
 	}
 	if (!last)
-		return (0);
+		return (STDOUT_FILENO);
 	tmp = list->redirs;
 	while (tmp != last)
 	{

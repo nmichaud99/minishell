@@ -213,8 +213,8 @@ int				pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list);
 // get path
 char			*find_cmd(char *cmd, char **path);
 // exec commands
-int				exec_cmd1(t_data *data, t_expanded_list *list);
-int				exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
-int				exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
+void			exec_cmd1(t_data *data, t_expanded_list *list);
+void			exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
+void			exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
 
 #endif

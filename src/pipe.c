@@ -41,8 +41,8 @@ int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 		close(*prev_fd);
 	if (list->next)
 	{
-		close(data->pipefd[1]);
 		*prev_fd = data->pipefd[0];
+		//close(data->pipefd[0]);
 	}
 	return (data->pid);
 }

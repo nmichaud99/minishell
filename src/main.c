@@ -133,6 +133,8 @@ int	main(int ac, char **av, char **env)
 		data->env_tab = get_env_tab(data);
 		prev_fd = -1;
 		list = data->expanded_list;
+		/*if (!*list->args && *(list->redirs) == NULL)
+			break ;*/
 		if (data->expanded_list->next || !*(list->args) || is_built_in(*list->args) == NO)
 		{
 			while (list)
