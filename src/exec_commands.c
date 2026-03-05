@@ -18,6 +18,7 @@ int	exec_cmd1(t_data *data, t_expanded_list *list)
 	char	*path_val;
 	int		in;
 	int		out;
+	struct	stat st;
 
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
@@ -56,12 +57,37 @@ int	exec_cmd1(t_data *data, t_expanded_list *list)
 	}
 	if (*list->args)
 	{
+		if (is_built_in(list->args[0]))
+		{
+			ft_free(&paths);
+			exit(exec_built_in(data, list, 1));
+		}
 		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
-		if (data->full_path == NULL)
-			return (1);
+		if (!data->full_path)
+		{
+			f_printf(list->args[0], "command not found\n");
+			exit(127);
+		}
+		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
+		{
+			f_printf(data->full_path, "Is a directory\n");
+			exit(126);
+		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
-			error_sys(data, "exec failure");
+		{
+			if (errno == ENOENT)
+				f_printf(list->args[0], "No such file or directory\n");
+			else if (errno == EACCES)
+				f_printf(list->args[0], "Permission denied\n");
+			else if (errno == EISDIR)
+				f_printf(list->args[0], "Is a directory\n");
+			else if (errno == ENOEXEC)
+				f_printf(list->args[0], "cannot execute binary file\n");
+			else
+				f_printf(list->args[0], "Unknown execve error\n");
+			exit(errno == ENOENT ? 127 : 126);
+		}
 	}
 	ft_free(&paths);
 	exit(0);
@@ -74,6 +100,7 @@ int	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
+	struct	stat st;
 
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
@@ -115,12 +142,37 @@ int	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	close(data->pipefd[1]);
 	if (*list->args)
 	{
+		if (is_built_in(list->args[0]))
+		{
+			ft_free(&paths);
+			exit(exec_built_in(data, list, 1));
+		}
 		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
-		if (data->full_path == NULL)
-			return (1);
+		if (!data->full_path)
+		{
+			f_printf(list->args[0], "command not found\n");
+			exit(127);
+		}
+		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
+		{
+			f_printf(data->full_path, "Is a directory\n");
+			exit(126);
+		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
-			error_sys(data, "exec failure");
+		{
+			if (errno == ENOENT)
+				f_printf(list->args[0], "No such file or directory\n");
+			else if (errno == EACCES)
+				f_printf(list->args[0], "Permission denied\n");
+			else if (errno == EISDIR)
+				f_printf(list->args[0], "Is a directory\n");
+			else if (errno == ENOEXEC)
+				f_printf(list->args[0], "cannot execute binary file\n");
+			else
+				f_printf(list->args[0], "Unknown execve error\n");
+			exit(errno == ENOENT ? 127 : 126);
+		}
 	}
 	ft_free(&paths);
 	exit(0);
@@ -133,6 +185,7 @@ int	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
+	struct	stat st;
 
 	path_val = get_variable_value(data, "PATH");
 	if (!path_val)
@@ -167,31 +220,35 @@ int	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	}
 	if (*list->args)
 	{
+		if (is_built_in(list->args[0]))
+		{
+			ft_free(&paths);
+			exit(exec_built_in(data, list, 1));
+		}
 		data->full_path = find_cmd(list->args[0], paths);
 		ft_free(&paths);
 		if (!data->full_path)
 		{
-			fprintf(stderr, "%s: command not found\n", list->args[0]);
+			f_printf(list->args[0], "command not found\n");
 			exit(127);
 		}
-		struct stat st;
 		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
 		{
-			fprintf(stderr, "%s: Is a directory\n", data->full_path);
+			f_printf(data->full_path, "Is a directory\n");
 			exit(126);
 		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
 		{
 			if (errno == ENOENT)
-				fprintf(stderr, "%s: No such file or directory\n", list->args[0]);
+				f_printf(list->args[0], "No such file or directory\n");
 			else if (errno == EACCES)
-				fprintf(stderr, "%s: Permission denied\n", list->args[0]);
+				f_printf(list->args[0], "Permission denied\n");
 			else if (errno == EISDIR)
-				fprintf(stderr, "%s: Is a directory\n", list->args[0]);
+				f_printf(list->args[0], "Is a directory\n");
 			else if (errno == ENOEXEC)
-				fprintf(stderr, "%s: cannot execute binary file\n", list->args[0]);
+				f_printf(list->args[0], "cannot execute binary file\n");
 			else
-				fprintf(stderr, "%s: Unknown execve error\n", list->args[0]);
+				f_printf(list->args[0], "Unknown execve error\n");
 			exit(errno == ENOENT ? 127 : 126);
 		}
 	}

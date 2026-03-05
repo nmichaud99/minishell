@@ -139,7 +139,8 @@ int	main(int ac, char **av, char **env)
 			data->last_pid = pipe_creator(data, &prev_fd, list);
 			list = list->next;
 		}
-		wait_and_return(data);
+		if (data->expanded_list->next || is_built_in(*(data->expanded_list->args)) == NONE)
+			wait_and_return(data);
 	}
 	free_env(&data->env);
 	free(data->exit_status);

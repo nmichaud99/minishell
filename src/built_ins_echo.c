@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-int	ft_echo(char **args)
+int	exec_echo(char **args)
 {
 	char	**tmp_args;
 

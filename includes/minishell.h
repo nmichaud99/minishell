@@ -52,6 +52,18 @@ typedef enum e_quote_type
 	SINGLE
 }	t_quote_type;
 
+typedef enum e_builtin_type
+{
+	ECHO,
+	CD,
+	PWD,
+	EXPORT,
+	UNSET,
+	ENV,
+	EXIT,
+	NO
+}	t_builtin_type;
+
 typedef struct s_word
 {
 	char			*txt;
@@ -118,6 +130,7 @@ void			add_token(t_token **head, t_token *new);
 t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
+void			f_printf(char *s1, char *s2);
 
 // --- env utils --- //
 char			**get_env_tab(t_data *data);
@@ -168,6 +181,10 @@ void			expansion(t_data *data);
 
 // --- built-ins --- //
 
+// utils
+t_builtin_type	is_built_in(char *arg);
+int				exec_cmd(t_data *data, t_expanded_list *list);
+int				exec_built_in(t_data *data, t_expanded_list *list, int flag);
 // unset
 void			free_env_node(t_env **env);
 int				exec_unset(t_data *data, char **args);
@@ -177,11 +194,11 @@ void			add_env_node(t_data *data, char *env_line);
 void			add_or_modify_env_node(t_data *data, char *new_var);
 void			print_env_export(t_data *data);
 int				is_valid_string(char *str);
-int				ft_export(t_data *data, char **args);
+int				exec_export(t_data *data, char **args);
 // echo
-int				ft_echo(char **args);
+int				exec_echo(char **args);
 // env
-void			print_env(t_data *data);
+int				exec_env(t_data *data);
 // cd
 int				exec_cd(t_data *data, char **args);
 

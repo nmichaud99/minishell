@@ -142,7 +142,7 @@ int	is_valid_string(char *str)
 	return (1);
 }
 
-int	ft_export(t_data *data, char **args)
+int	exec_export(t_data *data, char **args)
 {
 	if (!*(args + 1))
 	{
