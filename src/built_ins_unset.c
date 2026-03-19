@@ -25,26 +25,35 @@ int	exec_unset(t_data *data, char **args)
 	t_env	*tmp;
 	t_env	*prev;
 	t_env	*to_delete;
+	char	**tmp_args;
 
 	tmp = data->env;
 	prev = NULL;
 	if (!*(args + 1))
 		return (0);
-	while (tmp)
+	tmp_args = args + 1;
+	while (*tmp_args)
 	{
-		if (tmp && ft_strcmp(tmp->key, *(args + 1)) == 0)
+		printf("%s\n", *tmp_args);
+		while (tmp)
 		{
-			to_delete = tmp;
-			if (prev)
-				prev->next = tmp->next;
-			else
-				data->env = tmp->next;
+			if (tmp && ft_strcmp(tmp->key, *tmp_args) == 0)
+			{
+				to_delete = tmp;
+				if (prev)
+					prev->next = tmp->next;
+				else
+					data->env = tmp->next;
+				tmp = tmp->next;
+				free_env_node(&to_delete);
+				break ;
+			}
+			prev = tmp;
 			tmp = tmp->next;
-			free_env_node(&to_delete);
-			return (0);
 		}
-		prev = tmp;
-		tmp = tmp->next;
+		tmp_args++;
+		tmp = data->env;
+		prev = NULL;
 	}
 	return (0);
 }

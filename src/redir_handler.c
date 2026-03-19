@@ -49,7 +49,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 			}
 			close(new_fd);
 		}
-		else
+		else if (tmp->type == REDIR_HEREDOC)
 		{
 			if (pipe(pipefd) == -1)
 				error_sys(data, "pipe failure");

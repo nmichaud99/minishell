@@ -119,10 +119,11 @@ typedef struct	s_data
 	int				*exit_status;
 	int				pipefd[2];
 	pid_t			pid;
-	pid_t			last_pid;
 	int				last_status;
 	char			*full_path;
 }	t_data;
+
+extern volatile 		sig_atomic_t gSignalStatus;
 
 // --- utils --- //
 t_token			*new_token(t_token_type type, t_word *word);
@@ -146,6 +147,7 @@ void			free_token(t_token **head);
 void			free_env(t_env **env);
 void			free_redirs(t_redirs **redirs);
 void			free_word_tab(t_word ***word);
+void			free_word_tab_2(t_word ***word, int size);
 void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
 void			free_data(t_data *data);
@@ -155,8 +157,8 @@ void			error_sys(t_data *data, char *s);
 // --- lexing --- //
 
 // lexing_1
-int				handle_word(t_data *data, t_token **head, char *str, int *i);
-void			handle_operators(t_data *data, t_token **head, char *str, int *i);
+int				handle_word(t_token **head, char *str, int *i);
+int				handle_operators(t_token **head, char *str, int *i);
 int				lexing(t_data *data);
 // lexing_2
 int				is_operator(char c);
@@ -173,14 +175,14 @@ t_redirs		*get_redirs(t_token *start, t_token *end, int *flag);
 int				count_args(t_token *start, t_token *end);
 t_quote_type	*dup_quoting(t_word *word);
 t_word			**get_args(t_token *start, t_token *end, int *flag);
-void			parsing(t_data *data);
+int				parsing(t_data *data);
 
 // --- expansion --- //
 char			*get_variable_value(t_data *data, char *str);
 char			*expand(t_data *data, t_word *arg, int *i, t_quote_type quote);
 char			*expand_arg(t_data *data, t_word *arg);
 t_redirs		*dup_redirs(t_redirs *src);
-void			expansion(t_data *data);
+int				expansion(t_data *data);
 
 // --- built-ins --- //
 
@@ -193,8 +195,8 @@ void			free_env_node(t_env **env);
 int				exec_unset(t_data *data, char **args);
 // export
 char			*get_variable_key(const char *s);
-void			add_env_node(t_data *data, char *env_line);
-void			add_or_modify_env_node(t_data *data, char *new_var);
+int				add_env_node(t_data *data, char *env_line);
+int				add_or_modify_env_node(t_data *data, char *new_var);
 void			print_env_export(t_data *data);
 int				is_valid_string(char *str);
 int				exec_export(t_data *data, char **args);
@@ -221,5 +223,8 @@ char			*find_cmd(char *cmd, char **path);
 void			exec_cmd1(t_data *data, t_expanded_list *list);
 void			exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
 void			exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
+
+// main
+void			sigint_handler(int sig);
 
 #endif

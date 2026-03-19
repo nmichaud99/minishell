@@ -134,7 +134,13 @@ t_quote_type	*dup_quoting(t_word *word)
 
 	size = ft_strlen(word->txt);
 	if (size == 0)
-		return (NULL);
+	{
+		res = malloc(1);
+		if (!res)
+			return (NULL);
+		res[0] = 0;
+		return (res);
+	}
 	res = malloc(sizeof(t_quote_type) * size);
 	if (!res)
 		return (NULL);
@@ -181,23 +187,24 @@ t_word	**get_args(t_token *start, t_token *end, int *flag)
 				if (!args[i])
 				{
 					*flag = 1;
-					free_word_tab(&args);
+					free_word_tab_2(&args, i);
 					return (NULL);
 				}
 				args[i]->txt = ft_strdup(tmp->word->txt);
 				if (!args[i]->txt)
 				{
 					*flag = 1;
-					args[i] = NULL;
-					free_word_tab(&args);
+					free(args[i]);
+					free_word_tab_2(&args, i);
 					return (NULL);
 				}
 				args[i]->quoting = dup_quoting(tmp->word);
 				if (!args[i]->quoting)
 				{
 					*flag = 1;
-					args[i] = NULL;
-					free_word_tab(&args);
+					free(args[i]->txt);
+					free(args[i]);
+					free_word_tab_2(&args, i);
 					return (NULL);
 				}
 				i++;
@@ -210,7 +217,7 @@ t_word	**get_args(t_token *start, t_token *end, int *flag)
 	return (args);
 }
 
-void	parsing(t_data *data)
+int	parsing(t_data *data)
 {
 	t_token		*start;
 	t_token		*current;
@@ -228,19 +235,27 @@ void	parsing(t_data *data)
 		{
 			tmp = get_args(start, current, &flag);
 			if (!tmp && flag == 1)
-				exit_free(data, EXIT_FAILURE);
+			{
+				free_list(&data->cmd_list);
+				data->cmd_list = NULL;
+				return (0);
+			}
 			tmp_redirs = get_redirs(start, current, &flag);
 			if (!tmp_redirs && flag == 1)
 			{
 				free_word_tab(&tmp);
-				exit_free(data, EXIT_FAILURE);
+				free_list(&data->cmd_list);
+				data->cmd_list = NULL;
+				return (0);
 			}
 			tmp_list = new_cmd(tmp, tmp_redirs);
 			if (!tmp_list)
 			{
 				free_word_tab(&tmp);
 				free_redirs(&tmp_redirs);
-				exit_free(data, EXIT_FAILURE);
+				free_list(&data->cmd_list);
+				data->cmd_list = NULL;
+				return (0);
 			}
 			add_cmd(&data->cmd_list, tmp_list);
 			start = current->next;
@@ -249,19 +264,28 @@ void	parsing(t_data *data)
 	}
 	tmp = get_args(start, NULL, &flag);
 	if (!tmp && flag == 1)
-		exit_free(data, EXIT_FAILURE);
+	{
+		free_list(&data->cmd_list);
+		data->cmd_list = NULL;
+		return (0);
+	}
 	tmp_redirs = get_redirs(start, current, &flag);
 	if (!tmp_redirs && flag == 1)
 	{
 		free_word_tab(&tmp);
-		exit_free(data, EXIT_FAILURE);
+		free_list(&data->cmd_list);
+		data->cmd_list = NULL;
+		return (0);
 	}
 	tmp_list = new_cmd(tmp, tmp_redirs);
 	if (!tmp_list)
 	{
 		free_word_tab(&tmp);
 		free_redirs(&tmp_redirs);
-		exit_free(data, EXIT_FAILURE);
+		free_list(&data->cmd_list);
+		data->cmd_list = NULL;
+		return (0);
 	}
 	add_cmd(&data->cmd_list, tmp_list);
+	return (1);
 }

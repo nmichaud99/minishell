@@ -44,7 +44,7 @@ static int append_char(char **txt, t_quote_type **quoting, char c, t_quote_type 
     return (1);
 }
 
-int	handle_word(t_data *data, t_token **head, char *str, int *i)
+int	handle_word(t_token **head, char *str, int *i)
 {
 	t_word			*word;
 	char			*txt;
@@ -64,14 +64,14 @@ int	handle_word(t_data *data, t_token **head, char *str, int *i)
 				{
 					free(txt);
 					free(quoting);
-					exit_free(data, EXIT_FAILURE);
+					return (0);
 				}
 			}
             if (str[*i] != '\'')
 			{
 				free(txt);
 				free(quoting);
-            	return (1);
+            	return (-1);
 			}
             (*i)++;
         }
@@ -84,14 +84,14 @@ int	handle_word(t_data *data, t_token **head, char *str, int *i)
 				{
 					free(txt);
 					free(quoting);
-					exit_free(data, EXIT_FAILURE);
+					return (0);
 				}
 			}
             if (str[*i] != '"')
             {
 				free(txt);
 				free(quoting);
-            	return (1);
+            	return (-1);
 			}
             (*i)++;
         }
@@ -101,7 +101,7 @@ int	handle_word(t_data *data, t_token **head, char *str, int *i)
 			{
 				free(txt);
 				free(quoting);
-				exit_free(data, EXIT_FAILURE);
+				return (0);
 			}
         }
     }
@@ -110,7 +110,7 @@ int	handle_word(t_data *data, t_token **head, char *str, int *i)
 	{
 		free(txt);
 		free(quoting);
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	}
     word->txt = txt;
     word->quoting = quoting;
@@ -118,13 +118,13 @@ int	handle_word(t_data *data, t_token **head, char *str, int *i)
 	if (!tmp)
 	{
 		free_word(&word);
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	}
 	add_token(head, tmp);
-	return (0);
+	return (1);
 }
 
-void	handle_operators(t_data *data, t_token **head, char *str, int *i)
+int	handle_operators(t_token **head, char *str, int *i)
 {
 	t_token	*tmp;
 
@@ -132,7 +132,7 @@ void	handle_operators(t_data *data, t_token **head, char *str, int *i)
 	{
 		tmp = new_token(PIPE, NULL);
 		if (!tmp)
-			exit_free(data, EXIT_FAILURE);
+			return (0);
 		add_token(head, tmp);
 		(*i)++;
 	}
@@ -142,7 +142,7 @@ void	handle_operators(t_data *data, t_token **head, char *str, int *i)
 		{
 			tmp = new_token(HEREDOC, NULL);
 			if (!tmp)
-				exit_free(data, EXIT_FAILURE);
+				return (0);
 			add_token(head, tmp);
 			(*i) += 2;
 		}
@@ -150,7 +150,7 @@ void	handle_operators(t_data *data, t_token **head, char *str, int *i)
 		{
 			tmp = new_token(IN_DIR, NULL);
 			if (!tmp)
-				exit_free(data, EXIT_FAILURE);
+				return (0);
 			add_token(head, tmp);
 			(*i)++;
 		}
@@ -161,7 +161,7 @@ void	handle_operators(t_data *data, t_token **head, char *str, int *i)
 		{
 			tmp = new_token(APPEND, NULL);
 			if (!tmp)
-				exit_free(data, EXIT_FAILURE);
+				return (0);
 			add_token(head, tmp);
 			(*i) += 2;
 		}
@@ -169,16 +169,18 @@ void	handle_operators(t_data *data, t_token **head, char *str, int *i)
 		{
 			tmp = new_token(OUT_DIR, NULL);
 			if (!tmp)
-				exit_free(data, EXIT_FAILURE);
+				return (0);
 			add_token(head, tmp);
 			(*i)++;
 		}
 	}
+	return (1);
 }
 
 int	lexing(t_data *data)
 {
 	int		i;
+	int		ret;
 
 	i = 0;
 	while (data->line[i])
@@ -188,14 +190,21 @@ int	lexing(t_data *data)
 		if (data->line[i] == 0)
 			return (1);
 		else if (is_operator(data->line[i]))
-			handle_operators(data, &data->tokens, data->line, &i);
+		{
+			ret = handle_operators(&data->tokens, data->line, &i);
+			if (!ret)
+				return (0);
+		}
 		else
 		{
-			if (handle_word(data, &data->tokens, data->line, &i) == 1)
+			ret = handle_word(&data->tokens, data->line, &i);
+			if (ret == -1)
 			{
 				printf("Syntax error unclosed quotes\n");
 				return (0);
 			}
+			if (ret == 0)
+				return (0);
 		}
 	}
 	return (1);

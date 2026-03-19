@@ -21,7 +21,7 @@ char	*get_variable_value(t_data *data, char *str)
 	{
 		tmp_value = ft_itoa(*(data->exit_status));
 		if (!tmp_value)
-			exit_free(data, EXIT_FAILURE);
+			return (NULL);
 		return (tmp_value);
 	}
 	tmp = data->env;
@@ -38,7 +38,7 @@ char	*get_variable_value(t_data *data, char *str)
 	}
 	tmp_value = ft_strdup("");
 	if (!tmp_value)
-		exit_free(data, EXIT_FAILURE);
+		return (NULL);
 	return (tmp_value);
 }
 
@@ -67,18 +67,18 @@ char	*expand(t_data *data, t_word *arg, int *i, t_quote_type quote)
 	}
 	tmp = malloc(count + 1);
 	if (!tmp)
-		exit_free(data, EXIT_FAILURE);
+		return (NULL);
 	ft_memcpy(tmp, &arg->txt[start], count);
 	tmp[count] = 0;
 	res = get_variable_value(data, tmp);
 	free(tmp);
 	if (!res)
-		exit_free(data, EXIT_FAILURE);
+		return (NULL);
 	*i = start + count;
 	return (res);
 }
 
-static void	append_variable(t_data *data, char **res, char **str)
+static int	append_variable(char **res, char **str)
 {
 	char	*new_str;
 	int		size;
@@ -88,16 +88,17 @@ static void	append_variable(t_data *data, char **res, char **str)
 	size2 = ft_strlen(*str);
 	new_str = malloc(size + size2 + 1);
 	if (!new_str)
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	ft_memcpy(new_str, *res, size);
 	ft_memcpy(new_str + size, *str, size2);
 	new_str[size + size2] = 0;
 	free(*res);
 	free(*str);
 	*res = new_str;
+	return (1);
 }
 
-static void	append_char(t_data *data, char **res, char c)
+static int	append_char(char **res, char c)
 {
 	char	*new_str;
 	int		size;
@@ -105,12 +106,13 @@ static void	append_char(t_data *data, char **res, char c)
 	size = ft_strlen(*res);
 	new_str = malloc(size + 2);
 	if (!new_str)
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	ft_memcpy(new_str, *res, size);
 	new_str[size] = c;
 	new_str[size + 1] = 0;
 	free(*res);
 	*res = new_str;
+	return (1);
 }
 
 char	*expand_arg(t_data *data, t_word *arg)
@@ -133,11 +135,19 @@ char	*expand_arg(t_data *data, t_word *arg)
 				free(res);
 				return (NULL);
 			}
-			append_variable(data, &res, &variable);
+			if (!append_variable(&res, &variable))
+			{
+				free(res);
+				return (NULL);
+			}
 		}
 		else
 		{
-			append_char(data, &res, arg->txt[i]);
+			if (!append_char(&res, arg->txt[i]))
+			{
+				free(res);
+				return (NULL);
+			}
 			i++;
 		}
 	}
@@ -155,6 +165,12 @@ t_redirs	*dup_redirs(t_redirs *src)
 		if (!node)
 			return NULL;
 		node->file_name = ft_strdup(src->file_name);
+		if (!node->file_name)
+		{
+			free(node);
+			free_redirs(&head);
+			return (NULL);
+		}
 		node->type = src->type;
 		node->next = NULL;
 		if (!head)
@@ -167,7 +183,7 @@ t_redirs	*dup_redirs(t_redirs *src)
 	return head;
 }
 
-void	expansion(t_data *data)
+int	expansion(t_data *data)
 {
 	t_cmd_list		*lst;
 	t_word			**args;
@@ -186,7 +202,11 @@ void	expansion(t_data *data)
 			i++;
 		expanded_args = malloc(sizeof(char *) * (i + 1));
 		if (!expanded_args)
-			exit_free(data, EXIT_FAILURE);
+		{
+			free_expanded_list(&data->expanded_list);
+    		data->expanded_list = NULL;
+			return (0);
+		}
 		args = lst->args;
 		i = 0;
 		while (args[i])
@@ -195,7 +215,9 @@ void	expansion(t_data *data)
 			if (!expanded_args[i])
 			{
 				ft_free(&expanded_args);
-				exit_free(data, EXIT_FAILURE);
+				free_expanded_list(&data->expanded_list);
+    			data->expanded_list = NULL;
+				return (0);
 			}
 			i++;
 		}
@@ -204,12 +226,20 @@ void	expansion(t_data *data)
 		if (!expanded)
 		{
 			ft_free(&expanded_args);
-			exit_free(data, EXIT_FAILURE);
+			free_expanded_list(&data->expanded_list);
+    		data->expanded_list = NULL;
+			return (0);
 		}
 		expanded->args = expanded_args;
 		expanded->redirs = dup_redirs(lst->redirs);
 		if (lst->redirs && !expanded->redirs)
-			exit_free(data, EXIT_FAILURE);
+		{
+			ft_free(&expanded_args);
+			free_redirs(&expanded->redirs);
+			free_expanded_list(&data->expanded_list);
+    		data->expanded_list = NULL;
+			return (0);
+		}
 		expanded->next = NULL;
 		if (!data->expanded_list)
 			data->expanded_list = expanded;
@@ -218,4 +248,5 @@ void	expansion(t_data *data)
 		prev = expanded;
 		lst = lst->next;
 	}
+	return (1);
 }

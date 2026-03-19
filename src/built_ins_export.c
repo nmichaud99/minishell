@@ -35,38 +35,39 @@ char	*get_variable_key(const char *s)
 	return (result);
 }
 
-void	add_env_node(t_data *data, char *env_line)
+int	add_env_node(t_data *data, char *env_line)
 {
 	t_env	*new_node;
 	t_env	*tmp;
 
 	new_node = malloc(sizeof(t_env));
 	if (!new_node)
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	new_node->key = get_variable_key(env_line);
 	if (!new_node->key)
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	new_node->value = ft_strdup(ft_strchr(env_line, '=') + 1);
 	if (!new_node->value)
 	{
 		free(new_node->key);
 		new_node->key = NULL;
 		free(new_node);
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	}
 	new_node->next = NULL;
 	tmp = data->env;
 	if (!data->env)
 	{
 		data->env = new_node;
-		return ;
+		return (1);
 	}
 	while (tmp && tmp->next)
 		tmp = tmp->next;
 	tmp->next = new_node;
+	return (1);
 }
 
-void	add_or_modify_env_node(t_data *data, char *new_var)
+int	add_or_modify_env_node(t_data *data, char *new_var)
 {
 	t_env	*tmp;
 	char	*new_key;
@@ -74,15 +75,15 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 
 	new_key = get_variable_key(new_var);
 	if (!new_key)
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	new_value = ft_strdup(ft_strchr(new_var, '=') + 1);
 	if (!new_value)
 	{
 		free(new_key);
-		exit_free(data, EXIT_FAILURE);
+		return (0);
 	}
 	tmp = data->env;
-	while (tmp && tmp->next)
+	while (tmp)
 	{
 		if (ft_strcmp(tmp->key, new_key) == 0)
 		{
@@ -90,21 +91,23 @@ void	add_or_modify_env_node(t_data *data, char *new_var)
 			{
 				free(new_key);
 				free(new_value);
-				return ;
+				return (0);
 			}
 			else
 			{
 				free(tmp->value);
 				tmp->value = new_value;
 				free(new_key);
-				return ;
+				return (0);
 			}
 		}
 		tmp = tmp->next;
 	}
 	free(new_key);
 	free(new_value);
-	add_env_node(data, new_var);
+	if (!add_env_node(data, new_var))
+		return (0);
+	return (1);
 }
 
 void	print_env_export(t_data *data)
@@ -159,7 +162,8 @@ int	exec_export(t_data *data, char **args)
 				printf("export: '%s': is not a valid identifier\n", *args);
 					return (2);
 			}
-			add_or_modify_env_node(data, *args);
+			if (!add_or_modify_env_node(data, *args))
+				return (1);
 			args++;
 		}
 	}

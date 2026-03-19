@@ -18,11 +18,13 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 	char	*path_val;
 	int		in;
 	int		out;
+	int		status;
 	struct	stat st;
 
+	rl_clear_history();
 	in = redir_in_handler(data, list);
 	if (in == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (in != STDIN_FILENO)
 	{
 		if (dup2(in, STDIN_FILENO) == -1)
@@ -31,14 +33,14 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 	}
 	out = redir_out_handler(data, list);
 	if (out == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
 	{
 		if (dup2(out, STDOUT_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 		close(out);
 	}
-	if (list->next)
+	else if (list->next)
 	{
 		if (dup2(data->pipefd[1], STDOUT_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
@@ -48,7 +50,10 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 	if (*list->args)
 	{
 		if (is_built_in(list->args[0]) != NO)
-			exit(exec_built_in(data, list, 1));
+		{
+			status = exec_built_in(data, list, 1);
+			exit_free(data, status);
+		}
 		path_val = get_variable_value(data, "PATH");
 		if (!path_val)
 			exit_free(data, EXIT_FAILURE);
@@ -61,12 +66,12 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 		if (!data->full_path)
 		{
 			f_printf(list->args[0], "command not found\n");
-			exit(127);
+			exit_free(data, 127);
 		}
 		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
 		{
 			f_printf(data->full_path, "Is a directory\n");
-			exit(126);
+			exit_free(data, 126);
 		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
 		{
@@ -80,10 +85,10 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 				f_printf(list->args[0], "cannot execute binary file\n");
 			else
 				f_printf(list->args[0], "Unknown execve error\n");
-			exit(errno == ENOENT ? 127 : 126);
+			exit_free(data, errno == ENOENT ? 127 : 126);
 		}
 	}
-	exit(0);
+	exit_free(data, 0);
 }
 
 void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
@@ -92,11 +97,13 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
+	int		status;
 	struct	stat st;
 
+	rl_clear_history();
 	in = redir_in_handler(data, list);
 	if (in == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (in != STDIN_FILENO)
 	{
 		if (dup2(in, STDIN_FILENO) == -1)
@@ -111,7 +118,7 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	close(prev_fd);
 	out = redir_out_handler(data, list);
 	if (out == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
 	{
 		if (dup2(out, STDOUT_FILENO) == -1)
@@ -123,12 +130,15 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 		if (dup2(data->pipefd[1], STDOUT_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 	}
-	//close(data->pipefd[0]);
+	close(data->pipefd[0]);
 	close(data->pipefd[1]);
 	if (*list->args)
 	{
 		if (is_built_in(list->args[0]) != NO)
-			exit(exec_built_in(data, list, 1));
+		{
+			status = exec_built_in(data, list, 1);
+			exit_free(data, status);
+		}
 		path_val = get_variable_value(data, "PATH");
 		if (!path_val)
 			exit_free(data, EXIT_FAILURE);
@@ -141,12 +151,12 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 		if (!data->full_path)
 		{
 			f_printf(list->args[0], "command not found\n");
-			exit(127);
+			exit_free(data, 127);
 		}
 		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
 		{
 			f_printf(data->full_path, "Is a directory\n");
-			exit(126);
+			exit_free(data, 126);
 		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
 		{
@@ -160,10 +170,10 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 				f_printf(list->args[0], "cannot execute binary file\n");
 			else
 				f_printf(list->args[0], "Unknown execve error\n");
-			exit(errno == ENOENT ? 127 : 126);
+			exit_free(data, errno == ENOENT ? 127 : 126);
 		}
 	}
-	exit(0);
+	exit_free(data, 0);
 }
 
 void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
@@ -172,11 +182,13 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	char	*path_val;
 	int		in;
 	int		out;
+	int		status;
 	struct	stat st;
 
+	rl_clear_history();
 	in = redir_in_handler(data, list);
 	if (in == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (in != STDIN_FILENO)
 	{
 		if (dup2(in, STDIN_FILENO) == -1)
@@ -191,7 +203,7 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	close(prev_fd);
 	out = redir_out_handler(data, list);
 	if (out == -1)
-		exit(1);
+		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
 	{
 		if (dup2(out, STDOUT_FILENO) == -1)
@@ -201,7 +213,10 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	if (*list->args)
 	{
 		if (is_built_in(list->args[0]) != NO)
-			exit(exec_built_in(data, list, 1));
+		{
+			status = exec_built_in(data, list, 1);
+			exit_free(data, status);
+		}
 		path_val = get_variable_value(data, "PATH");
 		if (!path_val)
 			exit_free(data, EXIT_FAILURE);
@@ -214,12 +229,12 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 		if (!data->full_path)
 		{
 			f_printf(list->args[0], "command not found\n");
-			exit(127);
+			exit_free(data, 127);
 		}
 		if (stat(data->full_path, &st) == 0 && S_ISDIR(st.st_mode))
 		{
 			f_printf(data->full_path, "Is a directory\n");
-			exit(126);
+			exit_free(data, 126);
 		}
 		if (execve(data->full_path, list->args, data->env_tab) == -1)
 		{
@@ -233,8 +248,8 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 				f_printf(list->args[0], "cannot execute binary file\n");
 			else
 				f_printf(list->args[0], "Unknown execve error\n");
-			exit(errno == ENOENT ? 127 : 126);
+			exit_free(data, errno == ENOENT ? 127 : 126);
 		}
 	}
-	exit(0);
+	exit_free(data, 0);
 }

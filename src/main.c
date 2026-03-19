@@ -14,16 +14,18 @@
 
 volatile sig_atomic_t gSignalStatus = 0;
 
-void	init_env_tab(char **env, t_data *data)
+int	init_env_tab(char **env, t_data *data)
 {
 	int	i;
 
 	i = 0;
 	while (env[i])
 	{
-		add_env_node(data, env[i]);
+		if (!add_env_node(data, env[i]))
+			return (0);
 		i++;
 	}
+	return (1);
 }
 
 void	init_data(t_data *data, int flag)
@@ -36,26 +38,23 @@ void	init_data(t_data *data, int flag)
 		data->expanded_list = NULL;
 		data->env = NULL;
 		data->env_tab = NULL;
+		data->full_path = NULL;
 		data->exit_status = malloc(sizeof(int));
 		if (!data->exit_status)
 			exit(EXIT_FAILURE);
 		*(data->exit_status) = 0;
-		data->full_path = NULL;
 	}
 	else
 	{
-		free_token(&data->tokens);
-		free_list(&data->cmd_list);
+		free_data(data);
 		free_expanded_list(&data->expanded_list);
 		ft_free(&data->env_tab);
-		free(data->full_path);
-		data->full_path = NULL;
 		free(data->line);
 		data->line = NULL;
 	}
 }
 
-static void	wait_and_return(t_data *data)
+/*static void	wait_and_return(t_data *data)
 {
 	int	status;
 	int	i;
@@ -71,15 +70,47 @@ static void	wait_and_return(t_data *data)
 	}
 	if (WIFEXITED(data->last_status))
 		*(data->exit_status) = (WEXITSTATUS(data->last_status));
-}
+}*/
 
 void	sigint_handler(int sig)
 {
-	gSignalStatus = sig;
+	(void)sig;
+	gSignalStatus = SIGINT;
 	write(1, "\n", 1);
+	rl_replace_line("", 0);
 	rl_on_new_line();
-    rl_replace_line("", 0);
-    rl_redisplay();
+	rl_redisplay();
+}
+
+void	sigint_handler_exec(int sig)
+{
+	(void)sig;
+	gSignalStatus = SIGINT;
+	write(1, "\n", 1);
+}
+
+void	sigquit_handler(int sig)
+{
+	(void)sig;
+	write(1, "Quit (core dumped)\n", 19);
+}
+
+void	set_signals_interactive(void)
+{
+	signal(SIGINT, sigint_handler);
+	signal(SIGQUIT, SIG_IGN);
+}
+
+void	set_signals_exec(void)
+{
+	signal(SIGINT, sigint_handler_exec);
+	signal(SIGQUIT, sigquit_handler);
+}
+
+void	set_signals_ignore(void)
+{
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
 }
 
 int	main(int ac, char **av, char **env)
@@ -91,17 +122,16 @@ int	main(int ac, char **av, char **env)
 	(void)av;
 	if (ac != 1)
 		return (0);
-	signal(SIGINT, sigint_handler);
-	signal(SIGQUIT, SIG_IGN);
 	data = malloc(sizeof(t_data));
 	if (!data)
 		return (1);
 	init_data(data, 0);
-	init_env_tab(env, data);
+	if (!init_env_tab(env, data))
+		return (1);
 	while (1)
 	{
 		init_data(data, 1);
-		gSignalStatus = 0;
+		set_signals_interactive();
 		data->line = readline("minishell$ ");
 		if (!data->line)
 		{
@@ -111,46 +141,53 @@ int	main(int ac, char **av, char **env)
 		if (*(data->line))
 			add_history(data->line);
 		if (gSignalStatus == SIGINT)
-		{
-			free(data->line);
-			continue ;
-		}
+			*(data->exit_status) = 130;
+		gSignalStatus = 0;
 		if (!lexing(data))
-		{
-			free_data(data);
 			continue ;
-		}
 		if (!syntax_check(data))
 		{
 			printf("Syntax error !\n");
-			free_data(data);
 			continue ;
 		}
-		parsing(data);
-		if (!data->cmd_list)
-			exit_free(data, EXIT_FAILURE);
-		expansion(data);
+		if (!parsing(data))
+			continue ;
+		if (!expansion(data))
+			continue ;
 		data->env_tab = get_env_tab(data);
+		if (!data->env_tab)
+			continue ;
 		prev_fd = -1;
 		list = data->expanded_list;
+		if (!data->expanded_list)
+			continue ;
 		/*if (!*list->args && *(list->redirs) == NULL)
 			break ;*/
-		if (data->expanded_list->next || !*(list->args) || is_built_in(*list->args) == NO)
+		set_signals_exec();
+		if (list->next || !*(list->args) || is_built_in(*list->args) == NO)
 		{
 			while (list)
 			{
-				data->last_pid = pipe_creator(data, &prev_fd, list);
+				data->last_status = pipe_creator(data, &prev_fd, list);
 				list = list->next;
 			}
-			wait_and_return(data);
+			if (WIFEXITED(data->last_status))
+				*(data->exit_status) = (WEXITSTATUS(data->last_status));
+			else if (WIFSIGNALED(data->last_status))
+				*(data->exit_status) = 128 + WTERMSIG(data->last_status);
 		}
 		else
-			*(data->exit_status) = exec_built_in(data, list, 0);
+		{
+			data->last_status = exec_built_in(data, list, 0);
+			if (WIFEXITED(data->last_status))
+				*(data->exit_status) = (WEXITSTATUS(data->last_status));
+			else if (WIFSIGNALED(data->last_status))
+				*(data->exit_status) = 128 + WTERMSIG(data->last_status);
+		}
+		set_signals_interactive();
 	}
-	free_env(&data->env);
-	free(data->exit_status);
-	free(data);
 	rl_clear_history();
+	exit_free(data, 0);
 	return (0);
 }
 

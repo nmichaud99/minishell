@@ -41,20 +41,20 @@ char	**get_env_tab(t_data *data)
 	}
 	res = malloc(sizeof(char *) * (i + 1));
 	if (!res)
-		exit_free(data, EXIT_FAILURE);
+		return (NULL);
 	i = 0;
 	tmp = data->env;
 	while (tmp)
 	{
 		tmp_str = ft_strjoin(tmp->key, "=");
 		if (!tmp_str)
-			exit_free(data, EXIT_FAILURE);
+			return (NULL);
 		res[i] = ft_strjoin(tmp_str, tmp->value);
 		free(tmp_str);
 		if (!res[i])
 		{
 			ft_free(&res);
-			exit_free(data, EXIT_FAILURE);
+			return (NULL);
 		}
 		i++;
 		tmp = tmp->next;

@@ -63,6 +63,8 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 	{
 		saved_stdin = dup(STDIN_FILENO);
 		saved_stdout = dup(STDOUT_FILENO);
+		if (saved_stdin == -1 || saved_stdout == -1)
+			error_sys(data, "dup error");
 		in = redir_in_handler(data, list);
 		if (in == -1)
 			return (1);

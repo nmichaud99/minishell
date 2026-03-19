@@ -38,10 +38,25 @@ void	free_word(t_word **word)
 void	free_word_tab(t_word ***word)
 {
 	int	i;
-	if (!word || !*word || !**word)
+	if (!word || !*word)
 		return ;
 	i = 0;
 	while ((*word)[i])
+	{
+		free_word(&((*word)[i]));
+		i++;
+	}
+	free(*word);
+	*word = NULL;
+}
+
+void	free_word_tab_2(t_word ***word, int size)
+{
+	int	i;
+	if (!word || !*word)
+		return ;
+	i = 0;
+	while (i < size)
 	{
 		free_word(&((*word)[i]));
 		i++;
@@ -142,16 +157,21 @@ void	free_data(t_data *data)
 {
 	free_token(&data->tokens);
 	free_list(&data->cmd_list);
-	free_expanded_list(&data->expanded_list);
 	free(data->full_path);
+	data->full_path = NULL;
 	free(data->line);
+	data->line = NULL;
 }
 
 void	exit_free(t_data *data, int status)
 {
+	if (!data)
+		exit(status);
 	free_data(data);
+	free_expanded_list(&data->expanded_list);
 	free_env(&data->env);
-	// free(data->exit_status);
+	ft_free(&data->env_tab);
+	free(data->exit_status);
 	free(data);
 	exit(status);
 }
