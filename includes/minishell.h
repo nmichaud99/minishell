@@ -170,7 +170,7 @@ int				syntax_check(t_data *data);
 
 int				is_redir(t_token_type type);
 t_redir_type	convert_types(t_token_type token_type);
-int				add_redir_node(t_redirs **redirs, t_token *token, t_token *end);
+int				add_redir_node(t_redirs **redirs, t_token *token);
 t_redirs		*get_redirs(t_token *start, t_token *end, int *flag);
 int				count_args(t_token *start, t_token *end);
 t_quote_type	*dup_quoting(t_word *word);
@@ -213,7 +213,7 @@ int				exec_cd(t_data *data, char **args);
 
 // redirs handler
 int				redir_in_handler(t_data *data, t_expanded_list *list);
-int				redir_out_handler(t_data *data, t_expanded_list *list);
+int				redir_out_handler(t_expanded_list *list);
 // pipes
 void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
 int				pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list);
