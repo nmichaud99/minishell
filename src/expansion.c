@@ -12,18 +12,23 @@
 
 #include "minishell.h"
 
+char	*get_exit_code(t_data *data)
+{
+	char	*tmp_value;
+
+	tmp_value = ft_itoa(*(data->exit_status));
+	if (!tmp_value)
+		return (NULL);
+	return (tmp_value);
+}
+
 char	*get_variable_value(t_data *data, char *str)
 {
 	t_env	*tmp;
 	char	*tmp_value;
 
 	if (ft_strcmp(str, "?") == 0)
-	{
-		tmp_value = ft_itoa(*(data->exit_status));
-		if (!tmp_value)
-			return (NULL);
-		return (tmp_value);
-	}
+		return (get_exit_code(data));
 	tmp = data->env;
 	while (tmp)
 	{
@@ -42,7 +47,19 @@ char	*get_variable_value(t_data *data, char *str)
 	return (tmp_value);
 }
 
-char	*expand(t_data *data, t_word *arg, int *i, t_quote_type quote)
+int	type_of_char(char c, t_quote_type quoting, t_quote_type quote)
+{
+	if (c && !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_')
+		&& quoting == quote)
+		return (1);
+	else if (c && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')
+			|| (c >= '0' && c <= '9') || c == '_')
+		&& quoting == quote)
+		return (2);
+	return (0);
+}
+
+char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 {
 	char	*tmp;
 	char	*res;
@@ -51,20 +68,11 @@ char	*expand(t_data *data, t_word *arg, int *i, t_quote_type quote)
 
 	start = *i + 1;
 	count = 0;
-	if (arg->txt[start] &&
-           !((arg->txt[start] >= 'A' && arg->txt[start] <= 'Z') ||
-            (arg->txt[start] >= 'a' && arg->txt[start] <= 'z') ||
-            arg->txt[start] == '_') && arg->quoting[start] == quote)
+	if (type_of_char(arg->txt[start], arg->quoting[start], quote) == 1)
 		count++;
-	else
-	{
-		while (arg->txt[start + count] &&
-			   ((arg->txt[start + count] >= 'A' && arg->txt[start + count] <= 'Z') ||
-				(arg->txt[start + count] >= 'a' && arg->txt[start + count] <= 'z') ||
-				(arg->txt[start + count] >= '0' && arg->txt[start + count] <= '9') ||
-				arg->txt[start + count] == '_') && arg->quoting[start + count] == quote)
-			count++;
-	}
+	while (type_of_char(arg->txt[start + count],
+			arg->quoting[start + count], quote) == 2)
+		count++;
 	tmp = malloc(count + 1);
 	if (!tmp)
 		return (NULL);
@@ -129,25 +137,14 @@ char	*expand_arg(t_data *data, t_word *arg)
 	{
 		if (arg->txt[i] == '$' && arg->quoting[i] != SINGLE)
 		{
-			variable = expand(data, arg, &i, arg->quoting[i]);
-			if (!variable)
-			{
-				free(res);
-				return (NULL);
-			}
-			if (!append_variable(&res, &variable))
-			{
-				free(res);
-				return (NULL);
-			}
+			variable = expand_word(data, arg, &i, arg->quoting[i]);
+			if (!variable || !append_variable(&res, &variable))
+				return (free(res), NULL);
 		}
 		else
 		{
 			if (!append_char(&res, arg->txt[i]))
-			{
-				free(res);
-				return (NULL);
-			}
+				return (free(res), NULL);
 			i++;
 		}
 	}
@@ -156,21 +153,20 @@ char	*expand_arg(t_data *data, t_word *arg)
 
 t_redirs	*dup_redirs(t_redirs *src)
 {
-	t_redirs *head = NULL;
-	t_redirs *prev = NULL;
+	t_redirs	*head;
+	t_redirs	*prev;
+	t_redirs	*node;
 
+	head = NULL;
+	prev = NULL;
 	while (src)
 	{
-		t_redirs *node = malloc(sizeof(t_redirs));
+		node = malloc(sizeof(t_redirs));
 		if (!node)
-			return NULL;
+			return (free_redirs(&head), NULL);
 		node->file_name = ft_strdup(src->file_name);
 		if (!node->file_name)
-		{
-			free(node);
-			free_redirs(&head);
-			return (NULL);
-		}
+			return (free(node), free_redirs(&head), NULL);
 		node->type = src->type;
 		node->next = NULL;
 		if (!head)
@@ -180,72 +176,82 @@ t_redirs	*dup_redirs(t_redirs *src)
 		prev = node;
 		src = src->next;
 	}
-	return head;
+	return (head);
+}
+
+char	**get_expanded_args(t_data *data, t_cmd_list *lst)
+{
+	char	**ret;
+	int		i;
+	int		size;
+
+	size = 0;
+	while (lst->args[size])
+		size++;
+	ret = malloc(sizeof(char *) * (size + 1));
+	if (!ret)
+		return (NULL);
+	i = 0;
+	while (i < size + 1)
+		ret[i++] = NULL;
+	i = 0;
+	while (lst->args[i])
+	{
+		ret[i] = expand_arg(data, lst->args[i]);
+		if (!ret[i])
+		{
+			ft_free(&ret);
+			return (NULL);
+		}
+		i++;
+	}
+	return (ret);
+}
+
+t_expanded_list	*build_expanded_list(char **expanded_args, t_cmd_list *lst)
+{
+	t_expanded_list	*ret;
+
+	ret = malloc(sizeof(t_expanded_list));
+	if (!ret)
+	{
+		ft_free(&expanded_args);
+		return (NULL);
+	}
+	ret->args = expanded_args;
+	ret->redirs = dup_redirs(lst->redirs);
+	if (lst->redirs && !ret->redirs)
+	{
+		ft_free(&expanded_args);
+		free(ret);
+		return (NULL);
+	}
+	ret->next = NULL;
+	return (ret);
 }
 
 int	expansion(t_data *data)
 {
 	t_cmd_list		*lst;
-	t_word			**args;
 	char			**expanded_args;
-	t_expanded_list	*expanded;
+	t_expanded_list	*expanded_list;
 	t_expanded_list	*prev;
-	int				i;
 
 	prev = NULL;
 	lst = data->cmd_list;
 	while (lst)
 	{
-		args = lst->args;
-		i = 0;
-		while (args[i])
-			i++;
-		expanded_args = malloc(sizeof(char *) * (i + 1));
+		expanded_args = get_expanded_args(data, lst);
 		if (!expanded_args)
-		{
-			free_expanded_list(&data->expanded_list);
-    		data->expanded_list = NULL;
-			return (0);
-		}
-		args = lst->args;
-		i = 0;
-		while (args[i])
-		{
-			expanded_args[i] = expand_arg(data, args[i]);
-			if (!expanded_args[i])
-			{
-				ft_free(&expanded_args);
-				free_expanded_list(&data->expanded_list);
-    			data->expanded_list = NULL;
-				return (0);
-			}
-			i++;
-		}
-		expanded_args[i] = NULL;
-		expanded = malloc(sizeof(t_expanded_list));
-		if (!expanded)
-		{
-			ft_free(&expanded_args);
-			free_expanded_list(&data->expanded_list);
-    		data->expanded_list = NULL;
-			return (0);
-		}
-		expanded->args = expanded_args;
-		expanded->redirs = dup_redirs(lst->redirs);
-		if (lst->redirs && !expanded->redirs)
-		{
-			ft_free(&expanded_args);
-			free_redirs(&expanded->redirs);
-			free_expanded_list(&data->expanded_list);
-    		data->expanded_list = NULL;
-			return (0);
-		}
-		expanded->next = NULL;
+			return (free_expanded_list(&data->expanded_list), 0);
+		expanded_list = build_expanded_list(expanded_args, lst);
+		if (!expanded_list)
+			return (free_expanded_list(&data->expanded_list), 0);
 		if (!data->expanded_list)
-			data->expanded_list = expanded;
+			data->expanded_list = expanded_list;
 		else
-			prev->next = expanded;
-		prev = expanded;
+			prev->next = expanded_list;
+		prev = expanded_list;
 		lst = lst->next;
 	}
 	return (1);

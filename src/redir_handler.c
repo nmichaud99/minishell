@@ -12,14 +12,67 @@
 
 #include "minishell.h"
 
+static int	heredoc(t_data *data, t_redirs *tmp)
+{
+	int		pipefd[2];
+	char	*line;
+	int		fd;
+
+	if (pipe(pipefd) == -1)
+		error_sys(data, "pipe failure");
+	while (1)
+	{
+		line = readline("> ");
+		if (!line)
+			break ;
+		if (ft_strcmp(line, tmp->file_name) == 0)
+		{
+			free(line);
+			break ;
+		}
+		write(pipefd[1], line, ft_strlen(line));
+		write(pipefd[1], "\n", 1);
+		free(line);
+	}
+	close(pipefd[1]);
+	fd = pipefd[0];
+	return (fd);
+}
+
+static int	check_redirs_in(t_data *data, t_redirs *tmp, int flag)
+{
+	int	fd;
+
+	fd = -1;
+	if (tmp->type == REDIR_IN)
+	{
+		fd = open(tmp->file_name, O_RDONLY);
+		if (fd == -1)
+		{
+			if (errno == EACCES)
+				f_printf(tmp->file_name, "Permission denied\n");
+			else
+				f_printf(tmp->file_name, "No such file or directory\n");
+			return (fd);
+		}
+		if (flag == 0)
+			close(fd);
+		return (fd);
+	}
+	else if (tmp->type == REDIR_HEREDOC)
+	{
+		fd = heredoc(data, tmp);
+		if (flag == 0)
+			close(fd);
+	}
+	return (fd);
+}
+
 int	redir_in_handler(t_data *data, t_expanded_list *list)
 {
 	t_redirs	*tmp;
 	t_redirs	*last;
 	int			fd;
-	int			new_fd;
-	int			pipefd[2];
-	char		*line;
 
 	last = NULL;
 	tmp = list->redirs;
@@ -30,90 +83,52 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 		tmp = tmp->next;
 	}
 	if (!last)
-	{
 		return (STDIN_FILENO);
-	}
 	tmp = list->redirs;
 	while (tmp != last)
 	{
-		if (tmp->type == REDIR_IN)
-		{
-			new_fd = open(tmp->file_name, O_RDONLY);
-			if (new_fd == -1)
-			{
-				if (errno == EACCES)
-					f_printf(tmp->file_name, "Permission denied\n");
-				else
-					f_printf(tmp->file_name, "No such file or directory\n");
-				return (-1);
-			}
-			close(new_fd);
-		}
-		else if (tmp->type == REDIR_HEREDOC)
-		{
-			if (pipe(pipefd) == -1)
-				error_sys(data, "pipe failure");
-			while (1)
-			{
-				line = readline("> ");
-				if (!line)
-					break ;
-				if (ft_strcmp(line, tmp->file_name) == 0)
-				{
-					free(line);
-					break ;
-				}
-				write(pipefd[1], line, ft_strlen(line));
-				write(pipefd[1], "\n", 1);
-				free(line);
-			}
-			close(pipefd[1]);
-			new_fd = pipefd[0];
-			close(new_fd);
-		}
+		fd = check_redirs_in(data, tmp, 0);
+		if (fd == -1)
+			return (fd);
 		tmp = tmp->next;
 	}
-	if (last->type == REDIR_IN)
-		fd = open(last->file_name, O_RDONLY);
-	else
+	fd = check_redirs_in(data, last, 1);
+	return (fd);
+}
+
+static int	check_redirs_out(t_redirs *tmp, int flag)
+{
+	int	fd;
+
+	fd = -1;
+	if (tmp->type == REDIR_OUT)
 	{
-		if (pipe(pipefd) == -1)
-			error_sys(data, "pipe failure");
-		while (1)
+		fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (fd == -1)
 		{
-			line = readline("> ");
-			if (!line)
-				break ;
-			if (ft_strcmp(line, last->file_name) == 0)
-			{
-				free(line);
-				break ;
-			}
-			write(pipefd[1], line, ft_strlen(line));
-			write(pipefd[1], "\n", 1);
-			free(line);
-		}
-		close(pipefd[1]);
-		fd = pipefd[0];
-	}
-	if (fd == -1)
-	{
-		if (errno == EACCES)
 			f_printf(tmp->file_name, "Permission denied\n");
-		else
-			f_printf(tmp->file_name, "No such file or directory\n");
+			return (fd);
+		}
+		if (flag == 0)
+			close(fd);
+	}
+	else if (tmp->type == REDIR_APPEND)
+	{
+		fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_APPEND, 0644);
+		if (fd == -1)
+			return (f_printf(tmp->file_name, "Permission denied\n"), fd);
+		if (flag == 0)
+			close(fd);
 	}
 	return (fd);
 }
 
-int	redir_out_handler(t_data *data, t_expanded_list *list)
+int	redir_out_handler(t_expanded_list *list)
 {
 	t_redirs	*tmp;
 	t_redirs	*last;
 	int			fd;
-	int			new_fd;
 
-	(void)data;
 	last = NULL;
 	tmp = list->redirs;
 	while (tmp)
@@ -127,37 +142,11 @@ int	redir_out_handler(t_data *data, t_expanded_list *list)
 	tmp = list->redirs;
 	while (tmp != last)
 	{
-		if (tmp->type == REDIR_OUT)
-		{
-			new_fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-			if (new_fd == -1)
-			{
-				f_printf(tmp->file_name, "Permission denied\n");
-				return (-1);
-			}
-			else
-				close(new_fd);
-		}
-		else if (tmp->type == REDIR_APPEND)
-		{
-			new_fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_APPEND, 0644);
-			if (new_fd == -1)
-			{
-				f_printf(tmp->file_name, "Permission denied\n");
-				return (-1);
-			}
-			else
-				close(new_fd);
-		}
+		fd = check_redirs_out(tmp, 0);
+		if (fd == -1)
+			return (fd);
 		tmp = tmp->next;
 	}
-	if (last->type == REDIR_OUT)
-	{
-		fd = open(last->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-	}
-	else
-		fd = open(last->file_name, O_WRONLY | O_CREAT | O_APPEND, 0644);
-	if (fd == -1)
-		f_printf(tmp->file_name, "Permission denied\n");
+	fd = check_redirs_out(last, 1);
 	return (fd);
 }

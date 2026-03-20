@@ -37,7 +37,7 @@ void	free_word(t_word **word)
 
 void	free_word_tab(t_word ***word)
 {
-	int	i;
+	int	i; 
 	if (!word || !*word)
 		return ;
 	i = 0;

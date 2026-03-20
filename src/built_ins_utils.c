@@ -74,7 +74,7 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 				error_sys(data, "dup2 error");
 			close(in);
 		}
-		out = redir_out_handler(data, list);
+		out = redir_out_handler(list);
 		if (out == -1)
 			return (1);
 		else if (out != STDOUT_FILENO)

@@ -31,7 +31,7 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 			error_sys(data, "dup2 error");
 		close(in);
 	}
-	out = redir_out_handler(data, list);
+	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
@@ -116,7 +116,7 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 			error_sys(data, "dup2 error 2");
 	}
 	close(prev_fd);
-	out = redir_out_handler(data, list);
+	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
@@ -201,7 +201,7 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 			error_sys(data, "dup2 error 2");
 	}
 	close(prev_fd);
-	out = redir_out_handler(data, list);
+	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);
 	if (out != STDOUT_FILENO)
