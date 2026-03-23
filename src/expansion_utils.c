@@ -16,7 +16,7 @@ char	*get_exit_code(t_data *data)
 {
 	char	*tmp_value;
 
-	tmp_value = ft_itoa(*(data->exit_status));
+	tmp_value = ft_itoa(data->exit_status);
 	if (!tmp_value)
 		return (NULL);
 	return (tmp_value);

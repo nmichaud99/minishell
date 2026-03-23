@@ -52,6 +52,8 @@ char	**get_env_tab(t_data *data)
 	int		i;
 
 	res = malloc_env_tab(data);
+	if (!res)
+		return (NULL);
 	i = 0;
 	tmp = data->env;
 	while (tmp)

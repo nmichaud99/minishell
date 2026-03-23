@@ -14,7 +14,7 @@
 
 void	exec_if(t_data *data, int *prev_fd, t_expanded_list *list)
 {
-	*(data->exit_status) = 0;
+	data->exit_status = 0;
 	if (list == data->expanded_list)
 		exec_cmd1(data, list);
 	else if (list->next)

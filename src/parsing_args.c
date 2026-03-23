@@ -111,7 +111,10 @@ t_word	**get_args(t_token *start, t_token *end, int *flag)
 	nb_args = count_args(start, end);
 	args = malloc(sizeof(t_word *) * (nb_args + 1));
 	if (!args)
+	{
+		*flag = 1;
 		return (NULL);
+	}
 	null_init(args, nb_args + 1);
 	if (!build_args(args, start, end, flag))
 		return (NULL);

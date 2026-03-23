@@ -20,13 +20,11 @@ void	exit_free(t_data *data, int status)
 	free_expanded_list(&data->expanded_list);
 	free_env(&data->env);
 	ft_free(&data->env_tab);
-	free(data->exit_status);
-	free(data);
 	exit(status);
 }
 
 void	error_sys(t_data *data, char *s)
 {
 	perror(s);
-	exit_free(data, *(data->exit_status));
+	exit_free(data, data->exit_status);
 }

@@ -33,8 +33,11 @@ void	f_printf(char *s1, char *s2)
 
 	write(2, "minishell: ", 11);
 	size1 = ft_strlen(s1);
-	size2 = ft_strlen(s2);
 	write(2, s1, size1);
-	write(2, ": ", 2);
-	write(2, s2, size2);
+	if (s2)
+	{
+		size2 = ft_strlen(s2);
+		write(2, ": ", 2);
+		write(2, s2, size2);
+	}
 }

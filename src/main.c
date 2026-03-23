@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-volatile sig_atomic_t gSignalStatus = 0;
+volatile sig_atomic_t g_SignalStatus = 0;
 
 int	init_env_tab(char **env, t_data *data)
 {
@@ -28,7 +28,7 @@ int	init_env_tab(char **env, t_data *data)
 	return (1);
 }
 
-void	init_data(t_data *data, int flag)
+int	init_data(t_data *data, char **env, int flag)
 {
 	if (flag == 0)
 	{
@@ -39,10 +39,10 @@ void	init_data(t_data *data, int flag)
 		data->env = NULL;
 		data->env_tab = NULL;
 		data->full_path = NULL;
-		data->exit_status = malloc(sizeof(int));
-		if (!data->exit_status)
-			exit(EXIT_FAILURE);
-		*(data->exit_status) = 0;
+		data->exit_status = 0;
+		if (!init_env_tab(env, data))
+			return (0);
+		return (1);
 	}
 	else
 	{
@@ -52,30 +52,13 @@ void	init_data(t_data *data, int flag)
 		free(data->line);
 		data->line = NULL;
 	}
+	return (1);
 }
-
-/*static void	wait_and_return(t_data *data)
-{
-	int	status;
-	int	i;
-
-	*(data->exit_status) = 0;
-	data->last_status = 0;
-	i = 1;
-	while (i > 0)
-	{
-		i = wait(&status);
-		if (i == data->last_pid)
-			data->last_status = status;
-	}
-	if (WIFEXITED(data->last_status))
-		*(data->exit_status) = (WEXITSTATUS(data->last_status));
-}*/
 
 void	sigint_handler(int sig)
 {
 	(void)sig;
-	gSignalStatus = SIGINT;
+	g_SignalStatus = SIGINT;
 	write(1, "\n", 1);
 	rl_replace_line("", 0);
 	rl_on_new_line();
@@ -85,7 +68,7 @@ void	sigint_handler(int sig)
 void	sigint_handler_exec(int sig)
 {
 	(void)sig;
-	gSignalStatus = SIGINT;
+	g_SignalStatus = SIGINT;
 	write(1, "\n", 1);
 }
 
@@ -113,82 +96,93 @@ void	set_signals_ignore(void)
 	signal(SIGQUIT, SIG_IGN);
 }
 
+int	treat_cmd_line(t_data *data, t_expanded_list **list)
+{
+	if (!lexing(data))
+		return (0);
+	if (!syntax_check(data))
+		return (0);
+	if (!parsing(data))
+		return (0);
+	if (!expansion(data))
+		return (0);
+	data->env_tab = get_env_tab(data);
+	if (!data->env_tab)
+		return (0);
+	*list = data->expanded_list;
+	if (!data->expanded_list)
+		return (0);
+	return (1);
+}
+
+int	ft_readline(t_data *data)
+{
+	data->line = readline("minishell$ ");
+	if (!data->line)
+	{
+		printf("exit\n");
+		return (0);
+	}
+	if (*(data->line))
+		add_history(data->line);
+	return (1);
+}
+
+void	ft_execution(t_data *data, t_expanded_list *list)
+{
+	int	prev_fd;
+
+	prev_fd = -1;
+	if (list->next || !*(list->args) || is_built_in(*list->args) == NO)
+	{
+		while (list)
+		{
+			data->last_status = pipe_creator(data, &prev_fd, list);
+			list = list->next;
+		}
+		if (WIFEXITED(data->last_status))
+			data->exit_status = (WEXITSTATUS(data->last_status));
+		else if (WIFSIGNALED(data->last_status))
+			data->exit_status = 128 + WTERMSIG(data->last_status);
+	}
+	else
+	{
+		data->last_status = exec_built_in(data, list, 0);
+		if (WIFEXITED(data->last_status))
+			data->exit_status = (WEXITSTATUS(data->last_status));
+		else if (WIFSIGNALED(data->last_status))
+			data->exit_status = 128 + WTERMSIG(data->last_status);
+	}
+}
+
 int	main(int ac, char **av, char **env)
 {
-	t_data			*data;
+	t_data			data;
 	t_expanded_list	*list;
-	int				prev_fd;
 
 	(void)av;
 	if (ac != 1)
 		return (0);
-	data = malloc(sizeof(t_data));
-	if (!data)
-		return (1);
-	init_data(data, 0);
-	if (!init_env_tab(env, data))
+	if (!init_data(&data, env, 0))
 		return (1);
 	while (1)
 	{
-		init_data(data, 1);
+		init_data(&data, env, 1);
 		set_signals_interactive();
-		data->line = readline("minishell$ ");
-		if (!data->line)
-		{
-			printf("exit\n");
+		if (!ft_readline(&data))
 			break ;
-		}
-		if (*(data->line))
-			add_history(data->line);
-		if (gSignalStatus == SIGINT)
-			*(data->exit_status) = 130;
-		gSignalStatus = 0;
-		if (!lexing(data))
+		if (g_SignalStatus == SIGINT)
+			data.exit_status = 130;
+		g_SignalStatus = 0;
+		list = NULL;
+		if (!treat_cmd_line(&data, &list))
 			continue ;
-		if (!syntax_check(data))
-		{
-			printf("Syntax error !\n");
-			continue ;
-		}
-		if (!parsing(data))
-			continue ;
-		if (!expansion(data))
-			continue ;
-		data->env_tab = get_env_tab(data);
-		if (!data->env_tab)
-			continue ;
-		prev_fd = -1;
-		list = data->expanded_list;
-		if (!data->expanded_list)
-			continue ;
-		/*if (!*list->args && *(list->redirs) == NULL)
-			break ;*/
 		set_signals_exec();
-		if (list->next || !*(list->args) || is_built_in(*list->args) == NO)
-		{
-			while (list)
-			{
-				data->last_status = pipe_creator(data, &prev_fd, list);
-				list = list->next;
-			}
-			if (WIFEXITED(data->last_status))
-				*(data->exit_status) = (WEXITSTATUS(data->last_status));
-			else if (WIFSIGNALED(data->last_status))
-				*(data->exit_status) = 128 + WTERMSIG(data->last_status);
-		}
-		else
-		{
-			data->last_status = exec_built_in(data, list, 0);
-			if (WIFEXITED(data->last_status))
-				*(data->exit_status) = (WEXITSTATUS(data->last_status));
-			else if (WIFSIGNALED(data->last_status))
-				*(data->exit_status) = 128 + WTERMSIG(data->last_status);
-		}
+		ft_execution(&data, list);
 		set_signals_interactive();
 	}
 	rl_clear_history();
-	exit_free(data, 0);
-	return (0);
+	exit_free(&data, 0);
 }
 
 /*int	main(int ac, char **av, char **env)

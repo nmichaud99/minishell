@@ -18,7 +18,7 @@ int	create_node(t_env **new_node, char *env_line)
 
 	node = *new_node;
 	node->key = get_variable_key(env_line);
-	if (!*node->key)
+	if (!node->key)
 		return (0);
 	node->value = ft_strdup(ft_strchr(env_line, '=') + 1);
 	if (!node->value)

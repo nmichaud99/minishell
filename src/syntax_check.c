@@ -26,15 +26,24 @@ int	syntax_check(t_data *data)
 	while (tmp)
 	{
 		if (tmp->type == PIPE && tmp->next && tmp->next->type == PIPE)
-			return (0);
+			return (f_printf("syntax error near unexpected token `|'\n", NULL), 0);
 		else if (tmp->type == PIPE && !tmp->next)
-			return (0);
+			return (f_printf("syntax error near unexpected token `newline'\n", NULL), 0);
 		else if (is_redir(tmp->type) && tmp->next && is_redir(tmp->next->type))
-			return (0);
+		{
+			if (tmp->next->type == IN_DIR)
+				return (f_printf("syntax error near unexpected token `<'\n", NULL), 0);
+			else if (tmp->next->type == OUT_DIR)
+				return (f_printf("syntax error near unexpected token `>'\n", NULL), 0);
+			else if (tmp->next->type == HEREDOC)
+				return (f_printf("syntax error near unexpected token `<<'\n", NULL), 0);
+			if (tmp->next->type == APPEND)
+				return (f_printf("syntax error near unexpected token `>>'\n", NULL), 0);
+		}
 		else if (is_redir(tmp->type) && tmp->next && tmp->next->type == PIPE)
-			return (0);
+			return (f_printf("syntax error near unexpected token `|'\n", NULL), 0);
 		else if (is_redir(tmp->type) && !tmp->next)
-			return (0);
+			return (f_printf("syntax error near unexpected token `newline'\n", NULL), 0);
 		tmp = tmp->next;
 	}
 	return (1);
