@@ -47,42 +47,55 @@ int	exec_cmd(t_data *data, t_expanded_list *list)
 	else if (is_built_in(*list->args) == ENV)
 		return (exec_env(data, list->args));
 	else if (is_built_in(*list->args) == EXIT)
-		return (0); //return (exec_exit(data, list->args));
+		return (0);
 	return (0);
+}
+
+void	save_std_fds(t_data *data, int *saved_stdin, int *saved_stdout)
+{
+	*saved_stdin = dup(STDIN_FILENO);
+	*saved_stdout = dup(STDOUT_FILENO);
+	if (*saved_stdin == -1 || *saved_stdout == -1)
+		error_sys(data, "dup error");
+}
+
+int	redir_handler(t_data *data, t_expanded_list *list)
+{
+	int	in;
+	int	out;
+
+	in = redir_in_handler(data, list);
+	if (in == -1)
+		return (0);
+	else if (in != STDIN_FILENO)
+	{
+		if (dup2(in, STDIN_FILENO) == -1)
+			error_sys(data, "dup2 error");
+		close(in);
+	}
+	out = redir_out_handler(list);
+	if (out == -1)
+		return (0);
+	else if (out != STDOUT_FILENO)
+	{
+		if (dup2(out, STDOUT_FILENO) == -1)
+			error_sys(data, "dup2 error 2");
+		close(out);
+	}
+	return (1);
 }
 
 int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 {
-	int	in;
-	int	out;
 	int	res;
 	int	saved_stdin;
 	int	saved_stdout;
 
 	if (!flag)
 	{
-		saved_stdin = dup(STDIN_FILENO);
-		saved_stdout = dup(STDOUT_FILENO);
-		if (saved_stdin == -1 || saved_stdout == -1)
-			error_sys(data, "dup error");
-		in = redir_in_handler(data, list);
-		if (in == -1)
+		save_std_fds(data, &saved_stdin, &saved_stdout);
+		if (!redir_handler(data, list))
 			return (1);
-		else if (in != STDIN_FILENO)
-		{
-			if (dup2(in, STDIN_FILENO) == -1)
-				error_sys(data, "dup2 error");
-			close(in);
-		}
-		out = redir_out_handler(list);
-		if (out == -1)
-			return (1);
-		else if (out != STDOUT_FILENO)
-		{
-			if (dup2(out, STDOUT_FILENO) == -1)
-				error_sys(data, "dup2 error 2");
-			close(out);
-		}
 	}
 	res = exec_cmd(data, list);
 	if (!flag)

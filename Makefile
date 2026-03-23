@@ -1,11 +1,13 @@
 NAME = minishell
 
 SOURCES = $(addprefix $(SRC_DIR)/, \
-		utils.c exit.c f_printf.c \
-		lexing_1.c lexing_2.c parsing.c syntax_check.c expansion.c \
-		built_ins_export.c built_ins_unset.c built_ins_echo.c built_ins_env.c built_ins_cd.c \
-		built_ins_utils.c \
-		pipe.c redir_handler.c exec_commands.c get_full_path.c env_utils.c \
+		utils.c exit_1.c exit_2.c exit_3.c f_printf.c env_utils.c \
+		lexing_handle_op.c lexing_handle_words.c lexing_utils.c lexing.c syntax_check.c \
+		parsing_args.c parsing_utils.c parsing.c \
+		expansion_args.c expansion_utils.c expansion.c \
+		built_ins_cd.c built_ins_echo.c built_ins_env.c built_ins_export_1.c built_ins_export_2.c \
+		built_ins_unset.c built_ins_utils.c \
+		pipe.c redir_handler.c exec_commands_1.c exec_commands_2.c get_full_path.c \
 		main.c)
 
 OBJECTS = $(SOURCES:src/%.c=obj/%.o)

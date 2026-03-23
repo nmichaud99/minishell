@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-
 int	exec_env(t_data *data, char **args)
 {
 	t_env	*tmp;

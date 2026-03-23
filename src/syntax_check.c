@@ -20,22 +20,22 @@ int	syntax_check(t_data *data)
 	if (!tmp)
 		return (1);
 	if (tmp->type == PIPE)
-		return (0); // error pipe in first position
+		return (0);
 	else
 		tmp = tmp->next;
 	while (tmp)
 	{
 		if (tmp->type == PIPE && tmp->next && tmp->next->type == PIPE)
-			return (0); // error pipe after pipe
+			return (0);
 		else if (tmp->type == PIPE && !tmp->next)
-			return (0); // error pipe in last position
+			return (0);
 		else if (is_redir(tmp->type) && tmp->next && is_redir(tmp->next->type))
-			return (0); // error double redir
+			return (0);
 		else if (is_redir(tmp->type) && tmp->next && tmp->next->type == PIPE)
-			return (0); // error pipe after redir
+			return (0);
 		else if (is_redir(tmp->type) && !tmp->next)
-			return (0); // error nothing after redir
+			return (0);
 		tmp = tmp->next;
 	}
-	return (1); // correct syntax
+	return (1);
 }

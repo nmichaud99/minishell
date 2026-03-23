@@ -12,11 +12,6 @@
 
 #include "minishell.h"
 
-/*
-- recuperer pwd
-- mettre a jour env avec pwd et oldpwd a chque deplacement
-*/
-
 int	exec_pwd(t_data *data, char **args)
 {
 	char	*pwd;
@@ -30,71 +25,39 @@ int	exec_pwd(t_data *data, char **args)
 	return (0);
 }
 
+static char	*build_pwd_line(t_data *data, char *var_name)
+{
+	char	*pwd_join;
+	char	*pwd;
+
+	pwd = getcwd(NULL, 0);
+	pwd_join = ft_strjoin(var_name, pwd);
+	free(pwd);
+	if (!pwd_join)
+		exit_free(data, EXIT_FAILURE);
+	return (pwd_join);
+}
+
 int	exec_cd(t_data *data, char **args)
 {
-	char	*old_pwd;
-	char	*new_pwd;
-	char	*old_pwd_join;
-	char	*new_pwd_join;
+	char	*old_pwd_line;
+	char	*new_pwd_line;
 
-	//print_env(data);
 	if (args[2])
 	{
 		ft_putstr_fd("minishell: cd: too many arguments\n", 2);
 		return (1);
 	}
-	old_pwd = getcwd(NULL, 0);
-	old_pwd_join = ft_strjoin("OLDPWD=", old_pwd);
-	free(old_pwd);
-	if (!old_pwd_join)
-	{
-		free(old_pwd_join);
-		exit_free(data, EXIT_FAILURE);
-	}
-	//printf("Old Pwd Join : %s\n", old_pwd_join);
-	add_or_modify_env_node(data, old_pwd_join);
-	free(old_pwd_join);
+	old_pwd_line = build_pwd_line(data, "OLDPWD=");
+	add_or_modify_env_node(data, old_pwd_line);
+	free(old_pwd_line);
 	if (*(args + 1) && chdir(*(args + 1)) != 0)
 	{
 		ft_perror(args);
 		return (1);
 	}
-	new_pwd = getcwd(NULL, 0);
-	new_pwd_join = ft_strjoin("PWD=", new_pwd);
-	free(new_pwd);
-	if (!new_pwd_join)
-	{
-		free(new_pwd_join);
-		exit_free(data, EXIT_FAILURE);
-	}
-	//printf("New Pwd Join : %s\n", new_pwd_join);
-	add_or_modify_env_node(data, new_pwd_join);
-	free(new_pwd_join);
-	//printf("cd: SUCCESS!\n");
-	//print_env(data);
+	new_pwd_line = build_pwd_line(data, "PWD=");
+	add_or_modify_env_node(data, new_pwd_line);
+	free(new_pwd_line);
 	return (0);
 }
-
-/*
-bash-5.1$ pwd test
-/home/fjerrige/Documents/minishell
-
-bash-5.1$ pwd echo test
-/home/fjerrige/Documents/minishell
-
-bash-5.1$ pwd echo test | grep test
-bash-5.1$
-
-bash-5.1$ pwd | echo test
-test
-
-bash-5.1$ pwd | grep /
-/home/fjerrige/Documents/minishell
-
-bash-5.1$ pwd | grep i
-/home/fjerrige/Documents/minishell
-
-bash-5.1$ pwd | grep z
-bash-5.1$
-
-*/

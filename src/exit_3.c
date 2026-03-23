@@ -1,47 +1,32 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   built_ins_echo.c                                   :+:      :+:    :+:   */
+/*   exit_3.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/03 21:16:57 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/03/03 21:17:08 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/03/23 13:11:53 by nmichaud          #+#    #+#             */
+/*   Updated: 2026/03/23 13:11:55 by nmichaud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-void	print_args(int option_n, char **args)
+void	exit_free(t_data *data, int status)
 {
-	while (*args)
-	{
-		if (*(args + 1))
-			printf("%s ", *args);
-		else
-		{
-			printf("%s", *args);
-			if (option_n)
-				printf("\n");
-		}
-		args++;
-	}
+	if (!data)
+		exit(status);
+	free_data(data);
+	free_expanded_list(&data->expanded_list);
+	free_env(&data->env);
+	ft_free(&data->env_tab);
+	free(data->exit_status);
+	free(data);
+	exit(status);
 }
 
-int	exec_echo(char **args)
+void	error_sys(t_data *data, char *s)
 {
-	char	**tmp_args;
-
-	if (*(args + 1) && !ft_strncmp(*(args + 1), "-n", 2))
-	{
-		tmp_args = args + 2;
-		print_args(0, tmp_args);
-		return (0);
-	}
-	else
-	{
-		tmp_args = args + 1;
-		print_args(1, tmp_args);
-	}
-	return (0);
+	perror(s);
+	exit_free(data, *(data->exit_status));
 }

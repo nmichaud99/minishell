@@ -25,12 +25,11 @@ void	print_env(t_data *data)
 	printf("%s=%s\n", tmp->key, tmp->value);
 }
 
-char	**get_env_tab(t_data *data)
+char	**malloc_env_tab(t_data *data)
 {
 	t_env	*tmp;
-	char	**res;
-	char	*tmp_str;
 	int		i;
+	char	**res;
 
 	tmp = data->env;
 	i = 0;
@@ -42,6 +41,17 @@ char	**get_env_tab(t_data *data)
 	res = malloc(sizeof(char *) * (i + 1));
 	if (!res)
 		return (NULL);
+	return (res);
+}
+
+char	**get_env_tab(t_data *data)
+{
+	t_env	*tmp;
+	char	**res;
+	char	*tmp_str;
+	int		i;
+
+	res = malloc_env_tab(data);
 	i = 0;
 	tmp = data->env;
 	while (tmp)

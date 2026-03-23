@@ -12,7 +12,6 @@
 
 #include "minishell.h"
 
-
 void	ft_perror(char **arg)
 {
 	ft_putstr_fd("minishell: ", 2);
@@ -27,15 +26,15 @@ void	ft_perror(char **arg)
 	ft_putstr_fd("\n", 2);
 }
 
-void    f_printf(char *s1, char *s2)
+void	f_printf(char *s1, char *s2)
 {
-    int size1;
-    int size2;
+	int	size1;
+	int	size2;
 
-    write(2, "minishell: ", 11);
-    size1 = ft_strlen(s1);
-    size2 = ft_strlen(s2);
-    write(2, s1, size1);
-    write(2, ": ", 2);
-    write(2, s2, size2);
+	write(2, "minishell: ", 11);
+	size1 = ft_strlen(s1);
+	size2 = ft_strlen(s2);
+	write(2, s1, size1);
+	write(2, ": ", 2);
+	write(2, s2, size2);
 }

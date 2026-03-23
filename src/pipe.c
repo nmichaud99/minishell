@@ -23,6 +23,17 @@ void	exec_if(t_data *data, int *prev_fd, t_expanded_list *list)
 		exec_last_cmd(data, list, *prev_fd);
 }
 
+void	close_if(t_data *data, int *prev_fd, t_expanded_list *list)
+{
+	if (*prev_fd != -1)
+		close(*prev_fd);
+	if (list->next)
+	{
+		*prev_fd = data->pipefd[0];
+		close(data->pipefd[1]);
+	}
+}
+
 int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 {
 	int	status;
@@ -43,13 +54,7 @@ int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 		signal(SIGQUIT, SIG_DFL);
 		exec_if(data, prev_fd, list);
 	}
-	if (*prev_fd != -1)
-		close(*prev_fd);
-	if (list->next)
-	{
-		*prev_fd = data->pipefd[0];
-		close(data->pipefd[1]);
-	}
+	close_if(data, prev_fd, list);
 	wait(&status);
 	return (status);
 }

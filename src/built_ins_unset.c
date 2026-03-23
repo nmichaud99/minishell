@@ -20,40 +20,45 @@ void	free_env_node(t_env **env)
 	*env = NULL;
 }
 
+void	delete_node_if(char *arg, t_data *data)
+{
+	t_env	*prev;
+	t_env	*tmp;
+	t_env	*to_delete;
+
+	prev = NULL;
+	tmp = data->env;
+	while (tmp)
+	{
+		if (tmp && ft_strcmp(tmp->key, arg) == 0)
+		{
+			to_delete = tmp;
+			if (prev)
+				prev->next = tmp->next;
+			else
+				data->env = tmp->next;
+			tmp = tmp->next;
+			free_env_node(&to_delete);
+			break ;
+		}
+		prev = tmp;
+		tmp = tmp->next;
+	}
+	prev = NULL;
+	tmp = data->env;
+}
+
 int	exec_unset(t_data *data, char **args)
 {
-	t_env	*tmp;
-	t_env	*prev;
-	t_env	*to_delete;
 	char	**tmp_args;
 
-	tmp = data->env;
-	prev = NULL;
 	if (!*(args + 1))
 		return (0);
 	tmp_args = args + 1;
 	while (*tmp_args)
 	{
-		printf("%s\n", *tmp_args);
-		while (tmp)
-		{
-			if (tmp && ft_strcmp(tmp->key, *tmp_args) == 0)
-			{
-				to_delete = tmp;
-				if (prev)
-					prev->next = tmp->next;
-				else
-					data->env = tmp->next;
-				tmp = tmp->next;
-				free_env_node(&to_delete);
-				break ;
-			}
-			prev = tmp;
-			tmp = tmp->next;
-		}
+		delete_node_if(*tmp_args, data);
 		tmp_args++;
-		tmp = data->env;
-		prev = NULL;
 	}
 	return (0);
 }

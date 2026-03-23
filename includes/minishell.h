@@ -126,6 +126,8 @@ typedef struct	s_data
 extern volatile 		sig_atomic_t gSignalStatus;
 
 // --- utils --- //
+
+// utils
 t_token			*new_token(t_token_type type, t_word *word);
 void			add_token(t_token **head, t_token *new);
 t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
@@ -134,54 +136,86 @@ int				ft_strcmp(const char *s1, const char *s2);
 // error messages
 void			ft_perror(char **arg);
 void			f_printf(char *s1, char *s2);
-
 // --- env utils --- //
 void			print_env(t_data *data);
+char			**malloc_env_tab(t_data *data);
 char			**get_env_tab(t_data *data);
 
 // --- exit and free --- //
 
+// exit_1
 void			ft_free(char ***str);
 void			free_word(t_word **word);
-void			free_token(t_token **head);
-void			free_env(t_env **env);
-void			free_redirs(t_redirs **redirs);
 void			free_word_tab(t_word ***word);
 void			free_word_tab_2(t_word ***word, int size);
+void			free_token(t_token **head);
+// exit_2
+void			free_redirs(t_redirs **redirs);
+void			free_env(t_env **env);
 void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
 void			free_data(t_data *data);
+// exit_3
 void			exit_free(t_data *data, int status);
 void			error_sys(t_data *data, char *s);
 
 // --- lexing --- //
 
-// lexing_1
-int				handle_word(t_token **head, char *str, int *i);
-int				handle_operators(t_token **head, char *str, int *i);
-int				lexing(t_data *data);
-// lexing_2
+// lexing_utils
 int				is_operator(char c);
 int				is_space(char c);
+int				word_error(int nb);
+int				lex_append_char(char **txt, t_quote_type **quoting,
+							char c, t_quote_type type);
+// lexing_handle_operators
+int				handle_pipe(t_token **head, int *i);
+int				handle_indir(t_token **head, char *str, int *i);
+int				handle_outdir(t_token **head, char *str, int *i);
+int				handle_operators(t_token **head, char *str, int *i);
+// lexing_handle_words
+int				handle_squote(char *str, int *i, char **txt, t_quote_type **quoting);
+int				handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting);
+int				handle_char(char *str, int *i, char **txt, t_quote_type **quoting);
+int				build_word(char *str, int *i, char **txt, t_quote_type **quoting);
+int				handle_word(t_token **head, char *str, int *i);
+// lexing
+int				lexing(t_data *data);
 // syntax check
 int				syntax_check(t_data *data);
 
 // --- parsing --- //
 
+// parsing_utils
 int				is_redir(t_token_type type);
 t_redir_type	convert_types(t_token_type token_type);
+void			null_init(t_word **args, int nb_args);
+// parsing_args
+int				count_args(t_token *start, t_token *end);
+t_word			*new_arg(t_token *tmp, int *flag);
+int				build_args(t_word **args, t_token *start, t_token *end, int *flag);
+t_word			**get_args(t_token *start, t_token *end, int *flag);
+// parsing
 int				add_redir_node(t_redirs **redirs, t_token *token);
 t_redirs		*get_redirs(t_token *start, t_token *end, int *flag);
-int				count_args(t_token *start, t_token *end);
 t_quote_type	*dup_quoting(t_word *word);
-t_word			**get_args(t_token *start, t_token *end, int *flag);
+t_cmd_list		*new_cmd_node(t_token *start, t_token *current);
 int				parsing(t_data *data);
 
 // --- expansion --- //
+
+// expansion_utils
+char			*get_exit_code(t_data *data);
 char			*get_variable_value(t_data *data, char *str);
-char			*expand(t_data *data, t_word *arg, int *i, t_quote_type quote);
+int				type_of_char(char c, t_quote_type quoting, t_quote_type quote);
+int				append_variable(char **res, char **str);
+int				append_char(char **res, char c);
+// expansion_args
+char			*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote);
 char			*expand_arg(t_data *data, t_word *arg);
+char			**get_expanded_args(t_data *data, t_cmd_list *lst);
+// expansion
 t_redirs		*dup_redirs(t_redirs *src);
+t_expanded_list	*build_expanded_list(char **expanded_args, t_cmd_list *lst);
 int				expansion(t_data *data);
 
 // --- built-ins --- //
@@ -189,24 +223,30 @@ int				expansion(t_data *data);
 // utils
 t_builtin_type	is_built_in(char *arg);
 int				exec_cmd(t_data *data, t_expanded_list *list);
+void			save_std_fds(t_data *data, int *saved_stdin, int *saved_stdout);
+int				redir_handler(t_data *data, t_expanded_list *list);
 int				exec_built_in(t_data *data, t_expanded_list *list, int flag);
 // unset
 void			free_env_node(t_env **env);
+void			delete_node_if(char *arg, t_data *data);
 int				exec_unset(t_data *data, char **args);
-// export
+// export_1
 char			*get_variable_key(const char *s);
-int				add_env_node(t_data *data, char *env_line);
-int				add_or_modify_env_node(t_data *data, char *new_var);
 void			print_env_export(t_data *data);
 int				is_valid_string(char *str);
+// export_2
+int				create_node(t_env **new_node, char *env_line);
+int				add_env_node(t_data *data, char *env_line);
+int				loop_over_each_node(t_data *data, char *new_key, char *new_value);
+int				add_or_modify_env_node(t_data *data, char *new_var);
 int				exec_export(t_data *data, char **args);
 // echo
+void			print_args(int option_n, char **args);
 int				exec_echo(char **args);
 // env
 int				exec_env(t_data *data, char **args);
-// pwd
+// pwd_cd
 int				exec_pwd(t_data *data, char **args);
-// cd
 int				exec_cd(t_data *data, char **args);
 
 // --- pipes and exec
@@ -216,10 +256,20 @@ int				redir_in_handler(t_data *data, t_expanded_list *list);
 int				redir_out_handler(t_expanded_list *list);
 // pipes
 void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
+void			close_if(t_data *data, int *prev_fd, t_expanded_list *list);
 int				pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list);
 // get path
+char			*build_path(char *cmd, char *path);
+int				access_path(char *path, int *permission_flag, char **tmp);
+char			*get_full_path(char *cmd, char **path);
 char			*find_cmd(char *cmd, char **path);
-// exec commands
+// exec_commands_1
+void			ft_exec(t_data *data, t_expanded_list *list);
+void			redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first);
+char			**get_all_paths(t_data *data);
+void			handle_path_error(t_data *data, int c, char *m, t_expanded_list *list);
+void			get_path_and_exec(t_data *data, t_expanded_list *list);
+// exec_commands_2
 void			exec_cmd1(t_data *data, t_expanded_list *list);
 void			exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
 void			exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
