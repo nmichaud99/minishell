@@ -28,20 +28,36 @@ void	print_args(int option_n, char **args)
 	}
 }
 
+int	is_option(char *str)
+{
+	int	i;
+
+	if (!str)
+		return (0);
+	if (str[0] != '-')
+		return (0);
+	i = 1;
+	while (str[i])
+	{
+		if (str[i] != 'n')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
 int	exec_echo(char **args)
 {
 	char	**tmp_args;
+	int		option;
 
-	if (*(args + 1) && !ft_strncmp(*(args + 1), "-n", 2))
+	option = 1;
+	tmp_args = args + 1;
+	while (*tmp_args && is_option(*tmp_args))
 	{
-		tmp_args = args + 2;
-		print_args(0, tmp_args);
-		return (0);
+		option = 0;
+		tmp_args++;
 	}
-	else
-	{
-		tmp_args = args + 1;
-		print_args(1, tmp_args);
-	}
+	print_args(option, tmp_args);
 	return (0);
 }

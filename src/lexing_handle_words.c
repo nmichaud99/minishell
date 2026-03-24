@@ -14,7 +14,10 @@
 
 int	handle_squote(char *str, int *i, char **txt, t_quote_type **quoting)
 {
+	int	start;
+
 	(*i)++;
+	start = *i;
 	while (str[*i] && str[*i] != '\'')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], SINGLE))
@@ -30,13 +33,26 @@ int	handle_squote(char *str, int *i, char **txt, t_quote_type **quoting)
 		free(*quoting);
 		return (-1);
 	}
+	if (*i == start)
+	{
+		*txt = ft_strdup("");
+		if (!*txt)
+			return (0);
+		*quoting = malloc(sizeof(t_quote_type));
+		if (!*quoting)
+			return (free(*txt), 0);
+		*quoting[0] = SINGLE;
+	}
 	(*i)++;
 	return (1);
 }
 
 int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 {
+	int	start;
+
 	(*i)++;
+	start = *i;
 	while (str[*i] && str[*i] != '"')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], DOUBLE))
@@ -51,6 +67,15 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 		free(*txt);
 		free(*quoting);
 		return (-1);
+	}
+	if (*i == start)
+	{
+		if (!*txt)
+			return (0);
+		*quoting = malloc(sizeof(t_quote_type));
+		if (!*quoting)
+			return (free(*txt), 0);
+		*quoting[0] = DOUBLE;
 	}
 	(*i)++;
 	return (1);

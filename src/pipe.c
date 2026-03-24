@@ -36,8 +36,6 @@ void	close_if(t_data *data, int *prev_fd, t_expanded_list *list)
 
 int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 {
-	int	status;
-
 	if (list->next)
 	{
 		if (pipe(data->pipefd) == -1)
@@ -50,11 +48,11 @@ int	pipe_creator(t_data *data, int *prev_fd, t_expanded_list *list)
 		error_sys(data, "fork");
 	if (data->pid == 0)
 	{
+		signal(SIGPIPE, SIG_DFL);
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
 		exec_if(data, prev_fd, list);
 	}
 	close_if(data, prev_fd, list);
-	wait(&status);
-	return (status);
+	return (data->pid);
 }

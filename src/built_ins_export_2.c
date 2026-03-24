@@ -115,7 +115,7 @@ int	exec_export(t_data *data, char **args)
 		{
 			if (!is_valid_string(*args))
 			{
-				printf("export: '%s': is not a valid identifier\n", *args);
+				f_printf_2("export: `", *args, "': not a valid identifier\n");
 				return (2);
 			}
 			if (!add_or_modify_env_node(data, *args))

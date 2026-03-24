@@ -84,12 +84,10 @@ typedef struct s_redirs
 	struct s_redirs	*next;
 }	t_redirs;
 
-// Command List
 typedef struct s_cmd_list
 {
 	t_word			**args;
 	t_redirs		*redirs;
-	//t_token_type	type;
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
@@ -100,7 +98,6 @@ typedef struct s_expanded_list
 	struct s_expanded_list	*next;
 }	t_expanded_list;
 
-// Environment
 typedef struct s_env
 {
 	char			*key;
@@ -116,14 +113,15 @@ typedef struct	s_data
 	t_expanded_list	*expanded_list;
 	t_env			*env;
 	char			**env_tab;
-	int				*exit_status;
+	int				exit_status;
 	int				pipefd[2];
 	pid_t			pid;
+	pid_t			last_pid;
 	int				last_status;
 	char			*full_path;
 }	t_data;
 
-extern volatile 		sig_atomic_t gSignalStatus;
+extern volatile 		sig_atomic_t g_SignalStatus;
 
 // --- utils --- //
 
@@ -136,6 +134,7 @@ int				ft_strcmp(const char *s1, const char *s2);
 // error messages
 void			ft_perror(char **arg);
 void			f_printf(char *s1, char *s2);
+void			f_printf_2(char *s1, char *s2, char *s3);
 // --- env utils --- //
 void			print_env(t_data *data);
 char			**malloc_env_tab(t_data *data);

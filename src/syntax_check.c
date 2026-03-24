@@ -20,9 +20,7 @@ int	syntax_check(t_data *data)
 	if (!tmp)
 		return (1);
 	if (tmp->type == PIPE)
-		return (0);
-	else
-		tmp = tmp->next;
+		return (f_printf("syntax error near unexpected token `|'\n", NULL), 0);
 	while (tmp)
 	{
 		if (tmp->type == PIPE && tmp->next && tmp->next->type == PIPE)

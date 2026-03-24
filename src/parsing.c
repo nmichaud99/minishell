@@ -74,10 +74,10 @@ t_quote_type	*dup_quoting(t_word *word)
 	size = ft_strlen(word->txt);
 	if (size == 0)
 	{
-		res = malloc(1);
+		res = malloc(sizeof(t_quote_type));
 		if (!res)
 			return (NULL);
-		res[0] = 0;
+		res[0] = word->quoting[0];
 		return (res);
 	}
 	res = malloc(sizeof(t_quote_type) * size);

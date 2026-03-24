@@ -55,6 +55,26 @@ int	init_data(t_data *data, char **env, int flag)
 	return (1);
 }
 
+static void	wait_and_return(t_data *data)
+{
+	int	status;
+	int	i;
+
+	data->last_status = 0;
+	i = 1;
+	while (i > 0)
+	{
+		i = wait(&status);
+		if (i == data->last_pid)
+			data->last_status = status;
+	}
+	if (WIFEXITED(data->last_status))
+		data->exit_status = (WEXITSTATUS(data->last_status));
+	else if (WIFSIGNALED(data->last_status))
+		data->exit_status = 128 + WTERMSIG(data->last_status);
+}
+
+
 void	sigint_handler(int sig)
 {
 	(void)sig;
@@ -137,22 +157,13 @@ void	ft_execution(t_data *data, t_expanded_list *list)
 	{
 		while (list)
 		{
-			data->last_status = pipe_creator(data, &prev_fd, list);
+			data->last_pid = pipe_creator(data, &prev_fd, list);
 			list = list->next;
 		}
-		if (WIFEXITED(data->last_status))
-			data->exit_status = (WEXITSTATUS(data->last_status));
-		else if (WIFSIGNALED(data->last_status))
-			data->exit_status = 128 + WTERMSIG(data->last_status);
+		wait_and_return(data);
 	}
 	else
-	{
-		data->last_status = exec_built_in(data, list, 0);
-		if (WIFEXITED(data->last_status))
-			data->exit_status = (WEXITSTATUS(data->last_status));
-		else if (WIFSIGNALED(data->last_status))
-			data->exit_status = 128 + WTERMSIG(data->last_status);
-	}
+		data->exit_status = exec_built_in(data, list, 0);
 }
 
 int	main(int ac, char **av, char **env)
@@ -161,7 +172,7 @@ int	main(int ac, char **av, char **env)
 	t_expanded_list	*list;
 
 	(void)av;
-	if (ac != 1)
+	if (ac != 1 || !isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
 		return (0);
 	if (!init_data(&data, env, 0))
 		return (1);

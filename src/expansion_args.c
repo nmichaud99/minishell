@@ -21,9 +21,18 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 
 	start = *i + 1;
 	count = 0;
-	if (type_of_char(arg->txt[start], arg->quoting[start], quote) == 1)
+	if (arg->txt[start] == '?')
+	{
+		(*i) = start + 1;
+		tmp = "?";
+		res = get_variable_value(data, tmp);
+		if (!res)
+			return (NULL);
+		return (res);
+	}
+	if (arg->txt[start] && type_of_char(arg->txt[start], arg->quoting[start], quote) == 1)
 		count++;
-	while (type_of_char(arg->txt[start + count],
+	while (arg->txt[start + count] && type_of_char(arg->txt[start + count],
 			arg->quoting[start + count], quote) == 2)
 		count++;
 	tmp = malloc(count + 1);

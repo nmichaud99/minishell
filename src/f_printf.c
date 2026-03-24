@@ -41,3 +41,19 @@ void	f_printf(char *s1, char *s2)
 		write(2, s2, size2);
 	}
 }
+
+void	f_printf_2(char *s1, char *s2, char *s3)
+{
+	int	size1;
+	int	size2;
+	int	size3;
+
+	if (!s1 || !s2 || !s3)
+		return ;
+	size1 = ft_strlen(s1);
+	size2 = ft_strlen(s2);
+	size3 = ft_strlen(s3);
+	write(2, s1, size1);
+	write(2, s2, size2);
+	write(2, s3, size3);
+}
