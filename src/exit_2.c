@@ -20,7 +20,8 @@ void	free_redirs(t_redirs **redirs)
 		return ;
 	while (*redirs)
 	{
-		free((*redirs)->file_name);
+		if ((*redirs)->file_name)
+			free((*redirs)->file_name);
 		tmp = *redirs;
 		*redirs = (*redirs)->next;
 		free(tmp);

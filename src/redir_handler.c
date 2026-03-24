@@ -16,12 +16,14 @@ static int	heredoc(t_data *data, t_redirs *tmp)
 {
 	int		pipefd[2];
 	char	*line;
+	char	*expanded;
 	int		fd;
 
 	if (pipe(pipefd) == -1)
 		error_sys(data, "pipe failure");
 	while (1)
 	{
+		expanded = NULL;
 		line = readline("> ");
 		if (!line)
 			break ;
@@ -30,9 +32,21 @@ static int	heredoc(t_data *data, t_redirs *tmp)
 			free(line);
 			break ;
 		}
-		write(pipefd[1], line, ft_strlen(line));
+		if (tmp->to_expand == 1)
+		{
+			expanded = expand_line(data, line);
+			if (!expanded)
+			{
+				free(line);
+				break ;
+			}
+			write(pipefd[1], expanded, ft_strlen(expanded));
+		}
+		else
+			write(pipefd[1], line, ft_strlen(line));
 		write(pipefd[1], "\n", 1);
 		free(line);
+		free(expanded);
 	}
 	close(pipefd[1]);
 	fd = pipefd[0];

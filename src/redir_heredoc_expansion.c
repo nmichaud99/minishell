@@ -1,18 +1,18 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   expansion_args.c                                   :+:      :+:    :+:   */
+/*   redir_heredoc_expansion.c                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/23 12:07:36 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/03/23 12:07:46 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/03/24 17:54:32 by nmichaud          #+#    #+#             */
+/*   Updated: 2026/03/24 17:54:34 by nmichaud         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
 
-char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
+char	*expand_variable(t_data *data, char *line, int *i)
 {
 	char	*tmp;
 	char	*res;
@@ -20,7 +20,7 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 	int		start;
 
 	start = *i + 1;
-	if (arg->txt[start] == '?')
+	if (line[start] == '?')
 	{
 		(*i) = start + 1;
 		tmp = "?";
@@ -29,7 +29,7 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 			return (NULL);
 		return (res);
 	}
-	if (arg->txt[start] && (arg->txt[start] <= '9' && arg->txt[start] >= '0'))
+	if (line[start] && (line[start] <= '9' && line[start] >= '0'))
 	{
 		(*i) = start + 1;
 		res = ft_strdup("");
@@ -37,8 +37,8 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 			return (NULL);
 		return (res);
 	}
-	if (!(arg->txt[start] && type_of_char(arg->txt[start],
-			arg->quoting[start], quote) == 1))
+	if (!(line[start] && ((line[start] <= 'z' && line[start] >= 'a') || (line[start] <= 'Z' && line[start] >= 'A')
+		|| line[start] == '_')))
 	{
 		(*i)++;
 		res = ft_strdup("$");
@@ -47,13 +47,13 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 		return (res);
 	}
 	count = 1;
-	while (arg->txt[start + count] && type_of_char(arg->txt[start + count],
-			arg->quoting[start + count], quote) == 2)
+	while (line[start + count] && ((line[start + count] <= 'z' && line[start + count] >= 'a') || (line[start + count] <= 'Z' && line[start + count] >= 'A')
+		|| line[start + count] == '_' || (line[start + count] <= '9' && line[start + count] >= '0')))
 		count++;
 	tmp = malloc(count + 1);
 	if (!tmp)
 		return (NULL);
-	ft_memcpy(tmp, &arg->txt[start], count);
+	ft_memcpy(tmp, &line[start], count);
 	tmp[count] = 0;
 	res = get_variable_value(data, tmp);
 	free(tmp);
@@ -63,59 +63,30 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 	return (res);
 }
 
-char	*expand_arg(t_data *data, t_word *arg)
+char	*expand_line(t_data *data, char *line)
 {
-	char			*res;
-	char			*variable;
-	int				i;
+	int		i;
+	char	*res;
+	char	*variable;
 
-	i = 0;
 	res = ft_strdup("");
 	if (!res)
 		return (NULL);
-	while (arg->txt[i])
+	i = 0;
+	while (line[i])
 	{
-		if (arg->txt[i] == '$' && arg->quoting[i] != SINGLE)
+		if (line[i] == '$')
 		{
-			variable = expand_word(data, arg, &i, arg->quoting[i]);
+			variable = expand_variable(data, line, &i);
 			if (!variable || !append_variable(&res, &variable))
 				return (free(res), NULL);
 		}
 		else
 		{
-			if (!append_char(&res, arg->txt[i]))
+			if (!append_char(&res, line[i]))
 				return (free(res), NULL);
 			i++;
 		}
 	}
 	return (res);
-}
-
-char	**get_expanded_args(t_data *data, t_cmd_list *lst)
-{
-	char	**ret;
-	int		i;
-	int		size;
-
-	size = 0;
-	while (lst->args[size])
-		size++;
-	ret = malloc(sizeof(char *) * (size + 1));
-	if (!ret)
-		return (NULL);
-	i = 0;
-	while (i < size + 1)
-		ret[i++] = NULL;
-	i = 0;
-	while (lst->args[i])
-	{
-		ret[i] = expand_arg(data, lst->args[i]);
-		if (!ret[i])
-		{
-			ft_free(&ret);
-			return (NULL);
-		}
-		i++;
-	}
-	return (ret);
 }

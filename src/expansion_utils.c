@@ -49,7 +49,7 @@ char	*get_variable_value(t_data *data, char *str)
 
 int	type_of_char(char c, t_quote_type quoting, t_quote_type quote)
 {
-	if (c && !((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_')
+	if (c && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_')
 		&& quoting == quote)
 		return (1);
 	else if (c && ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')

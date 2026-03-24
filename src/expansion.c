@@ -29,6 +29,7 @@ t_redirs	*dup_redirs(t_redirs *src)
 		if (!node->file_name)
 			return (free(node), free_redirs(&head), NULL);
 		node->type = src->type;
+		node->to_expand = src->to_expand;
 		node->next = NULL;
 		if (!head)
 			head = node;
