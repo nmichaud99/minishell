@@ -81,13 +81,14 @@ typedef struct s_redirs
 {
 	t_redir_type	type;
 	char			*file_name;
+	int				to_expand;
 	struct s_redirs	*next;
 }	t_redirs;
 
 typedef struct s_cmd_list
 {
-	t_word			**args;
-	t_redirs		*redirs;
+	t_word				**args;
+	t_redirs			*redirs;
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
@@ -253,6 +254,7 @@ int				exec_cd(t_data *data, char **args);
 // redirs handler
 int				redir_in_handler(t_data *data, t_expanded_list *list);
 int				redir_out_handler(t_expanded_list *list);
+char			*expand_line(t_data *data, char *line);
 // pipes
 void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
 void			close_if(t_data *data, int *prev_fd, t_expanded_list *list);

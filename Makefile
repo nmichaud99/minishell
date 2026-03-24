@@ -7,7 +7,8 @@ SOURCES = $(addprefix $(SRC_DIR)/, \
 		expansion_args.c expansion_utils.c expansion.c \
 		built_ins_cd.c built_ins_echo.c built_ins_env.c built_ins_export_1.c built_ins_export_2.c \
 		built_ins_unset.c built_ins_utils.c \
-		pipe.c redir_handler.c exec_commands_1.c exec_commands_2.c get_full_path.c \
+		redir_handler.c redir_heredoc_expansion.c \
+		pipe.c exec_commands_1.c exec_commands_2.c get_full_path.c \
 		main.c)
 
 OBJECTS = $(SOURCES:src/%.c=obj/%.o)
