@@ -29,7 +29,7 @@ char	*expand_variable(t_data *data, char *line, int *i)
 			return (NULL);
 		return (res);
 	}
-	if (line[start] && (line[start] <= '9' && line[start] >= '0'))
+	else if (line[start] && (line[start] <= '9' && line[start] >= '0'))
 	{
 		(*i) = start + 1;
 		res = ft_strdup("");
@@ -37,7 +37,7 @@ char	*expand_variable(t_data *data, char *line, int *i)
 			return (NULL);
 		return (res);
 	}
-	if (!(line[start] && ((line[start] <= 'z' && line[start] >= 'a') || (line[start] <= 'Z' && line[start] >= 'A')
+	else if (!(line[start] && ((line[start] <= 'z' && line[start] >= 'a') || (line[start] <= 'Z' && line[start] >= 'A')
 		|| line[start] == '_')))
 	{
 		(*i)++;

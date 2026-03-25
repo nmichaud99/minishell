@@ -28,11 +28,7 @@ int	handle_squote(char *str, int *i, char **txt, t_quote_type **quoting)
 		}
 	}
 	if (str[*i] != '\'')
-	{
-		free(*txt);
-		free(*quoting);
-		return (-1);
-	}
+		return (free(*txt), free(*quoting), -1);
 	if (*i == start)
 	{
 		*txt = ft_strdup("");
@@ -63,13 +59,10 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 		}
 	}
 	if (str[*i] != '"')
-	{
-		free(*txt);
-		free(*quoting);
-		return (-1);
-	}
+		return (free(*txt), free(*quoting), -1);
 	if (*i == start)
 	{
+		*txt = ft_strdup("");
 		if (!*txt)
 			return (0);
 		*quoting = malloc(sizeof(t_quote_type));

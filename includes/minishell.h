@@ -189,6 +189,7 @@ int				syntax_check(t_data *data);
 int				is_redir(t_token_type type);
 t_redir_type	convert_types(t_token_type token_type);
 void			null_init(t_word **args, int nb_args);
+void			fill_redir_node(t_redirs **redir, char *filename, t_token_type type, t_quote_type *quoting);
 // parsing_args
 int				count_args(t_token *start, t_token *end);
 t_word			*new_arg(t_token *tmp, int *flag);

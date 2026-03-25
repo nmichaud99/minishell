@@ -24,13 +24,8 @@ int	add_redir_node(t_redirs **redirs, t_token *token)
 	filename = ft_strdup(token->next->word->txt);
 	if (!filename)
 		return (free(new_node), 0);
-	new_node->file_name = filename;
-	new_node->type = convert_types(token->type);
-	if (token->next->word->quoting[0] == SINGLE || token->next->word->quoting[0] == DOUBLE)
-		new_node->to_expand = 0;
-	else
-		new_node->to_expand = 1;
-	new_node->next = NULL;
+	fill_redir_node(&new_node, filename, token->type,
+		token->next->word->quoting);
 	if (!*redirs)
 	{
 		*redirs = new_node;

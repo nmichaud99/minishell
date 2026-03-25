@@ -42,3 +42,23 @@ void	null_init(t_word **args, int nb_args)
 	while (i < nb_args)
 		args[i++] = NULL;
 }
+
+void	fill_redir_node(t_redirs **redir, char *filename,
+							t_token_type type, t_quote_type *quoting)
+{
+	int	i;
+
+	i = 0;
+	(*redir)->to_expand = 1;
+	while (filename[i])
+	{
+		if (quoting[i] == SINGLE || quoting[i] == DOUBLE)
+			(*redir)->to_expand = 0;
+		i++;
+	}
+	if (!filename[0] && (quoting[0] == SINGLE || quoting[0] == DOUBLE))
+		(*redir)->to_expand = 0;
+	(*redir)->file_name = filename;
+	(*redir)->type = convert_types(type);
+	(*redir)->next = NULL;
+}

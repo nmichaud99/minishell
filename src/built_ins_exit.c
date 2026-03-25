@@ -16,7 +16,7 @@ int	exec_exit(t_data *data, char **args)
 {
 	int		i;
 
-	f_printf_2("exit\n", "", "");
+	ft_putstr_fd("exit\n", 2);
 	if (!*(args + 1))
 		exit_free(data, 0);
 	i = 0;
@@ -32,7 +32,7 @@ int	exec_exit(t_data *data, char **args)
 	}
 	if (args[2])
 	{
-		f_printf_2("minishell: ", "exit: ", "too many arguments\n");
+		ft_putstr_fd("minishell: exit: too many arguments\n", 2);
 		return (1);
 	}
 	i = ft_atoi(args[1]);

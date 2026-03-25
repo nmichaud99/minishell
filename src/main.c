@@ -173,7 +173,7 @@ int	main(int ac, char **av, char **env)
 
 	(void)av;
 	if (ac != 1 || !isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
-		return (0);
+		return (ft_putstr_fd("./minishell: too many arguments\n", 2), 1);
 	if (!init_data(&data, env, 0))
 		return (1);
 	while (1)
