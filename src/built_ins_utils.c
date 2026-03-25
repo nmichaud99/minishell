@@ -47,7 +47,7 @@ int	exec_cmd(t_data *data, t_expanded_list *list)
 	else if (is_built_in(*list->args) == ENV)
 		return (exec_env(data, list->args));
 	else if (is_built_in(*list->args) == EXIT)
-		return (0);
+		return (exec_exit(data, list->args));
 	return (0);
 }
 

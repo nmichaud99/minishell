@@ -248,6 +248,8 @@ int				exec_env(t_data *data, char **args);
 // pwd_cd
 int				exec_pwd(t_data *data, char **args);
 int				exec_cd(t_data *data, char **args);
+// exit
+int				exec_exit(t_data *data, char **args);
 
 // --- pipes and exec
 
