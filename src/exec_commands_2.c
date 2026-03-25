@@ -15,9 +15,10 @@
 void	exec_cmd1(t_data *data, t_expanded_list *list)
 {
 	int		out;
+	int		in;
 
 	rl_clear_history();
-	redir_in(data, list, 0, 1);
+	in = redir_in(data, list, 0, 1);
 	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);
@@ -41,9 +42,10 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 {
 	int		out;
+	int		in;
 
 	rl_clear_history();
-	redir_in(data, list, prev_fd, 0);
+	in = redir_in(data, list, prev_fd, 0);
 	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);
@@ -67,9 +69,10 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 {
 	int		out;
+	int		in;
 
 	rl_clear_history();
-	redir_in(data, list, prev_fd, 0);
+	in = redir_in(data, list, prev_fd, 0);
 	out = redir_out_handler(list);
 	if (out == -1)
 		exit_free(data, 1);

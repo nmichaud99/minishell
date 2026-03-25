@@ -33,7 +33,7 @@ void	ft_exec(t_data *data, t_expanded_list *list)
 	}
 }
 
-void	redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first)
+int	redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first)
 {
 	int	in;
 
@@ -53,6 +53,7 @@ void	redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first)
 	}
 	if (!first)
 		close(prev_fd);
+	return (in);
 }
 
 char	**get_all_paths(t_data *data)

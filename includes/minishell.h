@@ -268,7 +268,7 @@ char			*get_full_path(char *cmd, char **path);
 char			*find_cmd(char *cmd, char **path);
 // exec_commands_1
 void			ft_exec(t_data *data, t_expanded_list *list);
-void			redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first);
+int			redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first);
 char			**get_all_paths(t_data *data);
 void			handle_path_error(t_data *data, int c, char *m, t_expanded_list *list);
 void			get_path_and_exec(t_data *data, t_expanded_list *list);

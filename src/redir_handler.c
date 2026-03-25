@@ -102,7 +102,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 	while (tmp != last)
 	{
 		fd = check_redirs_in(data, tmp, 0);
-		if (fd == -1)
+		if (fd == -1 && (tmp->type == REDIR_IN || tmp->type == HEREDOC))
 			return (fd);
 		tmp = tmp->next;
 	}
@@ -157,7 +157,7 @@ int	redir_out_handler(t_expanded_list *list)
 	while (tmp != last)
 	{
 		fd = check_redirs_out(tmp, 0);
-		if (fd == -1)
+		if (fd == -1 && (tmp->type == REDIR_OUT || tmp->type == REDIR_APPEND))
 			return (fd);
 		tmp = tmp->next;
 	}
