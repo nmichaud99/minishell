@@ -134,8 +134,10 @@ void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
 // error messages
 void			ft_perror(char **arg);
+void			ft_perror_2(char *s1, char *s2, char *s3);
 void			f_printf(char *s1, char *s2);
 void			f_printf_2(char *s1, char *s2, char *s3);
+void			f_printf_3(char *s1, char *s2, char *s3);
 // --- env utils --- //
 void			print_env(t_data *data);
 char			**malloc_env_tab(t_data *data);
@@ -235,6 +237,7 @@ int				exec_unset(t_data *data, char **args);
 char			*get_variable_key(const char *s);
 void			print_env_export(t_data *data);
 int				is_valid_string(char *str);
+int				find_key(t_data *data, char *key);
 // export_2
 int				create_node(t_env **new_node, char *env_line);
 int				add_env_node(t_data *data, char *env_line);

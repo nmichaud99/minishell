@@ -71,3 +71,17 @@ int	is_valid_string(char *str)
 		return (0);
 	return (1);
 }
+
+int	find_key(t_data *data, char *key)
+{
+	t_env	*tmp;
+
+	tmp = data->env;
+	while (tmp)
+	{
+		if (ft_strcmp(tmp->key, key) == 0)
+			return (1);
+		tmp = tmp->next;
+	}
+	return (0);
+}

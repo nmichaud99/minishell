@@ -29,7 +29,7 @@ int	handle_squote(char *str, int *i, char **txt, t_quote_type **quoting)
 	}
 	if (str[*i] != '\'')
 		return (free(*txt), free(*quoting), -1);
-	if (*i == start)
+	if (*i == start && (!*txt && (!str[*i + 1] || (str[*i + 1] && (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
 	{
 		*txt = ft_strdup("");
 		if (!*txt)
@@ -60,7 +60,7 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 	}
 	if (str[*i] != '"')
 		return (free(*txt), free(*quoting), -1);
-	if (*i == start)
+	if (*i == start && (!*txt && (!str[*i + 1] || (str[*i + 1] && (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
 	{
 		*txt = ft_strdup("");
 		if (!*txt)

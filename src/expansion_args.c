@@ -75,7 +75,7 @@ char	*expand_arg(t_data *data, t_word *arg)
 		return (NULL);
 	while (arg->txt[i])
 	{
-		if (arg->txt[i] == '$' && arg->quoting[i] != SINGLE)
+		if (arg->txt[i] == '$' && ft_strlen(arg->txt) > 1 && arg->quoting[i] != SINGLE)
 		{
 			variable = expand_word(data, arg, &i, arg->quoting[i]);
 			if (!variable || !append_variable(&res, &variable))
