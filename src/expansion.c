@@ -12,22 +12,22 @@
 
 #include "minishell.h"
 
-t_redirs	*dup_redirs(t_redirs *src)
+t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 {
-	t_redirs	*head;
-	t_redirs	*prev;
-	t_redirs	*node;
+	t_expanded_redirs	*head;
+	t_expanded_redirs	*prev;
+	t_expanded_redirs	*node;
 
 	head = NULL;
 	prev = NULL;
 	while (src)
 	{
-		node = malloc(sizeof(t_redirs));
+		node = malloc(sizeof(t_expanded_redirs));
 		if (!node)
-			return (free_redirs(&head), NULL);
-		node->file_name = ft_strdup(src->file_name);
+			return (free_expanded_redirs(&head), NULL);
+		node->file_name = expand_arg(data, src->filename);
 		if (!node->file_name)
-			return (free(node), free_redirs(&head), NULL);
+			return (free(node), free_expanded_redirs(&head), NULL);
 		node->type = src->type;
 		node->to_expand = src->to_expand;
 		node->next = NULL;
@@ -41,7 +41,7 @@ t_redirs	*dup_redirs(t_redirs *src)
 	return (head);
 }
 
-t_expanded_list	*build_expanded_list(char **expanded_args, t_cmd_list *lst)
+t_expanded_list	*build_expanded_list(t_data *data, char **expanded_args, t_cmd_list *lst)
 {
 	t_expanded_list	*ret;
 
@@ -52,8 +52,8 @@ t_expanded_list	*build_expanded_list(char **expanded_args, t_cmd_list *lst)
 		return (NULL);
 	}
 	ret->args = expanded_args;
-	ret->redirs = dup_redirs(lst->redirs);
-	if (lst->redirs && !ret->redirs)
+	ret->expanded_redirs = dup_redirs(data, lst->redirs);
+	if (lst->redirs && !ret->expanded_redirs)
 	{
 		ft_free(&expanded_args);
 		free(ret);
@@ -77,7 +77,7 @@ int	expansion(t_data *data)
 		expanded_args = get_expanded_args(data, lst);
 		if (!expanded_args)
 			return (free_expanded_list(&data->expanded_list), 0);
-		expanded_list = build_expanded_list(expanded_args, lst);
+		expanded_list = build_expanded_list(data, expanded_args, lst);
 		if (!expanded_list)
 			return (free_expanded_list(&data->expanded_list), 0);
 		if (!data->expanded_list)

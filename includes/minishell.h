@@ -80,10 +80,18 @@ typedef struct s_token
 typedef struct s_redirs
 {
 	t_redir_type	type;
-	char			*file_name;
+	t_word			*filename;
 	int				to_expand;
 	struct s_redirs	*next;
 }	t_redirs;
+
+typedef struct s_expanded_redirs
+{
+	t_redir_type				type;
+	char						*file_name;
+	int							to_expand;
+	struct s_expanded_redirs	*next;
+}	t_expanded_redirs;
 
 typedef struct s_cmd_list
 {
@@ -94,9 +102,9 @@ typedef struct s_cmd_list
 
 typedef struct s_expanded_list
 {
-	char					**args;
-	t_redirs				*redirs;
-	struct s_expanded_list	*next;
+	char							**args;
+	t_expanded_redirs				*expanded_redirs;
+	struct s_expanded_list			*next;
 }	t_expanded_list;
 
 typedef struct s_env
@@ -155,6 +163,7 @@ void			free_word_tab_2(t_word ***word, int size);
 void			free_token(t_token **head);
 // exit_2
 void			free_redirs(t_redirs **redirs);
+void			free_expanded_redirs(t_expanded_redirs **redirs);
 void			free_env(t_env **env);
 void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
@@ -193,7 +202,7 @@ int				syntax_check(t_data *data);
 int				is_redir(t_token_type type);
 t_redir_type	convert_types(t_token_type token_type);
 void			null_init(t_word **args, int nb_args);
-void			fill_redir_node(t_redirs **redir, char *filename, t_token_type type, t_quote_type *quoting);
+void			fill_redir_node(t_redirs **redir, t_word *filename, t_token_type type, t_quote_type *quoting);
 // parsing_args
 int				count_args(t_token *start, t_token *end);
 t_word			*new_arg(t_token *tmp, int *flag);
@@ -219,8 +228,8 @@ char			*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote);
 char			*expand_arg(t_data *data, t_word *arg);
 char			**get_expanded_args(t_data *data, t_cmd_list *lst);
 // expansion
-t_redirs		*dup_redirs(t_redirs *src);
-t_expanded_list	*build_expanded_list(char **expanded_args, t_cmd_list *lst);
+t_expanded_redirs		*dup_redirs(t_data *data, t_redirs *src);
+t_expanded_list	*build_expanded_list(t_data *data, char **expanded_args, t_cmd_list *lst);
 int				expansion(t_data *data);
 
 // --- built-ins --- //

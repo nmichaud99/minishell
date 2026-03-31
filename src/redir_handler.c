@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-static int	heredoc(t_data *data, t_redirs *tmp)
+static int	heredoc(t_data *data, t_expanded_redirs *tmp)
 {
 	int		pipefd[2];
 	char	*line;
@@ -53,7 +53,7 @@ static int	heredoc(t_data *data, t_redirs *tmp)
 	return (fd);
 }
 
-static int	check_redirs_in(t_data *data, t_redirs *tmp, int flag)
+static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 {
 	int	fd;
 
@@ -65,6 +65,8 @@ static int	check_redirs_in(t_data *data, t_redirs *tmp, int flag)
 		{
 			if (errno == EACCES)
 				f_printf(tmp->file_name, "Permission denied\n");
+			else if (errno == EISDIR)
+				f_printf(tmp->file_name, "Is a directory\n");
 			else
 				f_printf(tmp->file_name, "No such file or directory\n");
 			return (fd);
@@ -84,12 +86,12 @@ static int	check_redirs_in(t_data *data, t_redirs *tmp, int flag)
 
 int	redir_in_handler(t_data *data, t_expanded_list *list)
 {
-	t_redirs	*tmp;
-	t_redirs	*last;
+	t_expanded_redirs	*tmp;
+	t_expanded_redirs	*last;
 	int			fd;
 
 	last = NULL;
-	tmp = list->redirs;
+	tmp = list->expanded_redirs;
 	while (tmp)
 	{
 		if (tmp->type == REDIR_IN || tmp->type == REDIR_HEREDOC)
@@ -98,7 +100,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 	}
 	if (!last)
 		return (STDIN_FILENO);
-	tmp = list->redirs;
+	tmp = list->expanded_redirs;
 	while (tmp != last)
 	{
 		fd = check_redirs_in(data, tmp, 0);
@@ -110,7 +112,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 	return (fd);
 }
 
-static int	check_redirs_out(t_redirs *tmp, int flag)
+static int	check_redirs_out(t_expanded_redirs *tmp, int flag)
 {
 	int	fd;
 
@@ -120,7 +122,12 @@ static int	check_redirs_out(t_redirs *tmp, int flag)
 		fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd == -1)
 		{
-			f_printf(tmp->file_name, "Permission denied\n");
+			if (errno == EACCES)
+				f_printf(tmp->file_name, "Permission denied\n");
+			else if (errno == EISDIR)
+				f_printf(tmp->file_name, "Is a directory\n");
+			else
+				f_printf(tmp->file_name, "No such file or directory\n");
 			return (fd);
 		}
 		if (flag == 0)
@@ -139,12 +146,12 @@ static int	check_redirs_out(t_redirs *tmp, int flag)
 
 int	redir_out_handler(t_expanded_list *list)
 {
-	t_redirs	*tmp;
-	t_redirs	*last;
+	t_expanded_redirs	*tmp;
+	t_expanded_redirs	*last;
 	int			fd;
 
 	last = NULL;
-	tmp = list->redirs;
+	tmp = list->expanded_redirs;
 	while (tmp)
 	{
 		if (tmp->type == REDIR_OUT || tmp->type == REDIR_APPEND)
@@ -153,7 +160,7 @@ int	redir_out_handler(t_expanded_list *list)
 	}
 	if (!last)
 		return (STDOUT_FILENO);
-	tmp = list->redirs;
+	tmp = list->expanded_redirs;
 	while (tmp != last)
 	{
 		fd = check_redirs_out(tmp, 0);

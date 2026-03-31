@@ -20,6 +20,23 @@ void	free_redirs(t_redirs **redirs)
 		return ;
 	while (*redirs)
 	{
+		free_word(&(*redirs)->filename);
+		tmp = *redirs;
+		*redirs = (*redirs)->next;
+		free(tmp);
+		tmp = NULL;
+	}
+	*redirs = NULL;
+}
+
+void	free_expanded_redirs(t_expanded_redirs **redirs)
+{
+	t_expanded_redirs	*tmp;
+
+	if (!redirs || !*redirs)
+		return ;
+	while (*redirs)
+	{
 		if ((*redirs)->file_name)
 			free((*redirs)->file_name);
 		tmp = *redirs;
@@ -76,7 +93,7 @@ void	free_expanded_list(t_expanded_list **list)
 	while (*list)
 	{
 		ft_free(&(*list)->args);
-		free_redirs(&(*list)->redirs);
+		free_expanded_redirs(&(*list)->expanded_redirs);
 		tmp = *list;
 		*list = (*list)->next;
 		free(tmp);
