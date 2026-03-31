@@ -37,8 +37,8 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 			return (NULL);
 		return (res);
 	}
-	if (!(arg->txt[start] && type_of_char(arg->txt[start],
-			arg->quoting[start], quote) == 1))
+	if (!(arg->txt[start] && (type_of_char(arg->txt[start],
+			arg->quoting[start], quote) == 1)))
 	{
 		(*i)++;
 		res = ft_strdup("$");
@@ -46,9 +46,9 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 			return (NULL);
 		return (res);
 	}
-	count = 1;
-	while (arg->txt[start + count] && type_of_char(arg->txt[start + count],
-			arg->quoting[start + count], quote) == 2)
+	count = 0;
+	while (arg->txt[start + count] && (type_of_char(arg->txt[start + count],
+			arg->quoting[start + count], quote) >= 1))
 		count++;
 	tmp = malloc(count + 1);
 	if (!tmp)

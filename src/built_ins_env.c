@@ -22,11 +22,11 @@ int	exec_env(t_data *data, char **args)
 		return (1);
 	}
 	tmp = data->env;
-	while (tmp && tmp->next)
+	while (tmp)
 	{
-		printf("%s=%s\n", tmp->key, tmp->value);
+		if (tmp->has_value)
+			printf("%s=%s\n", tmp->key, tmp->value);
 		tmp = tmp->next;
 	}
-	printf("%s=%s\n", tmp->key, tmp->value);
 	return (0);
 }

@@ -35,7 +35,8 @@ char	**malloc_env_tab(t_data *data)
 	i = 0;
 	while (tmp)
 	{
-		i++;
+		if (tmp->has_value)
+			i++;
 		tmp = tmp->next;
 	}
 	res = malloc(sizeof(char *) * (i + 1));
@@ -58,6 +59,11 @@ char	**get_env_tab(t_data *data)
 	tmp = data->env;
 	while (tmp)
 	{
+		if (!tmp->has_value)
+		{
+			tmp = tmp->next;
+			continue ;
+		}
 		tmp_str = ft_strjoin(tmp->key, "=");
 		if (!tmp_str)
 			return (NULL);
@@ -73,4 +79,21 @@ char	**get_env_tab(t_data *data)
 	}
 	res[i] = NULL;
 	return (res);
+}
+
+int	build_minimal_env(t_data *data)
+{
+	char	*pwd;
+	char	*line;
+
+	pwd = getcwd(NULL, 0);
+	if (!pwd)
+		return (0);
+	line = ft_strjoin("PWD=", pwd);
+	free(pwd);
+	if (!line)
+		exit_free(data, EXIT_FAILURE);
+	add_env_node(data, line, 1);
+	free(line);
+	return (1);
 }

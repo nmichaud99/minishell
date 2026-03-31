@@ -100,7 +100,7 @@ int	handle_old_pwd(t_data *data, char *new_directory)
 		}
 		return (free(new_directory), 0);
 	}
-	add_or_modify_env_node(data, old_pwd_line);
+	add_or_modify_env_node(data, old_pwd_line, 1);
 	free(old_pwd_line);
 	return (1);
 }
@@ -112,7 +112,7 @@ int	handle_new_pwd(t_data *data, char *new_directory)
 	new_pwd_line = build_pwd_line(data, "PWD=");
 	if (!new_pwd_line)
 		return (free(new_directory), 0);
-	add_or_modify_env_node(data, new_pwd_line);
+	add_or_modify_env_node(data, new_pwd_line, 1);
 	return (free(new_directory), free(new_pwd_line), 1);
 }
 

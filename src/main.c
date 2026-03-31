@@ -18,10 +18,12 @@ int	init_env_tab(char **env, t_data *data)
 {
 	int	i;
 
+	if (!*env && build_minimal_env(data))
+		return (1);
 	i = 0;
 	while (env[i])
 	{
-		if (!add_env_node(data, env[i]))
+		if (!add_env_node(data, env[i], 1))
 			return (0);
 		i++;
 	}

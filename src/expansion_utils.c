@@ -32,7 +32,7 @@ char	*get_variable_value(t_data *data, char *str)
 	tmp = data->env;
 	while (tmp)
 	{
-		if (ft_strcmp(tmp->key, str) == 0)
+		if (ft_strcmp(tmp->key, str) == 0 && tmp->has_value == 1)
 		{
 			tmp_value = ft_strdup(tmp->value);
 			if (!tmp_value)

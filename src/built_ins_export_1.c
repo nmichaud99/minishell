@@ -34,21 +34,52 @@ char	*get_variable_key(const char *s)
 	return (result);
 }
 
+
 void	print_env_export(t_data *data)
 {
-	t_env	*tmp;
+	t_env	*cpy;
+	t_env	*first;
+	int		swapped;
+	char	*tmp_key;
+	char	*tmp_value;
 
-	tmp = data->env;
-	while (tmp && tmp->next)
+	first = data->env;
+	cpy = data->env;
+	swapped = 1;
+	while (swapped)
+	{
+		swapped = 0;
+		cpy = first;
+		while (cpy && cpy->next)
+		{
+			if (ft_strcmp(cpy->key, cpy->next->key) > 0)
+			{
+				tmp_key = cpy->key;
+				tmp_value = cpy->value;
+				cpy->key = cpy->next->key;
+				cpy->value = cpy->next->value;
+				cpy->next->key = tmp_key;
+				cpy->next->value = tmp_value;
+
+				swapped = 1;
+			}
+			cpy = cpy->next;
+		}
+	}
+
+	while (first)
 	{
 		printf("export ");
-		printf("%s=%s\n", tmp->key, tmp->value);
-		tmp = tmp->next;
+		printf("%s", first->key);
+		if (first->has_value)
+			printf("=\"%s\"\n", first->value);
+		else
+			printf("\n");
+		first = first->next;
 	}
-	printf("%s=%s\n", tmp->key, tmp->value);
 }
 
-int	is_valid_string(char *str)
+int	is_valid_string(char *str, int has_value)
 {
 	int	i;
 
@@ -67,7 +98,9 @@ int	is_valid_string(char *str)
 		else
 			return (0);
 	}
-	if (!str[i] || str[i] != '=')
+	if (has_value && str[i] != '=')
+		return (0);
+	if (!has_value && str[i] == '=')
 		return (0);
 	return (1);
 }
@@ -82,6 +115,22 @@ int	find_key(t_data *data, char *key)
 		if (ft_strcmp(tmp->key, key) == 0)
 			return (1);
 		tmp = tmp->next;
+	}
+	return (0);
+}
+
+int	ft_schr(const char *s, char c)
+{
+	int		i;
+	char	c1;
+
+	c1 = (char)c;
+	i = 0;
+	while (s[i])
+	{
+		if (s[i] == c1)
+			return (1);
+		i++;
 	}
 	return (0);
 }

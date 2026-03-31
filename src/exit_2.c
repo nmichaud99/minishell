@@ -39,7 +39,8 @@ void	free_env(t_env **env)
 	while (*env)
 	{
 		free((*env)->key);
-		free((*env)->value);
+		if ((*env)->has_value == 1)
+			free((*env)->value);
 		tmp = *env;
 		*env = (*env)->next;
 		free(tmp);

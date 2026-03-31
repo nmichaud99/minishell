@@ -103,6 +103,7 @@ typedef struct s_env
 {
 	char			*key;
 	char			*value;
+	int				has_value;
 	struct s_env	*next;
 }					t_env;
 
@@ -142,6 +143,7 @@ void			f_printf_3(char *s1, char *s2, char *s3);
 void			print_env(t_data *data);
 char			**malloc_env_tab(t_data *data);
 char			**get_env_tab(t_data *data);
+int				build_minimal_env(t_data *data);
 
 // --- exit and free --- //
 
@@ -236,13 +238,14 @@ int				exec_unset(t_data *data, char **args);
 // export_1
 char			*get_variable_key(const char *s);
 void			print_env_export(t_data *data);
-int				is_valid_string(char *str);
+int				is_valid_string(char *str, int has_value);
 int				find_key(t_data *data, char *key);
+int				ft_schr(const char *s, char c);
 // export_2
-int				create_node(t_env **new_node, char *env_line);
-int				add_env_node(t_data *data, char *env_line);
-int				loop_over_each_node(t_data *data, char *new_key, char *new_value);
-int				add_or_modify_env_node(t_data *data, char *new_var);
+int				create_node(t_env **new_node, char *env_line, int has_value);
+int				add_env_node(t_data *data, char *env_line, int has_value);
+int				looper(t_data *data, char *new_key, char *new_value);
+int				add_or_modify_env_node(t_data *data, char *new_var, int has_value);
 int				exec_export(t_data *data, char **args);
 // echo
 void			print_args(int option_n, char **args);
