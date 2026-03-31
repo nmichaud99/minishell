@@ -20,6 +20,14 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 	int		start;
 
 	start = *i + 1;
+	if (arg->txt[start] && arg->quoting[start] != quote)
+	{
+		(*i) = start;
+		res = ft_strdup("");
+		if (!res)
+			return (NULL);
+		return (res);
+	}
 	if (arg->txt[start] == '?')
 	{
 		(*i) = start + 1;
