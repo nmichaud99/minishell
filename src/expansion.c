@@ -25,16 +25,13 @@ t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 		node = malloc(sizeof(t_expanded_redirs));
 		if (!node)
 			return (free_expanded_redirs(&head), NULL);
-		if (src->type == HEREDOC)
-		{
+		if (src->type == REDIR_HEREDOC)
 			node->file_name = ft_strdup(src->filename->txt);
-			if (!node->file_name)
-				return (free(node), free_expanded_redirs(&head), NULL);
-		}
 		else
 			node->file_name = expand_arg(data, src->filename);
 		if (!node->file_name)
 			return (free(node), free_expanded_redirs(&head), NULL);
+		node->heredoc_name = NULL;
 		node->type = src->type;
 		node->to_expand = src->to_expand;
 		node->next = NULL;

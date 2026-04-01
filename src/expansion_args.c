@@ -20,7 +20,23 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 	int		start;
 
 	start = *i + 1;
-	if (arg->txt[start] && arg->quoting[start] != quote)
+	if (quote == SPECIAL)
+	{
+		(*i) = start;
+		res = ft_strdup("");
+		if (!res)
+			return (NULL);
+		return (res);
+	}
+	if (quote == SPECIAL && !arg->txt[start])
+	{
+		(*i) = start + 1;
+		res = ft_strdup("$");
+		if (!res)
+			return (NULL);
+		return (res);
+	}
+	if (arg->txt[start] && arg->quoting[start] != quote && quote != SPECIAL)
 	{
 		(*i) = start;
 		res = ft_strdup("");
@@ -83,7 +99,7 @@ char	*expand_arg(t_data *data, t_word *arg)
 		return (NULL);
 	while (arg->txt[i])
 	{
-		if (arg->txt[i] == '$' && ft_strlen(arg->txt) > 1 && arg->quoting[i] != SINGLE)
+		if (arg->txt[i] == '$' && arg->quoting[i] != SINGLE)
 		{
 			variable = expand_word(data, arg, &i, arg->quoting[i]);
 			if (!variable || !append_variable(&res, &variable))

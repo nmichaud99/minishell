@@ -39,6 +39,8 @@ void	free_expanded_redirs(t_expanded_redirs **redirs)
 	{
 		if ((*redirs)->file_name)
 			free((*redirs)->file_name);
+		if ((*redirs)->heredoc_name)
+			free((*redirs)->heredoc_name);
 		tmp = *redirs;
 		*redirs = (*redirs)->next;
 		free(tmp);
@@ -56,7 +58,7 @@ void	free_env(t_env **env)
 	while (*env)
 	{
 		free((*env)->key);
-		if ((*env)->has_value == 1)
+		if ((*env)->value)
 			free((*env)->value);
 		tmp = *env;
 		*env = (*env)->next;

@@ -18,7 +18,7 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 	int		in;
 
 	rl_clear_history();
-	in = redir_in(data, list, 0, 1);
+	in = redir_in(data, list, -1, 1);
 	out = redir_out_handler(list);
 	if (out == -1)
 	{
@@ -42,7 +42,7 @@ void	exec_cmd1(t_data *data, t_expanded_list *list)
 		close(data->pipefd[0]);
 		close(data->pipefd[1]);
 	}
-	get_path_and_exec(data, list, out);
+	get_path_and_exec(data, list);
 	exit_free(data, 0);
 }
 
@@ -56,6 +56,7 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	out = redir_out_handler(list);
 	if (out == -1)
 	{
+		close(prev_fd);
 		close(data->pipefd[0]);
 		close(data->pipefd[1]);
 		exit_free(data, 1);
@@ -73,7 +74,7 @@ void	exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd)
 	}
 	close(data->pipefd[0]);
 	close(data->pipefd[1]);
-	get_path_and_exec(data, list, out);
+	get_path_and_exec(data, list);
 	exit_free(data, 0);
 }
 
@@ -86,13 +87,16 @@ void	exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd)
 	in = redir_in(data, list, prev_fd, 3);
 	out = redir_out_handler(list);
 	if (out == -1)
+	{
+		close(prev_fd);
 		exit_free(data, 1);
+	}
 	if (out != STDOUT_FILENO)
 	{
 		if (dup2(out, STDOUT_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 		close(out);
 	}
-	get_path_and_exec(data, list, out);
+	get_path_and_exec(data, list);
 	exit_free(data, 0);
 }

@@ -76,7 +76,25 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 
 int	handle_char(char *str, int *i, char **txt, t_quote_type **quoting)
 {
-	if (!lex_append_char(txt, quoting, str[(*i)++], NONE))
+	if (str[*i] == '$' && str[*i + 1] && str[*i + 2] && str[*i + 1] == '"' && str[*i + 2] == '"')
+	{
+		if (!lex_append_char(txt, quoting, str[(*i)++], SPECIAL))
+		{
+			free(*txt);
+			free(*quoting);
+			return (0);
+		}
+	}
+	else if (str[*i] == '$' && str[*i + 1] && str[*i + 2] && str[*i + 1] == '\'' && str[*i + 2] == '\'')
+	{
+		if (!lex_append_char(txt, quoting, str[(*i)++], SPECIAL))
+		{
+			free(*txt);
+			free(*quoting);
+			return (0);
+		}
+	}
+	else if (!lex_append_char(txt, quoting, str[(*i)++], NONE))
 	{
 		free(*txt);
 		free(*quoting);

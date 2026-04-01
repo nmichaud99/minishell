@@ -97,9 +97,13 @@ int	add_or_modify_env_node(t_data *data, char *new_var, int has_value)
 	{
 		if (!find_key(data, new_key))
 		{
-			if (!add_env_node(data, new_key, 0))
+			if (!add_env_node(data, new_key, has_value))
+			{
+				free(new_key);
 				return (0);
+			}
 		}
+		free(new_key);
 		return (1);
 	}
 	else

@@ -32,10 +32,10 @@ t_builtin_type	is_built_in(char *arg)
 		return (NO);
 }
 
-int	exec_cmd(t_data *data, t_expanded_list *list, int fd)
+int	exec_cmd(t_data *data, t_expanded_list *list)
 {
 	if (is_built_in(*list->args) == ECHO)
-		return (exec_echo(list->args, fd));
+		return (exec_echo(list->args));
 	else if (is_built_in(*list->args) == CD)
 		return (exec_cd(data, list->args));
 	else if (is_built_in(*list->args) == PWD)
@@ -85,7 +85,7 @@ int	redir_handler(t_data *data, t_expanded_list *list)
 	return (1);
 }
 
-int	exec_built_in(t_data *data, t_expanded_list *list, int flag, int fd)
+int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 {
 	int	res;
 	int	saved_stdin;
@@ -97,7 +97,7 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag, int fd)
 		if (!redir_handler(data, list))
 			return (1);
 	}
-	res = exec_cmd(data, list, fd);
+	res = exec_cmd(data, list);
 	if (!flag)
 	{
 		if (dup2(saved_stdin, STDIN_FILENO) == -1)

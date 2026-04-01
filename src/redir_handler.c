@@ -12,51 +12,11 @@
 
 #include "minishell.h"
 
-static int	heredoc(t_data *data, t_expanded_redirs *tmp)
-{
-	int		pipefd[2];
-	char	*line;
-	char	*expanded;
-	int		fd;
-
-	if (pipe(pipefd) == -1)
-		error_sys(data, "pipe failure");
-	while (1)
-	{
-		expanded = NULL;
-		line = readline("> ");
-		if (!line)
-			break ;
-		if (ft_strcmp(line, tmp->file_name) == 0)
-		{
-			free(line);
-			break ;
-		}
-		if (tmp->to_expand == 1)
-		{
-			expanded = expand_line(data, line);
-			if (!expanded)
-			{
-				free(line);
-				break ;
-			}
-			write(pipefd[1], expanded, ft_strlen(expanded));
-		}
-		else
-			write(pipefd[1], line, ft_strlen(line));
-		write(pipefd[1], "\n", 1);
-		free(line);
-		free(expanded);
-	}
-	close(pipefd[1]);
-	fd = pipefd[0];
-	return (fd);
-}
-
 static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 {
 	int	fd;
 
+	(void)data;
 	fd = -1;
 	if (tmp->type == REDIR_IN)
 	{
@@ -73,11 +33,20 @@ static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 		}
 		if (flag == 0)
 			close(fd);
-		return (fd);
 	}
 	else if (tmp->type == REDIR_HEREDOC)
 	{
-		fd = heredoc(data, tmp);
+		fd = open(tmp->heredoc_name, O_RDONLY);
+		if (fd == -1)
+		{
+			if (errno == EACCES)
+				f_printf(tmp->heredoc_name, "Permission denied\n");
+			else if (errno == EISDIR)
+				f_printf(tmp->heredoc_name, "Is a directory\n");
+			else
+				f_printf(tmp->heredoc_name, "No such file or directory\n");
+			return (fd);
+		}
 		if (flag == 0)
 			close(fd);
 	}

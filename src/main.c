@@ -111,13 +111,13 @@ void	set_signals_interactive(void)
 {
 	signal(SIGINT, sigint_handler);
 	signal(SIGQUIT, SIG_IGN);
-	set_signals_ignore();
 }
 
 void	set_signals_exec(void)
 {
 	signal(SIGINT, sigint_handler_exec);
 	signal(SIGQUIT, sigquit_handler);
+	signal(SIGPIPE, SIG_DFL);
 }
 
 int	treat_cmd_line(t_data *data, t_expanded_list **list)
@@ -129,6 +129,8 @@ int	treat_cmd_line(t_data *data, t_expanded_list **list)
 	if (!parsing(data))
 		return (0);
 	if (!expansion(data))
+		return (0);
+	if (!heredoc_handler(data))
 		return (0);
 	data->env_tab = get_env_tab(data);
 	if (!data->env_tab)
@@ -144,7 +146,7 @@ int	ft_readline(t_data *data)
 	data->line = readline("minishell$ ");
 	if (!data->line)
 	{
-		printf("\nexit\n");
+		printf("exit\n");
 		return (0);
 	}
 	if (*(data->line))
@@ -167,7 +169,7 @@ void	ft_execution(t_data *data, t_expanded_list *list)
 		wait_and_return(data);
 	}
 	else
-		data->exit_status = exec_built_in(data, list, 0, STDOUT_FILENO);
+		data->exit_status = exec_built_in(data, list, 0);
 }
 
 int	main(int ac, char **av, char **env)
@@ -183,6 +185,7 @@ int	main(int ac, char **av, char **env)
 	while (1)
 	{
 		init_data(&data, env, 1);
+		set_signals_ignore();
 		set_signals_interactive();
 		if (!ft_readline(&data))
 			break ;
