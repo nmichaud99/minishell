@@ -39,19 +39,26 @@ int	redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first)
 
 	in = redir_in_handler(data, list);
 	if (in == -1)
+	{
+		if ((first == 1 && list->next) || first == 2)
+		{
+			close(data->pipefd[0]);
+			close(data->pipefd[1]);
+		}
 		exit_free(data, 1);
+	}
 	if (in != STDIN_FILENO)
 	{
 		if (dup2(in, STDIN_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 		close(in);
 	}
-	else if (in == STDIN_FILENO && !first)
+	else if (in == STDIN_FILENO && first == 1)
 	{
 		if (dup2(prev_fd, STDIN_FILENO) == -1)
 			error_sys(data, "dup2 error 2");
 	}
-	if (!first)
+	if (first == 1)
 		close(prev_fd);
 	return (in);
 }
@@ -80,7 +87,7 @@ void	handle_path_error(t_data *data, int c, char *m, t_expanded_list *list)
 	exit_free(data, c);
 }
 
-void	get_path_and_exec(t_data *data, t_expanded_list *list)
+void	get_path_and_exec(t_data *data, t_expanded_list *list, int fd)
 {
 	int			status;
 	char		**paths;
@@ -90,7 +97,7 @@ void	get_path_and_exec(t_data *data, t_expanded_list *list)
 	{
 		if (is_built_in(list->args[0]) != NO)
 		{
-			status = exec_built_in(data, list, 1);
+			status = exec_built_in(data, list, 1, fd);
 			exit_free(data, status);
 		}
 		paths = get_all_paths(data);

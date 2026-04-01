@@ -100,22 +100,24 @@ void	sigquit_handler(int sig)
 	write(1, "Quit (core dumped)\n", 19);
 }
 
+void	set_signals_ignore(void)
+{
+	signal(SIGINT, SIG_IGN);
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGPIPE, SIG_DFL);
+}
+
 void	set_signals_interactive(void)
 {
 	signal(SIGINT, sigint_handler);
 	signal(SIGQUIT, SIG_IGN);
+	set_signals_ignore();
 }
 
 void	set_signals_exec(void)
 {
 	signal(SIGINT, sigint_handler_exec);
 	signal(SIGQUIT, sigquit_handler);
-}
-
-void	set_signals_ignore(void)
-{
-	signal(SIGINT, SIG_IGN);
-	signal(SIGQUIT, SIG_IGN);
 }
 
 int	treat_cmd_line(t_data *data, t_expanded_list **list)
@@ -165,7 +167,7 @@ void	ft_execution(t_data *data, t_expanded_list *list)
 		wait_and_return(data);
 	}
 	else
-		data->exit_status = exec_built_in(data, list, 0);
+		data->exit_status = exec_built_in(data, list, 0, STDOUT_FILENO);
 }
 
 int	main(int ac, char **av, char **env)

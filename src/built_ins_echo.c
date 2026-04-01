@@ -12,17 +12,33 @@
 
 #include "minishell.h"
 
-void	print_args(int option_n, char **args)
+int	ft_putstr_fd_safe(char *s, int fd)
+{
+	int	len;
+
+	if (!s)
+		return (0);
+	len = ft_strlen(s);
+	if (write(fd, s, len) == -1)
+	{
+		if (errno == EPIPE)
+			exit(0);
+		return (-1);
+	}
+	return (0);
+}
+
+void	print_args(int option_n, char **args, int fd)
 {
 	while (*args)
 	{
 		if (*(args + 1))
-			printf("%s ", *args);
+			ft_putstr_fd_safe(*args, fd);
 		else
 		{
-			printf("%s", *args);
+			ft_putstr_fd_safe(*args, fd);
 			if (option_n)
-				printf("\n");
+				ft_putstr_fd_safe("\n", fd);
 		}
 		args++;
 	}
@@ -46,7 +62,7 @@ int	is_option(char *str)
 	return (1);
 }
 
-int	exec_echo(char **args)
+int	exec_echo(char **args, int fd)
 {
 	char	**tmp_args;
 	int		option;
@@ -58,6 +74,6 @@ int	exec_echo(char **args)
 		option = 0;
 		tmp_args++;
 	}
-	print_args(option, tmp_args);
+	print_args(option, tmp_args, fd);
 	return (0);
 }

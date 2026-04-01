@@ -236,10 +236,10 @@ int				expansion(t_data *data);
 
 // utils
 t_builtin_type	is_built_in(char *arg);
-int				exec_cmd(t_data *data, t_expanded_list *list);
+int				exec_cmd(t_data *data, t_expanded_list *list, int fd);
 void			save_std_fds(t_data *data, int *saved_stdin, int *saved_stdout);
 int				redir_handler(t_data *data, t_expanded_list *list);
-int				exec_built_in(t_data *data, t_expanded_list *list, int flag);
+int				exec_built_in(t_data *data, t_expanded_list *list, int flag, int fd);
 // unset
 void			free_env_node(t_env **env);
 void			delete_node_if(char *arg, t_data *data);
@@ -257,8 +257,8 @@ int				looper(t_data *data, char *new_key, char *new_value);
 int				add_or_modify_env_node(t_data *data, char *new_var, int has_value);
 int				exec_export(t_data *data, char **args);
 // echo
-void			print_args(int option_n, char **args);
-int				exec_echo(char **args);
+void			print_args(int option_n, char **args, int fd);
+int				exec_echo(char **args, int fd);
 // env
 int				exec_env(t_data *data, char **args);
 // pwd_cd
@@ -287,7 +287,7 @@ void			ft_exec(t_data *data, t_expanded_list *list);
 int			redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first);
 char			**get_all_paths(t_data *data);
 void			handle_path_error(t_data *data, int c, char *m, t_expanded_list *list);
-void			get_path_and_exec(t_data *data, t_expanded_list *list);
+void			get_path_and_exec(t_data *data, t_expanded_list *list, int fd);
 // exec_commands_2
 void			exec_cmd1(t_data *data, t_expanded_list *list);
 void			exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);

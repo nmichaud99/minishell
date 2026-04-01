@@ -18,7 +18,7 @@ int	exec_exit(t_data *data, char **args)
 
 	ft_putstr_fd("exit\n", 2);
 	if (!*(args + 1))
-		exit_free(data, 0);
+		exit_free(data, data->exit_status);
 	i = 0;
 	while (args[1][i])
 	{
