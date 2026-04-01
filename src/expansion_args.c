@@ -63,6 +63,13 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 		return (NULL);
 	ft_memcpy(tmp, &arg->txt[start], count);
 	tmp[count] = 0;
+	if (find_key(data, tmp) == 0 && !arg->txt[start + count])
+	{
+		res = ft_strjoin("$", tmp);
+		free(tmp);
+		*i = start + count;
+		return (res);
+	}
 	res = get_variable_value(data, tmp);
 	free(tmp);
 	if (!res)

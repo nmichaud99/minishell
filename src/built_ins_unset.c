@@ -44,8 +44,6 @@ void	delete_node_if(char *arg, t_data *data)
 		prev = tmp;
 		tmp = tmp->next;
 	}
-	prev = NULL;
-	tmp = data->env;
 }
 
 int	exec_unset(t_data *data, char **args)

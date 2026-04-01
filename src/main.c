@@ -142,7 +142,7 @@ int	ft_readline(t_data *data)
 	data->line = readline("minishell$ ");
 	if (!data->line)
 	{
-		printf("exit\n");
+		printf("\nexit\n");
 		return (0);
 	}
 	if (*(data->line))
