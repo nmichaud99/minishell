@@ -42,12 +42,16 @@ int	init_data(t_data *data, char **env, int flag)
 		data->env_tab = NULL;
 		data->full_path = NULL;
 		data->exit_status = 0;
+		data->saved_stdin = -1;
+		data->saved_stdout = -1;
 		if (!init_env_tab(env, data))
 			return (0);
 		return (1);
 	}
 	else
 	{
+		data->saved_stdin = -1;
+		data->saved_stdout = -1;
 		free_data(data);
 		free_expanded_list(&data->expanded_list);
 		ft_free(&data->env_tab);

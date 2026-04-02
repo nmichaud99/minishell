@@ -137,6 +137,8 @@ typedef struct	s_data
 	pid_t			last_pid;
 	int				last_status;
 	char			*full_path;
+	int				saved_stdin;
+	int				saved_stdout;
 }	t_data;
 
 extern volatile 		sig_atomic_t g_SignalStatus;

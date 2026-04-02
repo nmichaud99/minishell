@@ -57,6 +57,8 @@ void	save_std_fds(t_data *data, int *saved_stdin, int *saved_stdout)
 	*saved_stdout = dup(STDOUT_FILENO);
 	if (*saved_stdin == -1 || *saved_stdout == -1)
 		error_sys(data, "dup error");
+	data->saved_stdin = *saved_stdin;
+	data->saved_stdout = *saved_stdout;
 }
 
 int	redir_handler(t_data *data, t_expanded_list *list)
@@ -95,7 +97,15 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 	{
 		save_std_fds(data, &saved_stdin, &saved_stdout);
 		if (!redir_handler(data, list))
+		{
+			if (dup2(saved_stdin, STDIN_FILENO) == -1)
+				error_sys(data, "dup2 error");
+			if (dup2(saved_stdout, STDOUT_FILENO) == -1)
+				error_sys(data, "dup2 error");
+			close(saved_stdin);
+			close(saved_stdout);
 			return (1);
+		}
 	}
 	res = exec_cmd(data, list);
 	if (!flag)
