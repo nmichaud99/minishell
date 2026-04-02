@@ -102,6 +102,12 @@ typedef struct s_cmd_list
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
+typedef struct	s_arg_list
+{
+	char		**args;
+	struct s_arg_list	*next;
+}	t_arg_list;
+
 typedef struct s_expanded_list
 {
 	char							**args;
@@ -169,6 +175,7 @@ void			free_expanded_redirs(t_expanded_redirs **redirs);
 void			free_env(t_env **env);
 void			free_list(t_cmd_list **list);
 void			free_expanded_list(t_expanded_list **list);
+void			free_arg_list(t_arg_list **head);
 void			free_data(t_data *data);
 // exit_3
 void			exit_free(t_data *data, int status);
@@ -227,7 +234,7 @@ int				append_variable(char **res, char **str);
 int				append_char(char **res, char c);
 // expansion_args
 char			*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote);
-char			*expand_arg(t_data *data, t_word *arg);
+char			**expand_arg(t_data *data, t_word *arg);
 char			**get_expanded_args(t_data *data, t_cmd_list *lst);
 // expansion
 t_expanded_redirs		*dup_redirs(t_data *data, t_redirs *src);
