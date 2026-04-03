@@ -12,6 +12,17 @@
 
 #include "minishell.h"
 
+int	error_open(char *filename)
+{
+	if (errno == EACCES)
+		f_printf(filename, "Permission denied\n");
+	else if (errno == EISDIR)
+		f_printf(filename, "Is a directory\n");
+	else
+		f_printf(filename, "No such file or directory\n");
+	return (-1);
+}
+
 static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 {
 	int	fd;
@@ -22,15 +33,7 @@ static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 	{
 		fd = open(tmp->file_name, O_RDONLY);
 		if (fd == -1)
-		{
-			if (errno == EACCES)
-				f_printf(tmp->file_name, "Permission denied\n");
-			else if (errno == EISDIR)
-				f_printf(tmp->file_name, "Is a directory\n");
-			else
-				f_printf(tmp->file_name, "No such file or directory\n");
-			return (fd);
-		}
+			return (error_open(tmp->file_name));
 		if (flag == 0)
 			close(fd);
 	}
@@ -38,15 +41,7 @@ static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 	{
 		fd = open(tmp->heredoc_name, O_RDONLY);
 		if (fd == -1)
-		{
-			if (errno == EACCES)
-				f_printf(tmp->heredoc_name, "Permission denied\n");
-			else if (errno == EISDIR)
-				f_printf(tmp->heredoc_name, "Is a directory\n");
-			else
-				f_printf(tmp->heredoc_name, "No such file or directory\n");
-			return (fd);
-		}
+			return (error_open(tmp->heredoc_name));
 		if (flag == 0)
 			close(fd);
 	}
@@ -57,7 +52,7 @@ int	redir_in_handler(t_data *data, t_expanded_list *list)
 {
 	t_expanded_redirs	*tmp;
 	t_expanded_redirs	*last;
-	int			fd;
+	int					fd;
 
 	last = NULL;
 	tmp = list->expanded_redirs;
@@ -90,15 +85,7 @@ static int	check_redirs_out(t_expanded_redirs *tmp, int flag)
 	{
 		fd = open(tmp->file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd == -1)
-		{
-			if (errno == EACCES)
-				f_printf(tmp->file_name, "Permission denied\n");
-			else if (errno == EISDIR)
-				f_printf(tmp->file_name, "Is a directory\n");
-			else
-				f_printf(tmp->file_name, "No such file or directory\n");
-			return (fd);
-		}
+			return (error_open(tmp->file_name));
 		if (flag == 0)
 			close(fd);
 	}
@@ -117,7 +104,7 @@ int	redir_out_handler(t_expanded_list *list)
 {
 	t_expanded_redirs	*tmp;
 	t_expanded_redirs	*last;
-	int			fd;
+	int					fd;
 
 	last = NULL;
 	tmp = list->expanded_redirs;
