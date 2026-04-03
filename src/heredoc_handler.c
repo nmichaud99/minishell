@@ -19,15 +19,35 @@ void	sigint_handler_heredoc(int sig)
 	close(STDIN_FILENO);
 }
 
+int	expand_heredoc(t_data *data, char **line, char **expanded,
+					t_expanded_redirs *tmp)
+{
+	int	fd;
+
+	fd = data->heredoc_fd;
+	if (tmp->to_expand == 1)
+	{
+		*expanded = expand_line(data, *line);
+		if (!*expanded)
+		{
+			free(*line);
+			return (0);
+		}
+		write(fd, *expanded, ft_strlen(*expanded));
+	}
+	else
+		write(fd, *line, ft_strlen(*line));
+	return (1);
+}
+
 static void	heredoc(t_data *data, t_expanded_redirs *tmp, char *filename)
 {
 	char	*line;
 	char	*expanded;
-	int		fd;
 
 	signal(SIGINT, sigint_handler_heredoc);
-	fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
-	if (fd == -1)
+	data->heredoc_fd = open(filename, O_CREAT | O_WRONLY | O_TRUNC, 0644);
+	if (data->heredoc_fd == -1)
 		return ;
 	while (1)
 	{
@@ -40,23 +60,13 @@ static void	heredoc(t_data *data, t_expanded_redirs *tmp, char *filename)
 			free(line);
 			break ;
 		}
-		if (tmp->to_expand == 1)
-		{
-			expanded = expand_line(data, line);
-			if (!expanded)
-			{
-				free(line);
-				break ;
-			}
-			write(fd, expanded, ft_strlen(expanded));
-		}
-		else
-			write(fd, line, ft_strlen(line));
-		write(fd, "\n", 1);
+		if (!expand_heredoc(data, &line, &expanded, tmp))
+			break ;
+		write(data->heredoc_fd, "\n", 1);
 		free(line);
 		free(expanded);
 	}
-	close(fd);
+	close(data->heredoc_fd);
 }
 
 char	*create_filename(int i)
@@ -74,8 +84,8 @@ char	*create_filename(int i)
 
 int	create_filenames(t_data *data)
 {
-	t_expanded_list     *tmp_cmds;
-	t_expanded_redirs   *tmp_redirs;
+	t_expanded_list		*tmp_cmds;
+	t_expanded_redirs	*tmp_redirs;
 	char				*filename;
 	int					i;
 
@@ -103,8 +113,8 @@ int	create_filenames(t_data *data)
 
 void	heredoc_handler_utils(t_data *data)
 {
-	t_expanded_list     *tmp_cmds;
-	t_expanded_redirs   *tmp_redirs;
+	t_expanded_list		*tmp_cmds;
+	t_expanded_redirs	*tmp_redirs;
 
 	tmp_cmds = data->expanded_list;
 	while (tmp_cmds)

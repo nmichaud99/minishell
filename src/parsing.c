@@ -16,22 +16,13 @@ int	add_redir_node(t_redirs **redirs, t_token *token)
 {
 	t_redirs	*tmp;
 	t_redirs	*new_node;
-	t_word		*filename;
 
 	new_node = malloc(sizeof(t_redirs));
 	if (!new_node)
 		return (0);
-	filename = malloc(sizeof(t_word));
-	if (!filename)
+	if (!fill_redir_node(&new_node, token, token->type,
+			token->next->word->quoting))
 		return (free(new_node), 0);
-	filename->txt = ft_strdup(token->next->word->txt);
-	if (!filename->txt)
-		return (free(filename), free(new_node), 0);
-	filename->quoting = dup_quoting(token->next->word);
-	if (!filename->quoting)
-		return (free(filename->txt), free(filename), free(new_node), 0);
-	fill_redir_node(&new_node, filename, token->type,
-		token->next->word->quoting);
 	if (!*redirs)
 	{
 		*redirs = new_node;

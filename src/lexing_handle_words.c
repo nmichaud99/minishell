@@ -21,15 +21,13 @@ int	handle_squote(char *str, int *i, char **txt, t_quote_type **quoting)
 	while (str[*i] && str[*i] != '\'')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], SINGLE))
-		{
-			free(*txt);
-			free(*quoting);
-			return (0);
-		}
+			return (free(*txt), free(*quoting), 0);
 	}
 	if (str[*i] != '\'')
 		return (free(*txt), free(*quoting), -1);
-	if (*i == start && (!*txt && (!str[*i + 1] || (str[*i + 1] && (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
+	if (*i == start && (!*txt
+			&& (!str[*i + 1] || (str[*i + 1]
+					&& (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
 	{
 		*txt = ft_strdup("");
 		if (!*txt)
@@ -52,15 +50,13 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 	while (str[*i] && str[*i] != '"')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], DOUBLE))
-		{
-			free(*txt);
-			free(*quoting);
-			return (0);
-		}
+			return (free(*txt), free(*quoting), 0);
 	}
 	if (str[*i] != '"')
 		return (free(*txt), free(*quoting), -1);
-	if (*i == start && (!*txt && (!str[*i + 1] || (str[*i + 1] && (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
+	if (*i == start && (!*txt
+			&& (!str[*i + 1] || (str[*i + 1]
+					&& (is_operator(str[*i + 1]) || is_space(str[*i + 1]))))))
 	{
 		*txt = ft_strdup("");
 		if (!*txt)
@@ -76,30 +72,20 @@ int	handle_dquote(char *str, int *i, char **txt, t_quote_type **quoting)
 
 int	handle_char(char *str, int *i, char **txt, t_quote_type **quoting)
 {
-	if (str[*i] == '$' && str[*i + 1] && str[*i + 2] && str[*i + 1] == '"' && str[*i + 2] == '"')
+	if (str[*i] == '$' && str[*i + 1]
+		&& str[*i + 2] && str[*i + 1] == '"' && str[*i + 2] == '"')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], SPECIAL))
-		{
-			free(*txt);
-			free(*quoting);
-			return (0);
-		}
+			return (free(*txt), free(*quoting), 0);
 	}
-	else if (str[*i] == '$' && str[*i + 1] && str[*i + 2] && str[*i + 1] == '\'' && str[*i + 2] == '\'')
+	else if (str[*i] == '$' && str[*i + 1]
+		&& str[*i + 2] && str[*i + 1] == '\'' && str[*i + 2] == '\'')
 	{
 		if (!lex_append_char(txt, quoting, str[(*i)++], SPECIAL))
-		{
-			free(*txt);
-			free(*quoting);
-			return (0);
-		}
+			return (free(*txt), free(*quoting), 0);
 	}
 	else if (!lex_append_char(txt, quoting, str[(*i)++], NONE))
-	{
-		free(*txt);
-		free(*quoting);
-		return (0);
-	}
+		return (free(*txt), free(*quoting), 0);
 	return (1);
 }
 

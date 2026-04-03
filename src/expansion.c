@@ -141,12 +141,19 @@ char	*expand_redir(t_data *data, t_word *arg)
 	return (res);
 }
 
-void	fill_node(t_expanded_redirs	*node, t_redirs *src)
+int	fill_node(t_data *data, t_expanded_redirs	*node, t_redirs *src)
 {
+	if (src->type == REDIR_HEREDOC)
+		node->file_name = ft_strdup(src->filename->txt);
+	else
+		node->file_name = expand_redir(data, src->filename);
+	if (!node->file_name)
+			return (0);
 	node->heredoc_name = NULL;
 	node->type = src->type;
 	node->to_expand = src->to_expand;
 	node->next = NULL;
+	return (1);
 }
 
 t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
@@ -162,13 +169,8 @@ t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 		node = malloc(sizeof(t_expanded_redirs));
 		if (!node)
 			return (free_expanded_redirs(&head), NULL);
-		if (src->type == REDIR_HEREDOC)
-			node->file_name = ft_strdup(src->filename->txt);
-		else
-			node->file_name = expand_redir(data, src->filename);
-		if (!node->file_name)
+		if (!fill_node(data, node, src))
 			return (free(node), free_expanded_redirs(&head), NULL);
-		fill_node(node, src);
 		if (!head)
 			head = node;
 		else
