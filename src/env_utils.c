@@ -45,11 +45,25 @@ char	**malloc_env_tab(t_data *data)
 	return (res);
 }
 
+int	add_env_var(char **res, int *i, t_env *env_var)
+{
+	char	*tmp_str;
+
+	tmp_str = ft_strjoin(env_var->key, "=");
+	if (!tmp_str)
+		return (0);
+	res[*i] = ft_strjoin(tmp_str, env_var->value);
+	free(tmp_str);
+	if (!res[*i])
+		return (0);
+	(*i)++;
+	return (1);
+}
+
 char	**get_env_tab(t_data *data)
 {
 	t_env	*tmp;
 	char	**res;
-	char	*tmp_str;
 	int		i;
 
 	res = malloc_env_tab(data);
@@ -59,22 +73,14 @@ char	**get_env_tab(t_data *data)
 	tmp = data->env;
 	while (tmp)
 	{
-		if (!tmp->has_value)
+		if (tmp->has_value)
 		{
-			tmp = tmp->next;
-			continue ;
+			if (!add_env_var(res, &i, tmp))
+			{
+				ft_free(&res);
+				return (NULL);
+			}
 		}
-		tmp_str = ft_strjoin(tmp->key, "=");
-		if (!tmp_str)
-			return (NULL);
-		res[i] = ft_strjoin(tmp_str, tmp->value);
-		free(tmp_str);
-		if (!res[i])
-		{
-			ft_free(&res);
-			return (NULL);
-		}
-		i++;
 		tmp = tmp->next;
 	}
 	res[i] = NULL;

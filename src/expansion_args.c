@@ -25,7 +25,73 @@ void	replace_spaces(char *str)
 	}
 }
 
+void	build_one_char_variable(t_data *data, int *i, char **res, int flag)
+{
+	if (flag == 0)
+	{
+		(*i)++;
+		*res = ft_strdup("");
+	}
+	else if (flag == 1)
+	{
+		(*i) = (*i) + 2;
+		*res = get_variable_value(data, "?");
+	}
+	else if (flag == 2)
+	{
+		(*i) = (*i) + 2;
+		*res = ft_strdup("");
+	}
+	else if (flag == 3)
+	{
+		(*i)++;
+		*res = ft_strdup("$");
+	}
+}
+
+char	*build_variable(t_data *data, t_word *arg, int start, int count)
+{
+	char	*tmp;
+	char	*res;
+
+	tmp = malloc(count + 1);
+	if (!tmp)
+		return (NULL);
+	ft_memcpy(tmp, &arg->txt[start], count);
+	tmp[count] = 0;
+	res = get_variable_value(data, tmp);
+	free(tmp);
+	return (res);
+}
+
 char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
+{
+	char	*res;
+	int		count;
+	int		start;
+
+	start = *i + 1;
+	if (quote == SPECIAL || (arg->txt[start] && arg->quoting[start] != quote))
+		return (build_one_char_variable(data, i, &res, 0), res);
+	if (arg->txt[start] && arg->txt[start] == '?')
+		return (build_one_char_variable(data, i, &res, 1), res);
+	if (arg->txt[start] && (arg->txt[start] <= '9' && arg->txt[start] >= '0'))
+		return (build_one_char_variable(data, i, &res, 2), res);
+	if (!(arg->txt[start] && (type_of_char(arg->txt[start],
+					arg->quoting[start], quote) == 1)))
+		return (build_one_char_variable(data, i, &res, 3), res);
+	count = 0;
+	while (arg->txt[start + count] && (type_of_char(arg->txt[start + count],
+				arg->quoting[start + count], quote) >= 1))
+		count++;
+	res = build_variable(data, arg, start, count);
+	if (quote == NONE)
+		replace_spaces(res);
+	*i = start + count;
+	return (res);
+}
+
+/*char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 {
 	char	*tmp;
 	char	*res;
@@ -100,7 +166,7 @@ char	*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 		replace_spaces(res);
 	*i = start + count;
 	return (res);
-}
+}*/
 
 char	**expand_arg(t_data *data, t_word *arg)
 {
@@ -123,14 +189,12 @@ char	**expand_arg(t_data *data, t_word *arg)
 		}
 		else
 		{
-			if (!append_char(&tmp, arg->txt[i]))
+			if (!append_char(&tmp, arg->txt[i++]))
 				return (free(tmp), NULL);
-			i++;
 		}
 	}
 	res = ft_split(tmp, 29);
-	free(tmp);
-	return (res);
+	return (free(tmp), res);
 }
 
 char	**dup_args(char **str)
@@ -182,11 +246,9 @@ int	add_arg_node(t_arg_list **head, char **str)
 	return (1);
 }
 
-char	**build_expanded_args(t_arg_list **head)
+int	count_expanded_args(t_arg_list **head)
 {
-	char		**res;
 	int			i;
-	int			j;
 	int			count;
 	t_arg_list	*tmp;
 
@@ -200,7 +262,18 @@ char	**build_expanded_args(t_arg_list **head)
 		count += i;
 		tmp = tmp->next;
 	}
-	res = malloc(sizeof(char *) * (count + 1));
+	return (count);
+}
+
+char	**build_expanded_args(t_arg_list **head)
+{
+	char		**res;
+	int			i;
+	int			j;
+	t_arg_list	*tmp;
+
+	j = count_expanded_args(head);
+	res = malloc(sizeof(char *) * (j + 1));
 	if (!res)
 		return (NULL);
 	j = 0;
@@ -210,10 +283,9 @@ char	**build_expanded_args(t_arg_list **head)
 		i = 0;
 		while (tmp->args[i])
 		{
-			res[j] = ft_strdup(tmp->args[i]);
+			res[j] = ft_strdup(tmp->args[i++]);
 			if (!res[j])
 				return (ft_free(&res), NULL);
-			i++;
 			j++;
 		}
 		tmp = tmp->next;

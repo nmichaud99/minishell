@@ -151,6 +151,8 @@ void			add_token(t_token **head, t_token *new);
 t_cmd_list		*new_cmd(t_word **args, t_redirs *redirs);
 void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
+void			close_saved_stds(t_data *data);
+void			dup_and_close(t_data *data, int fd1, int fd2);
 // error messages
 void			ft_perror(char **arg);
 void			ft_perror_2(char *s1, char *s2, char *s3);
@@ -181,6 +183,7 @@ void			free_arg_list(t_arg_list **head);
 void			free_data(t_data *data);
 // exit_3
 void			exit_free(t_data *data, int status);
+void			free_all(t_data *data);
 void			error_sys(t_data *data, char *s);
 
 // --- lexing --- //
@@ -235,6 +238,8 @@ int				type_of_char(char c, t_quote_type quoting, t_quote_type quote);
 int				append_variable(char **res, char **str);
 int				append_char(char **res, char c);
 // expansion_args
+void			build_one_char_variable(t_data *data, int *i, char **res, int flag);
+char			*build_variable(t_data *data, t_word *arg, int start, int count);
 char			*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote);
 char			**expand_arg(t_data *data, t_word *arg);
 char			**get_expanded_args(t_data *data, t_cmd_list *lst);

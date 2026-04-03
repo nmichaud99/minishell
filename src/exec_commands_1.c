@@ -50,16 +50,9 @@ int	redir_in(t_data *data, t_expanded_list *list, int prev_fd, int first)
 		exit_free(data, 1);
 	}
 	if (in != STDIN_FILENO)
-	{
-		if (dup2(in, STDIN_FILENO) == -1)
-			error_sys(data, "dup2 error 2");
-		close(in);
-	}
+		dup_and_close(data, in, STDIN_FILENO);
 	else if (in == STDIN_FILENO && first > 1)
-	{
-		if (dup2(prev_fd, STDIN_FILENO) == -1)
-			error_sys(data, "dup2 error 2");
-	}
+		dup_and_close(data, prev_fd, STDIN_FILENO);
 	if (first > 1)
 		close(prev_fd);
 	return (in);

@@ -23,6 +23,16 @@ void	exit_free(t_data *data, int status)
 	exit(status);
 }
 
+void	free_all(t_data *data)
+{
+	if (!data)
+		exit(data->exit_status);
+	free_data(data);
+	free_expanded_list(&data->expanded_list);
+	free_env(&data->env);
+	ft_free(&data->env_tab);
+}
+
 void	error_sys(t_data *data, char *s)
 {
 	perror(s);

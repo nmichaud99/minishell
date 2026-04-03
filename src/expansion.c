@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-char	*expand_redir_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
+/*char	*expand_redir_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 {
 	char	*tmp;
 	char	*res;
@@ -85,6 +85,32 @@ char	*expand_redir_word(t_data *data, t_word *arg, int *i, t_quote_type quote)
 		return (NULL);
 	*i = start + count;
 	return (res);
+}*/
+
+char	*expand_redir_word(t_data *data, t_word *arg, int *i,
+								t_quote_type quote)
+{
+	char	*res;
+	int		count;
+	int		start;
+
+	start = *i + 1;
+	if (quote == SPECIAL || (arg->txt[start] && arg->quoting[start] != quote))
+		return (build_one_char_variable(data, i, &res, 0), res);
+	if (arg->txt[start] && arg->txt[start] == '?')
+		return (build_one_char_variable(data, i, &res, 1), res);
+	if (arg->txt[start] && (arg->txt[start] <= '9' && arg->txt[start] >= '0'))
+		return (build_one_char_variable(data, i, &res, 2), res);
+	if (!(arg->txt[start] && (type_of_char(arg->txt[start],
+					arg->quoting[start], quote) == 1)))
+		return (build_one_char_variable(data, i, &res, 3), res);
+	count = 0;
+	while (arg->txt[start + count] && (type_of_char(arg->txt[start + count],
+				arg->quoting[start + count], quote) >= 1))
+		count++;
+	res = build_variable(data, arg, start, count);
+	*i = start + count;
+	return (res);
 }
 
 char	*expand_redir(t_data *data, t_word *arg)
@@ -115,6 +141,14 @@ char	*expand_redir(t_data *data, t_word *arg)
 	return (res);
 }
 
+void	fill_node(t_expanded_redirs	*node, t_redirs *src)
+{
+	node->heredoc_name = NULL;
+	node->type = src->type;
+	node->to_expand = src->to_expand;
+	node->next = NULL;
+}
+
 t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 {
 	t_expanded_redirs	*head;
@@ -134,10 +168,7 @@ t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 			node->file_name = expand_redir(data, src->filename);
 		if (!node->file_name)
 			return (free(node), free_expanded_redirs(&head), NULL);
-		node->heredoc_name = NULL;
-		node->type = src->type;
-		node->to_expand = src->to_expand;
-		node->next = NULL;
+		fill_node(node, src);
 		if (!head)
 			head = node;
 		else
@@ -148,7 +179,8 @@ t_expanded_redirs	*dup_redirs(t_data *data, t_redirs *src)
 	return (head);
 }
 
-t_expanded_list	*build_expanded_list(t_data *data, char **expanded_args, t_cmd_list *lst)
+t_expanded_list	*build_expanded_list(t_data *data, char **expanded_args,
+										t_cmd_list *lst)
 {
 	t_expanded_list	*ret;
 

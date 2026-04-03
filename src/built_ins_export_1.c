@@ -34,7 +34,6 @@ char	*get_variable_key(const char *s)
 	return (result);
 }
 
-
 void	print_env_export(t_data *data)
 {
 	t_env	*cpy;
@@ -60,13 +59,11 @@ void	print_env_export(t_data *data)
 				cpy->value = cpy->next->value;
 				cpy->next->key = tmp_key;
 				cpy->next->value = tmp_value;
-
 				swapped = 1;
 			}
 			cpy = cpy->next;
 		}
 	}
-
 	while (first)
 	{
 		printf("export ");

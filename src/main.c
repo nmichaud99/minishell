@@ -132,8 +132,10 @@ int	treat_cmd_line(t_data *data, t_expanded_list **list)
 		return (0);
 	if (!parsing(data))
 		return (0);
+	//free_token(&data->tokens);
 	if (!expansion(data))
 		return (0);
+	//free_list(&data->cmd_list);
 	if (!heredoc_handler(data))
 		return (0);
 	data->env_tab = get_env_tab(data);

@@ -82,3 +82,21 @@ int	ft_strcmp(const char *s1, const char *s2)
 	}
 	return (0);
 }
+
+void	close_saved_stds(t_data *data)
+{
+	if (data->saved_stdin != -1)
+		close(data->saved_stdin);
+	if (data->saved_stdout != -1)
+		close(data->saved_stdout);
+}
+
+void	dup_and_close(t_data *data, int fd1, int fd2)
+{
+	if (dup2(fd1, fd2) == -1)
+	{
+		close(fd1);
+		error_sys(data, "dup2 error 2");
+	}
+	close(fd1);
+}
