@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-char	*expand_exit_code(int *i, int start, t_data *data)
+char	*handle_exit_code(int *i, int start, t_data *data)
 {
 	char	*tmp;
 	char	*res;
@@ -25,6 +25,53 @@ char	*expand_exit_code(int *i, int start, t_data *data)
 	return (res);
 }
 
+char	*handle_digit(int *i, int start)
+{
+	char	*res;
+
+	(*i) = start + 1;
+	res = ft_strdup("");
+	if (!res)
+		return (NULL);
+	return (res);
+}
+
+char	*handle_invalid(int *i)
+{
+	char	*res;
+
+	(*i)++;
+	res = ft_strdup("$");
+	if (!res)
+		return (NULL);
+	return (res);
+}
+
+int	is_digit(char c)
+{
+	if (c >= '0' && c <= '9')
+		return (1);
+	return (0);
+}
+
+int	is_alpha(char c)
+{
+	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+		return (1);
+	return (0);
+}
+
+int	valid_count(char *str, int start)
+{
+	int	i;
+
+	i = 1;
+	while (str[start + i] && (is_alpha(str[start + i]) || str[start + i] == '_'
+			|| is_digit(str[start + i])))
+		i++;
+	return (i);
+}
+
 char	*expand_variable(t_data *data, char *line, int *i)
 {
 	char	*tmp;
@@ -34,36 +81,12 @@ char	*expand_variable(t_data *data, char *line, int *i)
 
 	start = *i + 1;
 	if (line[start] == '?')
-	{
-/* 		(*i) = start + 1;
-		tmp = "?";
-		res = get_variable_value(data, tmp);
-		if (!res)
-			return (NULL);
-		return (res); */
-		return (expand_exit_code(i, start, data));
-	}
-	else if (line[start] && (line[start] <= '9' && line[start] >= '0'))
-	{
-		(*i) = start + 1;
-		res = ft_strdup("");
-		if (!res)
-			return (NULL);
-		return (res);
-	}
-	else if (!(line[start] && ((line[start] <= 'z' && line[start] >= 'a') || (line[start] <= 'Z' && line[start] >= 'A')
-		|| line[start] == '_')))
-	{
-		(*i)++;
-		res = ft_strdup("$");
-		if (!res)
-			return (NULL);
-		return (res);
-	}
-	count = 1;
-	while (line[start + count] && ((line[start + count] <= 'z' && line[start + count] >= 'a') || (line[start + count] <= 'Z' && line[start + count] >= 'A')
-		|| line[start + count] == '_' || (line[start + count] <= '9' && line[start + count] >= '0')))
-		count++;
+		return (handle_exit_code(i, start, data));
+	else if (line[start] && is_digit(line[start]))
+		return (handle_digit(i, start));
+	else if (!(line[start] && (is_alpha(line[start]) || line[start] == '_')))
+		return (handle_invalid(i));
+	count = valid_count(line, start);
 	tmp = malloc(count + 1);
 	if (!tmp)
 		return (NULL);
