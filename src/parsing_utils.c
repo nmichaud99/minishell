@@ -60,7 +60,7 @@ int	fill_redir_node(t_redirs **redir, t_token *token,
 		return (free(filename->txt), free(filename), 0);
 	i = -1;
 	(*redir)->to_expand = 1;
-	while (filename->txt[i++])
+	while (filename->txt[++i])
 	{
 		if (quoting[i] == SINGLE || quoting[i] == DOUBLE)
 			(*redir)->to_expand = 0;
