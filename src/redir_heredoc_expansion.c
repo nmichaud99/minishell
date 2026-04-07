@@ -12,6 +12,19 @@
 
 #include "minishell.h"
 
+char	*expand_exit_code(int *i, int start, t_data *data)
+{
+	char	*tmp;
+	char	*res;
+
+	(*i) = start + 1;
+	tmp = "?";
+	res = get_variable_value(data, tmp);
+	if (!res)
+		return (NULL);
+	return (res);
+}
+
 char	*expand_variable(t_data *data, char *line, int *i)
 {
 	char	*tmp;
@@ -22,12 +35,13 @@ char	*expand_variable(t_data *data, char *line, int *i)
 	start = *i + 1;
 	if (line[start] == '?')
 	{
-		(*i) = start + 1;
+/* 		(*i) = start + 1;
 		tmp = "?";
 		res = get_variable_value(data, tmp);
 		if (!res)
 			return (NULL);
-		return (res);
+		return (res); */
+		return (expand_exit_code(i, start, data));
 	}
 	else if (line[start] && (line[start] <= '9' && line[start] >= '0'))
 	{

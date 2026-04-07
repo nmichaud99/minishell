@@ -30,6 +30,17 @@ int	init_env_tab(char **env, t_data *data)
 	return (1);
 }
 
+void	re_init(t_data *data)
+{
+	data->saved_stdin = -1;
+	data->saved_stdout = -1;
+	free_data(data);
+	free_expanded_list(&data->expanded_list);
+	ft_free(&data->env_tab);
+	free(data->line);
+	data->line = NULL;
+}
+
 int	init_data(t_data *data, char **env, int flag)
 {
 	if (flag == 0)
@@ -49,15 +60,7 @@ int	init_data(t_data *data, char **env, int flag)
 		return (1);
 	}
 	else
-	{
-		data->saved_stdin = -1;
-		data->saved_stdout = -1;
-		free_data(data);
-		free_expanded_list(&data->expanded_list);
-		ft_free(&data->env_tab);
-		free(data->line);
-		data->line = NULL;
-	}
+		re_init(data);
 	return (1);
 }
 
@@ -79,7 +82,6 @@ static void	wait_and_return(t_data *data)
 	else if (WIFSIGNALED(data->last_status))
 		data->exit_status = 128 + WTERMSIG(data->last_status);
 }
-
 
 void	sigint_handler(int sig)
 {

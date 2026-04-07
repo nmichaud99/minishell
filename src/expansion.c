@@ -148,7 +148,7 @@ int	fill_node(t_data *data, t_expanded_redirs	*node, t_redirs *src)
 	else
 		node->file_name = expand_redir(data, src->filename);
 	if (!node->file_name)
-			return (0);
+		return (0);
 	node->heredoc_name = NULL;
 	node->type = src->type;
 	node->to_expand = src->to_expand;
