@@ -34,21 +34,18 @@ char	*get_variable_key(const char *s)
 	return (result);
 }
 
-void	print_env_export(t_data *data)
+void	swap_node_values(t_data *data)
 {
 	t_env	*cpy;
-	t_env	*first;
 	int		swapped;
 	char	*tmp_key;
 	char	*tmp_value;
 
-	first = data->env;
-	cpy = data->env;
 	swapped = 1;
 	while (swapped)
 	{
 		swapped = 0;
-		cpy = first;
+		cpy = data->env;
 		while (cpy && cpy->next)
 		{
 			if (ft_strcmp(cpy->key, cpy->next->key) > 0)
@@ -64,15 +61,23 @@ void	print_env_export(t_data *data)
 			cpy = cpy->next;
 		}
 	}
-	while (first)
+}
+
+void	print_env_export(t_data *data)
+{
+	t_env	*tmp;
+
+	tmp = data->env;
+	swap_node_values(data);
+	while (tmp)
 	{
 		printf("export ");
-		printf("%s", first->key);
-		if (first->has_value)
-			printf("=\"%s\"\n", first->value);
+		printf("%s", tmp->key);
+		if (tmp->has_value)
+			printf("=\"%s\"\n", tmp->value);
 		else
 			printf("\n");
-		first = first->next;
+		tmp = tmp->next;
 	}
 }
 

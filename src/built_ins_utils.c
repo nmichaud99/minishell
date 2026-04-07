@@ -87,6 +87,16 @@ int	redir_handler(t_data *data, t_expanded_list *list)
 	return (1);
 }
 
+void	restore_fds(int saved_stdin, int saved_stdout, t_data *data)
+{
+	if (dup2(saved_stdin, STDIN_FILENO) == -1)
+		error_sys(data, "dup2 error");
+	if (dup2(saved_stdout, STDOUT_FILENO) == -1)
+		error_sys(data, "dup2 error");
+	close(saved_stdin);
+	close(saved_stdout);
+}
+
 int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 {
 	int	res;
@@ -109,13 +119,6 @@ int	exec_built_in(t_data *data, t_expanded_list *list, int flag)
 	}
 	res = exec_cmd(data, list);
 	if (!flag)
-	{
-		if (dup2(saved_stdin, STDIN_FILENO) == -1)
-			error_sys(data, "dup2 error");
-		if (dup2(saved_stdout, STDOUT_FILENO) == -1)
-			error_sys(data, "dup2 error");
-		close(saved_stdin);
-		close(saved_stdout);
-	}
+		restore_fds(saved_stdin, saved_stdout, data);
 	return (res);
 }

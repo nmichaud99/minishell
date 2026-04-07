@@ -98,21 +98,14 @@ int	add_or_modify_env_node(t_data *data, char *new_var, int has_value)
 		if (!find_key(data, new_key))
 		{
 			if (!add_env_node(data, new_key, has_value))
-			{
-				free(new_key);
-				return (0);
-			}
+				return (free(new_key), 0);
 		}
-		free(new_key);
-		return (1);
+		return (free(new_key), 1);
 	}
 	else
 		new_value = ft_strdup(ft_strchr(new_var, '=') + 1);
 	if (!new_value)
-	{
-		free(new_key);
-		return (0);
-	}
+		return (free(new_key), 0);
 	if (looper(data, new_key, new_value))
 		return (1);
 	if (!add_env_node(data, new_var, has_value))
@@ -120,38 +113,43 @@ int	add_or_modify_env_node(t_data *data, char *new_var, int has_value)
 	return (1);
 }
 
-int	exec_export(t_data *data, char **args)
+int	handle_args(char **args, int *invalid_flag, t_data *data)
 {
 	int	has_value;
-	int	invalid_flag;
 
 	has_value = 0;
+	while (*args)
+	{
+		if (!ft_schr(*args, '='))
+			has_value = 0;
+		else
+			has_value = 1;
+		if (!is_valid_string(*args, has_value))
+		{
+			f_printf_2("export: `", *args, "': not a valid identifier\n");
+			*invalid_flag = 1;
+			args++;
+			continue ;
+		}
+		if (!add_or_modify_env_node(data, *args, has_value))
+			return (0);
+		args++;
+	}
+	return (1);
+}
+
+int	exec_export(t_data *data, char **args)
+{
+	int	invalid_flag;
+
 	invalid_flag = 0;
 	if (!*(args + 1))
-	{
-		print_env_export(data);
-		return (0);
-	}
+		return (print_env_export(data), 0);
 	else
 	{
 		args++;
-		while (*args)
-		{
-			if (!ft_schr(*args, '='))
-				has_value = 0;
-			else
-				has_value = 1;
-			if (!is_valid_string(*args, has_value))
-			{
-				f_printf_2("export: `", *args, "': not a valid identifier\n");
-				invalid_flag = 1;
-				args++;
-				continue ;
-			}
-			if (!add_or_modify_env_node(data, *args, has_value))
-				return (1);
-			args++;
-		}
+		if (!handle_args(args, &invalid_flag, data))
+			return (1);
 	}
 	if (invalid_flag)
 		return (1);
