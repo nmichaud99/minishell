@@ -15,7 +15,7 @@
 void	sigint_handler_heredoc(int sig)
 {
 	(void)sig;
-	g_SignalStatus = SIGINT;
+	g_signalstatus = SIGINT;
 	close(STDIN_FILENO);
 }
 

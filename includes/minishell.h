@@ -142,7 +142,7 @@ typedef struct	s_data
 	int				heredoc_fd;
 }	t_data;
 
-extern volatile 		sig_atomic_t g_SignalStatus;
+extern volatile 		sig_atomic_t g_signalstatus;
 
 // --- utils --- //
 

@@ -12,7 +12,7 @@
 
 #include "minishell.h"
 
-volatile sig_atomic_t g_SignalStatus = 0;
+volatile sig_atomic_t	g_signalstatus = 0;
 
 int	init_env_tab(char **env, t_data *data)
 {
@@ -86,7 +86,7 @@ static void	wait_and_return(t_data *data)
 void	sigint_handler(int sig)
 {
 	(void)sig;
-	g_SignalStatus = SIGINT;
+	g_signalstatus = SIGINT;
 	write(1, "\n", 1);
 	rl_replace_line("", 0);
 	rl_on_new_line();
@@ -96,7 +96,7 @@ void	sigint_handler(int sig)
 void	sigint_handler_exec(int sig)
 {
 	(void)sig;
-	g_SignalStatus = SIGINT;
+	g_signalstatus = SIGINT;
 	write(1, "\n", 1);
 }
 
@@ -180,15 +180,22 @@ void	ft_execution(t_data *data, t_expanded_list *list)
 		data->exit_status = exec_built_in(data, list, 0);
 }
 
+int	check_args_and_int(int ac, char **av, char **env, t_data *data)
+{
+	(void)av;
+	if (ac != 1 || !isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
+		return (ft_putstr_fd("./minishell: too many arguments\n", 2), 0);
+	if (!init_data(data, env, 0))
+		return (0);
+	return (1);
+}
+
 int	main(int ac, char **av, char **env)
 {
 	t_data			data;
 	t_expanded_list	*list;
 
-	(void)av;
-	if (ac != 1 || !isatty(STDIN_FILENO) || !isatty(STDOUT_FILENO))
-		return (ft_putstr_fd("./minishell: too many arguments\n", 2), 1);
-	if (!init_data(&data, env, 0))
+	if (!check_args_and_int(ac, av, env, &data))
 		return (1);
 	while (1)
 	{
@@ -197,9 +204,9 @@ int	main(int ac, char **av, char **env)
 		set_signals_interactive();
 		if (!ft_readline(&data))
 			break ;
-		if (g_SignalStatus == SIGINT)
+		if (g_signalstatus == SIGINT)
 			data.exit_status = 130;
-		g_SignalStatus = 0;
+		g_signalstatus = 0;
 		list = NULL;
 		if (!treat_cmd_line(&data, &list))
 			continue ;
