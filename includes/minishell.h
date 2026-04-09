@@ -102,9 +102,9 @@ typedef struct s_cmd_list
 	struct s_cmd_list	*next;
 }	t_cmd_list;
 
-typedef struct	s_arg_list
+typedef struct s_arg_list
 {
-	char		**args;
+	char				**args;
 	struct s_arg_list	*next;
 }	t_arg_list;
 
@@ -123,7 +123,7 @@ typedef struct s_env
 	struct s_env	*next;
 }					t_env;
 
-typedef struct	s_data
+typedef struct s_data
 {
 	char			*line;
 	t_token			*tokens;
@@ -142,7 +142,7 @@ typedef struct	s_data
 	int				heredoc_fd;
 }	t_data;
 
-extern volatile 		sig_atomic_t g_signalstatus;
+extern volatile sig_atomic_t	g_signalstatus;
 
 // --- utils --- //
 
@@ -194,7 +194,7 @@ int				is_operator(char c);
 int				is_space(char c);
 int				word_error(int nb);
 int				lex_append_char(char **txt, t_quote_type **quoting,
-							char c, t_quote_type type);
+					char c, t_quote_type type);
 // lexing_handle_operators
 int				handle_pipe(t_token **head, int *i);
 int				handle_indir(t_token **head, char *str, int *i);

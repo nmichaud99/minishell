@@ -14,7 +14,7 @@
 
 void	print_args(int option_n, char **args)
 {
-	if (!*args)
+	if (!*args && option_n)
 		ft_putstr_fd("\n", STDOUT_FILENO);
 	while (*args)
 	{

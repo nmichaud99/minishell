@@ -44,6 +44,7 @@ static int	check_redirs_in(t_data *data, t_expanded_redirs *tmp, int flag)
 			return (error_open(tmp->heredoc_name));
 		if (flag == 0)
 			close(fd);
+		unlink(tmp->heredoc_name);
 	}
 	return (fd);
 }
