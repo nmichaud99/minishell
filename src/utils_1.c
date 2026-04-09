@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   utils.c                                            :+:      :+:    :+:   */
+/*   utils_1.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fjerrige <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/02/17 16:40:16 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/02/17 16:40:17 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/04/09 16:07:14 by fjerrige          #+#    #+#             */
+/*   Updated: 2026/04/09 16:07:18 by fjerrige         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,22 +81,4 @@ int	ft_strcmp(const char *s1, const char *s2)
 			return ((unsigned char)s1[i] - (unsigned char)s2[i]);
 	}
 	return (0);
-}
-
-void	close_saved_stds(t_data *data)
-{
-	if (data->saved_stdin != -1)
-		close(data->saved_stdin);
-	if (data->saved_stdout != -1)
-		close(data->saved_stdout);
-}
-
-void	dup_and_close(t_data *data, int fd1, int fd2)
-{
-	if (dup2(fd1, fd2) == -1)
-	{
-		close(fd1);
-		error_sys(data, "dup2 error 2");
-	}
-	close(fd1);
 }

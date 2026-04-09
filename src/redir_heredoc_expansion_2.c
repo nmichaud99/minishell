@@ -1,76 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   redir_heredoc_expansion.c                          :+:      :+:    :+:   */
+/*   redir_heredoc_expansion_2.c                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fjerrige <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/03/24 17:54:32 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/03/24 17:54:34 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/04/09 15:49:45 by fjerrige          #+#    #+#             */
+/*   Updated: 2026/04/09 15:49:47 by fjerrige         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-char	*handle_exit_code(int *i, int start, t_data *data)
-{
-	char	*tmp;
-	char	*res;
-
-	(*i) = start + 1;
-	tmp = "?";
-	res = get_variable_value(data, tmp);
-	if (!res)
-		return (NULL);
-	return (res);
-}
-
-char	*handle_digit(int *i, int start)
-{
-	char	*res;
-
-	(*i) = start + 1;
-	res = ft_strdup("");
-	if (!res)
-		return (NULL);
-	return (res);
-}
-
-char	*handle_invalid(int *i)
-{
-	char	*res;
-
-	(*i)++;
-	res = ft_strdup("$");
-	if (!res)
-		return (NULL);
-	return (res);
-}
-
-int	is_digit(char c)
-{
-	if (c >= '0' && c <= '9')
-		return (1);
-	return (0);
-}
-
-int	is_alpha(char c)
-{
-	if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-		return (1);
-	return (0);
-}
-
-int	valid_count(char *str, int start)
-{
-	int	i;
-
-	i = 1;
-	while (str[start + i] && (is_alpha(str[start + i]) || str[start + i] == '_'
-			|| is_digit(str[start + i])))
-		i++;
-	return (i);
-}
 
 char	*expand_variable(t_data *data, char *line, int *i)
 {

@@ -154,6 +154,9 @@ void			add_cmd(t_cmd_list **list, t_cmd_list *new);
 int				ft_strcmp(const char *s1, const char *s2);
 void			close_saved_stds(t_data *data);
 void			dup_and_close(t_data *data, int fd1, int fd2);
+int				ft_schr(const char *s, char c);
+int	is_digit(char c);
+int	is_alpha(char c);
 // error messages
 void			ft_perror(char **arg);
 void			ft_perror_2(char *s1, char *s2, char *s3);
@@ -238,23 +241,36 @@ char			*get_variable_value(t_data *data, char *str);
 int				type_of_char(char c, t_quote_type quoting, t_quote_type quote);
 int				append_variable(char **res, char **str);
 int				append_char(char **res, char c);
-// expansion_args
+// expansion_args_1
+void	replace_spaces(char *str);
 void			build_one_char_variable(t_data *data, int *i, char **res, int flag);
 char			*build_variable(t_data *data, t_word *arg, int start, int count);
 char			*expand_word(t_data *data, t_word *arg, int *i, t_quote_type quote);
 char			**expand_arg(t_data *data, t_word *arg);
+//expansion_args_2
+char	**dup_args(char **str);
+int	add_arg_node(t_arg_list **head, char **str);
+int	count_expanded_args(t_arg_list **head);
+char	**build_expanded_args(t_arg_list **head);
 char			**get_expanded_args(t_data *data, t_cmd_list *lst);
-// expansion
+// expansion_redirs
+char			*expand_redir_word(t_data *data, t_word *arg, int *i,
+								t_quote_type quote);
+char			*expand_redir(t_data *data, t_word *arg);
+int				fill_node(t_data *data, t_expanded_redirs	*node, t_redirs *src);
 t_expanded_redirs		*dup_redirs(t_data *data, t_redirs *src);
+// expansion
 t_expanded_list	*build_expanded_list(t_data *data, char **expanded_args, t_cmd_list *lst);
 int				expansion(t_data *data);
 
 // --- built-ins --- //
 
-// utils
+// utils_1
 t_builtin_type	is_built_in(char *arg);
 int				exec_cmd(t_data *data, t_expanded_list *list);
 void			save_std_fds(t_data *data, int *saved_stdin, int *saved_stdout);
+void	restore_fds(int saved_stdin, int saved_stdout, t_data *data);
+// utils_2
 int				redir_handler(t_data *data, t_expanded_list *list);
 int				exec_built_in(t_data *data, t_expanded_list *list, int flag);
 // unset
@@ -266,32 +282,57 @@ char			*get_variable_key(const char *s);
 void			print_env_export(t_data *data);
 int				is_valid_string(char *str, int has_value);
 int				find_key(t_data *data, char *key);
-int				ft_schr(const char *s, char c);
 // export_2
 int				create_node(t_env **new_node, char *env_line, int has_value);
 int				add_env_node(t_data *data, char *env_line, int has_value);
 int				looper(t_data *data, char *new_key, char *new_value);
 int				add_or_modify_env_node(t_data *data, char *new_var, int has_value);
+// export_3
 int				exec_export(t_data *data, char **args);
 // echo
 void			print_args(int option_n, char **args);
 int				exec_echo(char **args);
 // env
 int				exec_env(t_data *data, char **args);
-// pwd_cd
+// pwd
 int				exec_pwd(t_data *data, char **args);
+// cd_1
+char	*build_pwd_line(t_data *data, char *var_name);
+int		count_args_nb(char **args);
+void	handle_no_arg(t_data *data, char **new_directory, int *return_value);
+// cd_2
+int	handle_old_pwd(t_data *data, char *new_directory);
+int	handle_new_pwd(t_data *data, char *new_directory);
+int	ft_chdir(t_data *data, char *new_directory);
 int				exec_cd(t_data *data, char **args);
 // exit
 int				exec_exit(t_data *data, char **args);
 
-// --- pipes and exec
+// --- redirs --- //
 
-// heredoc_handler
+// heredoc_handler_1
+int	expand_heredoc(t_data *data, char **line, char **expanded,
+					t_expanded_redirs *tmp);
+void	heredoc(t_data *data, t_expanded_redirs *tmp, char *filename);
+char	*create_filename(int i);
+int	create_filenames(t_data *data);
+void	heredoc_handler_utils(t_data *data);
+// heredoc_handler_2
 int				heredoc_handler(t_data *data);
+// heredoc_expansion_1
+char	*handle_exit_code(int *i, int start, t_data *data);
+char	*handle_digit(int *i, int start);
+char	*handle_invalid(int *i);
+int	valid_count(char *str, int start);
+// heredoc_expansion_2
+char	*expand_variable(t_data *data, char *line, int *i);
+char	*expand_line(t_data *data, char *line);
 // redirs handler
 int				redir_in_handler(t_data *data, t_expanded_list *list);
 int				redir_out_handler(t_expanded_list *list);
-char			*expand_line(t_data *data, char *line);
+
+// --- pipes and exec
+
 // pipes
 void			exec_if(t_data *data, int *prev_fd, t_expanded_list *list);
 void			close_if(t_data *data, int *prev_fd, t_expanded_list *list);
@@ -311,6 +352,24 @@ void			get_path_and_exec(t_data *data, t_expanded_list *list);
 void			exec_cmd1(t_data *data, t_expanded_list *list);
 void			exec_cmdn(t_data *data, t_expanded_list *list, int prev_fd);
 void			exec_last_cmd(t_data *data, t_expanded_list *list, int prev_fd);
+
+// --- signals --- //
+
+// signals_1
+void	sigint_handler(int sig);
+void	sigint_handler_exec(int sig);
+void	sigquit_handler(int sig);
+void	set_signals_ignore(void);
+void	set_signals_interactive(void);
+// signals_2
+void	set_signals_exec(void);
+void	sigint_handler_heredoc(int sig);
+
+// init
+int	init_env_tab(char **env, t_data *data);
+void	re_init(t_data *data);
+int	init_data(t_data *data, char **env, int flag);
+int	check_args_and_int(int ac, char **av, char **env, t_data *data);
 
 // main
 void			sigint_handler(int sig);

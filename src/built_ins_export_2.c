@@ -137,21 +137,3 @@ int	handle_args(char **args, int *invalid_flag, t_data *data)
 	}
 	return (1);
 }
-
-int	exec_export(t_data *data, char **args)
-{
-	int	invalid_flag;
-
-	invalid_flag = 0;
-	if (!*(args + 1))
-		return (print_env_export(data), 0);
-	else
-	{
-		args++;
-		if (!handle_args(args, &invalid_flag, data))
-			return (1);
-	}
-	if (invalid_flag)
-		return (1);
-	return (0);
-}

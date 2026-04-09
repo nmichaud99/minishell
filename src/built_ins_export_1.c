@@ -120,19 +120,3 @@ int	find_key(t_data *data, char *key)
 	}
 	return (0);
 }
-
-int	ft_schr(const char *s, char c)
-{
-	int		i;
-	char	c1;
-
-	c1 = (char)c;
-	i = 0;
-	while (s[i])
-	{
-		if (s[i] == c1)
-			return (1);
-		i++;
-	}
-	return (0);
-}

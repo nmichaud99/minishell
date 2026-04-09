@@ -1,23 +1,16 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   heredoc_handler.c                                  :+:      :+:    :+:   */
+/*   heredoc_handler_1.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: nmichaud <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: fjerrige <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2026/04/01 19:55:12 by nmichaud          #+#    #+#             */
-/*   Updated: 2026/04/01 19:55:14 by nmichaud         ###   ########.fr       */
+/*   Created: 2026/04/09 16:03:59 by fjerrige          #+#    #+#             */
+/*   Updated: 2026/04/09 16:04:01 by fjerrige         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "minishell.h"
-
-void	sigint_handler_heredoc(int sig)
-{
-	(void)sig;
-	g_signalstatus = SIGINT;
-	close(STDIN_FILENO);
-}
 
 int	expand_heredoc(t_data *data, char **line, char **expanded,
 					t_expanded_redirs *tmp)
@@ -40,7 +33,7 @@ int	expand_heredoc(t_data *data, char **line, char **expanded,
 	return (1);
 }
 
-static void	heredoc(t_data *data, t_expanded_redirs *tmp, char *filename)
+void	heredoc(t_data *data, t_expanded_redirs *tmp, char *filename)
 {
 	char	*line;
 	char	*expanded;
@@ -128,25 +121,4 @@ void	heredoc_handler_utils(t_data *data)
 		}
 		tmp_cmds = tmp_cmds->next;
 	}
-}
-
-int	heredoc_handler(t_data *data)
-{
-	int	status;
-
-	if (!create_filenames(data))
-		return (0);
-	data->pid = fork();
-	if (data->pid == -1)
-		error_sys(data, "fork");
-	if (data->pid == 0)
-	{
-		signal(SIGPIPE, SIG_DFL);
-		signal(SIGINT, SIG_DFL);
-		signal(SIGQUIT, SIG_DFL);
-		heredoc_handler_utils(data);
-		exit(1);
-	}
-	wait(&status);
-	return (1);
 }

@@ -103,31 +103,3 @@ void	free_expanded_list(t_expanded_list **list)
 	}
 	*list = NULL;
 }
-
-void	free_arg_list(t_arg_list **head)
-{
-	t_arg_list	*current;
-	t_arg_list	*tmp;
-
-	if (!head || !*head)
-		return ;
-	current = *head;
-	while (current)
-	{
-		ft_free(&current->args);
-		tmp = current;
-		current = current->next;
-		free(tmp);
-	}
-	*head = NULL;
-}
-
-void	free_data(t_data *data)
-{
-	free_token(&data->tokens);
-	free_list(&data->cmd_list);
-	free(data->full_path);
-	data->full_path = NULL;
-	free(data->line);
-	data->line = NULL;
-}
